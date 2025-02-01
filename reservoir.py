@@ -1,10 +1,12 @@
 import numpy as np
 from scipy.sparse import random
 from scipy.sparse.linalg import eigs 
+from scipy.sparse import csc_matrix
 
 class Reservoir():
 
     def __init__(self, ):
+        self.W_res = None
         return
     
     def build_reservoir(self, N_res=100, eta=0.1, rho = 0.9):
@@ -31,4 +33,8 @@ class Reservoir():
 
     def forward(self, input):
         
-        return
+        # Precompute B in CSC format (needs to be done only once)
+        B_csc = csc_matrix(self.W_res)
+        X = input.dot(B_csc)
+
+        return X
