@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "neuron.h"
+class Neuron;
 
 class Manager {
 public:

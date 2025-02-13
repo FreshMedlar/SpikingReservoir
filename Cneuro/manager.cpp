@@ -1,11 +1,9 @@
 #include "manager.h"
-#include <vector>
-#include "neuron.h"
 #include <iostream>
 #include "raylib.h"
 #include <random>
 
-Manager::Manager(int size) : size(size) {
+Manager::Manager(int newSize) : size(newSize) {
     Manager::createNeurons();
 }
 
@@ -13,7 +11,7 @@ void Manager::createNeurons() {
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (int i = 0; i < size; i++) {
-        neurons.emplace_back(i, this);  // Create Neuron with ID = i
+        neurons.emplace_back(i, *this);  // Create Neuron with ID = i
     }
 }
 

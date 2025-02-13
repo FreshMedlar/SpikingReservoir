@@ -2,6 +2,7 @@
 #define NEURON_H
 
 #include "manager.h"
+class Manager;
 
 class Neuron {
 public:
@@ -13,7 +14,7 @@ private:
     std::vector<Neuron> receiver; // neuron i send to
     std::vector<Neuron> sender;   // neuron send to me
     Manager& manager_;
-    Neuron& connect();    
+    void connect();    
 };
 
 #endif // NEURON_H
