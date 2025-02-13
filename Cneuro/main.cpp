@@ -8,8 +8,8 @@ int main() {
     Manager manager(50);
     manager.status();
     
-    const int screenWidth = 800;
-    const int screenHeight = 600;
+    const int screenWidth = 1600;
+    const int screenHeight = 800;
 
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     SetTargetFPS(60);

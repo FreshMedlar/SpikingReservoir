@@ -7,14 +7,15 @@
 class Manager {
 public:
     Manager(int size);
-    int size;
-
-    void createNeurons();
-    std::vector<Neuron> neurons; 
-
-    void status();
-
     void draw();
+    void status();
+    Neuron& connect (Neuron& n);
+
+private:
+    std::vector<Neuron> neurons; 
+    int size;
+    void createNeurons();
+
 };
 
 #endif 
