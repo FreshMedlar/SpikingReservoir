@@ -2,16 +2,15 @@
 #include <iostream>
 #include "raylib.h"
 #include <random>
+#include "global.h"
 
-extern std::vector<Neuron> neurons;
+Manager::Manager(int size) : size(size) { }
 
-Manager::Manager() { }
-
-void Manager::createNeurons(int size, Scheduler* sched) {
+void Manager::createNeurons(Scheduler* sched) {
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (int i = 0; i < size; i++) {
-        neurons.emplace_back(i, *this, sched);  // Create Neuron with ID = i
+        neurons.emplace_back(i, *this, *sched);  // Create Neuron with ID = i
     }
     std::cout << "Neurons Created" << std::endl;
 }

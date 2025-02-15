@@ -4,13 +4,12 @@
 #include "raylib.h"
 #include "vector"
 #include "scheduler.h"
-
-extern std::vector<Neuron> neurons;
+#include "global.h"
 
 int main() {
-    Manager manager;
+    Manager manager(10);
     Scheduler scheduler;
-    manager.createNeurons(10, &scheduler);
+    manager.createNeurons(&scheduler);
     manager.initialConnections();
     manager.status();
 

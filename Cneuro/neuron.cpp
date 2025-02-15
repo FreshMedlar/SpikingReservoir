@@ -1,8 +1,7 @@
 #include "neuron.h"
 #include <random>
 #include <iostream>
-
-extern std::vector<Neuron> neurons;
+#include "global.h"
 
 // Constructor definition
 Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) : ID(id), manager_(manager), scheduler_(scheduler) {
