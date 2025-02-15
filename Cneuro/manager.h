@@ -3,20 +3,23 @@
 
 #include <vector>
 #include "neuron.h"
+#include "scheduler.h"
 class Neuron;
 
 class Manager {
 public:
-    Manager(int size);
+    Manager();
     void draw();
     void status();
-    Neuron& connect (Neuron& n);
+    Neuron* trackConnection (Neuron& n);
+    void applyForces();
+    void initialConnections();
+    void createNeurons(int size, Scheduler* sched);
 
 private:
-    std::vector<Neuron> neurons; 
+    std::vector<std::vector<int>> connectionMatrix;
     int size;
-    void createNeurons();
-
+    void updatePositions();
 };
 
 #endif 
