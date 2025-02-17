@@ -4,16 +4,24 @@
 #include "global.h"
 
 // Constructor definition
-Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) : ID(id), manager_(manager), scheduler_(scheduler) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
+Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) : 
+                ID(id), manager_(manager), scheduler_(scheduler) {
     std::uniform_real_distribution<> dis(0.0,1.0);
-    x = 900.0f + 200.0f*dis(gen);
-    y = 500.0f + 200.0f*dis(gen); 
+    x = 1920.0f*dis(gen);//460.0f + 1000.0f*dis(gen);
+    y = 1080.0f*dis(gen);//250.0f + 580.0f*dis(gen); 
+    actionPotential = 0;
+    color = WHITE;
 }
 
-void Neuron::spike(Neuron* n) {
-    scheduler_.toReceive[ID] = &(n->receiver);
+void Neuron::spike(Neuron* neuron) {
+    // scheduler_.toAdd.push_back(ID);
+    for (Neuron* n : receiver) {n->impulse(this);}
+    color = RED;
+}
+
+void Neuron::impulse(Neuron* neuron) {
+    actionPotential += 30;
+    if (actionPotential > 100) {scheduler_.toSpike.push_back(ID);}
 }
 
 void Neuron::connect(Neuron* n) {

@@ -6,26 +6,37 @@
 #include "scheduler.h"
 #include "global.h"
 
+const int SIZE = 1000;
+
 int main() {
-    Manager manager(10);
-    Scheduler scheduler;
+    Manager manager(SIZE);
+    Scheduler scheduler(SIZE);
     manager.createNeurons(&scheduler);
     manager.initialConnections();
     manager.status();
 
-    const int screenWidth = 1600;
-    const int screenHeight = 800;
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
     SetTargetFPS(60);
-    // for (int i = 0; i < 1000; i++) {manager.applyForces();};
+    int frameCounter = 0;
+    // for (int i = 0; i < 1500; i++) {manager.applyForces();};
 
+    std::uniform_real_distribution<> dis(0.0,1.0);
+    std::uniform_real_distribution<> disreal(0, SIZE);
     while (!WindowShouldClose()) {
+        frameCounter++;
         BeginDrawing();
         ClearBackground(BLACK); // Black background
+        scheduler.update();
         manager.draw();
-        manager.applyForces();
+        // manager.applyForces();
+        
+        if (dis(gen) > 0.9) {
+            neurons[disreal(gen)].spike(nullptr);
+        }
         EndDrawing();
     }
 

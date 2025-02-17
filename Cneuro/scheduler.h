@@ -7,12 +7,18 @@ class Neuron;
 
 class Scheduler {
 public:
-    Scheduler();
-    std::vector<std::vector<Neuron*>*> toReceive;
+    Scheduler(int size);
+    // std::vector<int> toAdd; 
+    // toAdd contains the ID of the neurons 
+    // that have just spiked 
+    std::vector<int> toSpike; 
+    // toSpike contains the ID of the neurons
+    // that have reached the threshold and
+    // will spike next iteration
+    void update();
     
 private:
-    std::vector<Neuron> neurons; 
-    std::vector<std::vector<int>> connectionMatrix;
+    std::vector<std::vector<Neuron*>*> toReceive;
     int size;
     
 };

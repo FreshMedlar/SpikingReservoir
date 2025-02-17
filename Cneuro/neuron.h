@@ -3,17 +3,23 @@
 
 #include "manager.h"
 #include "scheduler.h"
+#include "raylib.h"
 class Manager;
 class Scheduler;
 
 class Neuron {
 public:
-    Neuron(int id, Manager& manager, Scheduler& scheduler);
-    void new_sender(Neuron* n);
-    void connect(Neuron* n);    
+    Neuron( int id, 
+            Manager& manager, 
+            Scheduler& scheduler);
+    void new_sender(Neuron* neuron);
+    void connect(Neuron* neuron);    
     float x,y;
-    std::vector<Neuron*> receiver; // neuron i send to
-    void spike(Neuron* n);
+    std::vector<Neuron*> receiver; // neuron I send to
+    void spike(Neuron* neuron);
+    void impulse(Neuron* neuron);
+    short actionPotential;
+    Color color;
 
 private:
     int ID;

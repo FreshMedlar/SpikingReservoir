@@ -18,9 +18,9 @@ public:
     void createNeurons(Scheduler* sched);
 
 private:
-    std::vector<std::vector<int>> connectionMatrix;
     int size;
     void updatePositions();
+    static float calculateAttractionForce(float distance, float maxForce, float minDistance = 1.0f);
 };
 
 #endif 
