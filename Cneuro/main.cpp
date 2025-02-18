@@ -28,13 +28,14 @@ int main() {
     std::uniform_real_distribution<> disreal(0, SIZE);
     while (!WindowShouldClose()) {
         frameCounter++;
+        scheduler.changeColor();
         BeginDrawing();
         ClearBackground(BLACK); // Black background
         scheduler.update();
         manager.draw();
         // manager.applyForces();
         
-        if (dis(gen) > 0.9) {
+        if (dis(gen) > 0.5) {
             neurons[disreal(gen)].spike(nullptr);
         }
         EndDrawing();

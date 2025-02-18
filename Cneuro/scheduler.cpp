@@ -18,3 +18,20 @@ void Scheduler::update() {
         toSpike.clear();
     }
 }
+
+void Scheduler::changeColor() {
+    if (!trackColor.empty()) {
+        trackColor.erase(
+            std::remove_if(trackColor.begin(), trackColor.end(),
+                [this](std::pair<int, int>& n) {
+                    if (n.second == 0) {
+                        neurons[n.first].color = WHITE;
+                        return true;  // Mark for removal
+                    }
+                    n.second--;  // Decrement countdown
+                    return false;
+                }),
+            trackColor.end()
+        );
+    }
+}

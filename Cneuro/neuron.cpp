@@ -11,17 +11,22 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) :
     y = 1080.0f*dis(gen);//250.0f + 580.0f*dis(gen); 
     actionPotential = 0;
     color = WHITE;
+    timer = {ID, 60};
 }
 
 void Neuron::spike(Neuron* neuron) {
     // scheduler_.toAdd.push_back(ID);
     for (Neuron* n : receiver) {n->impulse(this);}
     color = RED;
+    scheduler_.trackColor.push_back(timer);
 }
 
 void Neuron::impulse(Neuron* neuron) {
     actionPotential += 30;
-    if (actionPotential > 100) {scheduler_.toSpike.push_back(ID);}
+    if (actionPotential > 100) {
+        actionPotential = 0;
+        scheduler_.toSpike.push_back(ID);
+    }
 }
 
 void Neuron::connect(Neuron* n) {
@@ -35,4 +40,3 @@ void Neuron::connect(Neuron* n) {
 void Neuron::new_sender(Neuron* n) {
     sender.push_back(n);
 }
-

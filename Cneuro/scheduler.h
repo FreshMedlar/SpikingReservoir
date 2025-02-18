@@ -3,6 +3,9 @@
 
 #include <vector>
 #include "neuron.h"
+#include <utility>
+#include <algorithm> 
+
 class Neuron;
 
 class Scheduler {
@@ -16,7 +19,9 @@ public:
     // that have reached the threshold and
     // will spike next iteration
     void update();
-    
+    void changeColor();
+    std::vector<std::pair<int,int>> trackColor;
+
 private:
     std::vector<std::vector<Neuron*>*> toReceive;
     int size;

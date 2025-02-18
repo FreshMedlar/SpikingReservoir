@@ -73,7 +73,7 @@ void Manager::draw() {
         }
     }
     for (const Neuron& neuron : neurons) {
-        DrawCircle(neuron.x, neuron.y, 5, neuron.color);  
+        DrawCircle(neuron.x, neuron.y, 8, neuron.color);  
     }
 }
 

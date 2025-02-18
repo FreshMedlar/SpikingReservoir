@@ -4,6 +4,8 @@
 #include "manager.h"
 #include "scheduler.h"
 #include "raylib.h"
+#include <utility>
+
 class Manager;
 class Scheduler;
 
@@ -20,6 +22,7 @@ public:
     void impulse(Neuron* neuron);
     short actionPotential;
     Color color;
+    std::pair<int, int> timer;
 
 private:
     int ID;
