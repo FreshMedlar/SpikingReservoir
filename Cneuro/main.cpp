@@ -25,27 +25,37 @@ int main() {
     // for (int i = 0; i < 1500; i++) {manager.applyForces();};
 
     std::uniform_real_distribution<> dis(0.0,1.0);
-    std::uniform_real_distribution<> disreal(0, SIZE);
+    std::uniform_real_distribution<> disreal(0, SIZE-1);
     while (!WindowShouldClose()) {
+        std::cout << "BEGIN" << std::endl;
         frameCounter++;
         scheduler.changeColor();
+        std::cout << "1" << std::endl;
         BeginDrawing();
         ClearBackground(BLACK); // Black background
         // FPS
         int fps = GetFPS();
         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN);
-        
+        std::cout << "7" << std::endl;
         scheduler.update();
-        manager.draw();
-        // manager.applyForces();
-        
-        if (dis(gen) > 0.5) {
+        std::cout << "7.5" << std::endl;
+        // manager.draw();
+        // if (frameCounter%2 ==0) {manager.applyForces();}
+
+        // if (frameCounter%400 ==0) {
+        //     std::cout << manager.countNonZero(connectionMatrix) << std::endl;
+        // }
+        std::cout << "8" << std::endl;
+        if (dis(gen) > 0.8) {
             neurons[disreal(gen)].spike(nullptr);
         }
         EndDrawing();
+        std::cout << "END" << std::endl;
+
     }
 
     CloseWindow();
 
     return 0;
 }
+

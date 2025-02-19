@@ -1,13 +1,8 @@
 #include "scheduler.h"
 #include "global.h"
+#include <iostream>
 
-Scheduler::Scheduler(int size) : size(size) {
-    // toReceive.clear();
-    // toReceive.reserve(size);  // Reserve memory to optimize performance
-    // for (int i = 0; i < size; i++) {
-    //     toReceive[i] = &(neurons[i].receiver);  // Create Neuron with ID = i
-    // }
-}
+Scheduler::Scheduler(int size) : size(size) {}
 
 void Scheduler::update() {
     // if (toAdd.size() > 0) {for (int n : toAdd) {for (Neuron* toadd : neurons[n].receiver){toadd->impulse(&(neurons[n]));}}}
@@ -20,23 +15,24 @@ void Scheduler::update() {
         for (int n : toSpike) {
             neurons[n].spike(nullptr);
         }
+        std::cout << "here?" << std::endl;
         toSpike.clear();
+        std::cout << "clean" << std::endl;
     }
 }
 
 void Scheduler::changeColor() {
     if (!trackColor.empty()) {
-        trackColor.erase(
-            std::remove_if(trackColor.begin(), trackColor.end(),
-                [this](std::pair<int, int>& n) {
-                    if (n.second == 0) {
-                        neurons[n.first].color = WHITE;
-                        return true;  // Mark for removal
-                    }
-                    n.second--;  // Decrement countdown
-                    return false;
-                }),
-            trackColor.end()
-        );
+        for (auto it = trackColor.begin(); it != trackColor.end();) {
+            if (it->second == 0) {
+                if (it->first < neurons.size()) {
+                    neurons[it->first].color = WHITE;
+                }
+                it = trackColor.erase(it);  // Safe erase-while-iterating
+            } else {
+                --(it->second);
+                ++it;
+            }
+        }
     }
 }

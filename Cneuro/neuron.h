@@ -25,9 +25,11 @@ public:
     void new_sender(Neuron* neuron);
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
-    void connect(Neuron* neuron);    
+    void connect(Neuron* neuron);   
+    void disconnect(int n); 
     void spike(Neuron* neuron);
     void forward(int n);
+    // update weight to next neuron (n)
     void backprop(int n);
     int timeSinceSpike;
 

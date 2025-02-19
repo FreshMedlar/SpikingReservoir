@@ -23,7 +23,6 @@ void Manager::status() {
     std::cout << "# of neurons: " << neurons.size() << std::endl;
 }
 
-
 Neuron* Manager::randomConnection (Neuron& n) {
     if (neurons.empty()) {
         throw std::runtime_error("No neurons available");
@@ -37,7 +36,7 @@ Neuron* Manager::randomConnection (Neuron& n) {
 void Manager::initialConnections() {
     connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
     std::uniform_real_distribution<> dis(0.0,1.0);
-    std::uniform_int_distribution<> intdis(0, size);
+    std::uniform_int_distribution<> intdis(0, size-1);
     // create connection matrix
     for (auto& row : connectionMatrix) {
         for (auto& elem : row) {
@@ -49,7 +48,7 @@ void Manager::initialConnections() {
         }
     }
     //at least one connection per neuron
-    for (std::vector<float>& row : connectionMatrix) {
+    for (auto& row : connectionMatrix) {
         row[intdis(gen)] = 1;
     }
     // update neurons
@@ -67,7 +66,7 @@ void Manager::initialConnections() {
 void Manager::draw() {
     for (size_t n = 0; n < size; n++) {
         for (size_t a = 0; a < size; a++) {
-            if (connectionMatrix[n][a] == 1.0f) {
+            if (!(connectionMatrix[n][a] == 0.0f)) {
                 DrawLine(neurons[n].x, neurons[n].y, neurons[a].x, neurons[a].y, EXTRALIGHTGRAY);
             } 
         }
@@ -128,4 +127,16 @@ float Manager::calculateAttractionForce(float distance, float maxForce, float mi
     }
     // Inverse square law: Force = maxForce / (distance^2)
     return maxForce / (distance * distance);
+}
+
+int Manager::countNonZero(std::vector<std::vector<float>>& matrix) {
+    int count = 0;
+    for (const auto& row : matrix) {
+        for (int value : row) {
+            if (value != 0.0f) {
+                count++;
+            }
+        }
+    }
+    return count;
 }

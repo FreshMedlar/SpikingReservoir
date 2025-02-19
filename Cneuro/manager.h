@@ -19,6 +19,7 @@ public:
     void applyForces();
     void initialConnections();
     void createNeurons(Scheduler* sched);
+    int countNonZero(std::vector<std::vector<float>>& matrix);
 
 private:
     int size;
