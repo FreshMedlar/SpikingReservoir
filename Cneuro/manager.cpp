@@ -24,9 +24,9 @@ void Manager::status() {
 }
 
 
-Neuron* Manager::trackConnection (Neuron& n) {
+Neuron* Manager::randomConnection (Neuron& n) {
     if (neurons.empty()) {
-        throw std::runtime_error("No circles available");
+        throw std::runtime_error("No neurons available");
     }
     std::uniform_int_distribution<> dis(0, neurons.size() - 1);
     int randomIndex = dis(gen);
@@ -35,29 +35,29 @@ Neuron* Manager::trackConnection (Neuron& n) {
 }
 
 void Manager::initialConnections() {
-    connectionMatrix = std::vector<std::vector<int>>(size, std::vector<int>(size));
+    connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
     std::uniform_real_distribution<> dis(0.0,1.0);
     std::uniform_int_distribution<> intdis(0, size);
     // create connection matrix
     for (auto& row : connectionMatrix) {
         for (auto& elem : row) {
             if (dis(gen) > 0.9999) {
-                elem = 1;
+                elem = 1.0f;
             } else {
-                elem = 0;
+                elem = 0.0f;
             }
         }
     }
     //at least one connection per neuron
-    for (std::vector<int>& row : connectionMatrix) {
+    for (std::vector<float>& row : connectionMatrix) {
         row[intdis(gen)] = 1;
     }
     // update neurons
-    for (size_t n = 0; n < size; n++) {
-        for (size_t a = 0; a < size; a++) {
-            if (connectionMatrix[n][a] == 1) {
-                neurons[n].connect(&neurons[a]);
-                neurons[a].new_sender(&neurons[n]);
+    for (size_t row = 0; row < size; row++) {
+        for (size_t col = 0; col < size; col++) {
+            if (connectionMatrix[row][col] == 1.0f) {
+                neurons[row].connect(&neurons[col]);
+                neurons[col].new_sender(&neurons[row]);
             } 
         }
     }
@@ -67,7 +67,7 @@ void Manager::initialConnections() {
 void Manager::draw() {
     for (size_t n = 0; n < size; n++) {
         for (size_t a = 0; a < size; a++) {
-            if (connectionMatrix[n][a] == 1) {
+            if (connectionMatrix[n][a] == 1.0f) {
                 DrawLine(neurons[n].x, neurons[n].y, neurons[a].x, neurons[a].y, EXTRALIGHTGRAY);
             } 
         }
@@ -101,9 +101,9 @@ void Manager::applyForces() {
         }
         // std::cout << force.x << std::endl;
         // --- Attraction: Pull connected neurons together ---
-        for (Neuron* connected : neuron.receiver) {
-            float dx = connected->x - neuron.x;
-            float dy = connected->y - neuron.y;
+        for (std::pair<Neuron*, float> connected : neuron.receiver) {
+            float dx = connected.first->x - neuron.x;
+            float dy = connected.first->y - neuron.y;
             float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
             
             float attractionStrength = Manager::calculateAttractionForce(distance, 10.0f);

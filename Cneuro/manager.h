@@ -12,7 +12,10 @@ public:
     Manager(int size);
     void draw();
     void status();
-    Neuron* trackConnection (Neuron& n);
+    // given a pre-synaptic neuron, creates a connection
+    // to a random post-synaptic neuron
+    Neuron* randomConnection (Neuron& n);
+
     void applyForces();
     void initialConnections();
     void createNeurons(Scheduler* sched);

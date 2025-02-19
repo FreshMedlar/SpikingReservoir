@@ -23,7 +23,7 @@ public:
     std::vector<std::pair<int,int>> trackColor;
 
 private:
-    std::vector<std::vector<Neuron*>*> toReceive;
+    // std::vector<std::vector<Neuron*>*> toReceive;
     int size;
     
 };

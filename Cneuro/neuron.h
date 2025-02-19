@@ -14,15 +14,22 @@ public:
     Neuron( int id, 
             Manager& manager, 
             Scheduler& scheduler);
+
+    float                   x,y;
+    // neuron I send to
+    std::vector<std::pair<Neuron*, float>> receiver; 
+    short                   actionPotential;
+    Color                   color;
+    std::pair<int, int>     timer;
+
     void new_sender(Neuron* neuron);
+    // if nullptr is given in input it connect to a 
+    // random neuron, otherwise to given neuron
     void connect(Neuron* neuron);    
-    float x,y;
-    std::vector<Neuron*> receiver; // neuron I send to
     void spike(Neuron* neuron);
-    void impulse(Neuron* neuron);
-    short actionPotential;
-    Color color;
-    std::pair<int, int> timer;
+    void forward(int n);
+    void backprop(int n);
+    int timeSinceSpike;
 
 private:
     int ID;

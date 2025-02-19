@@ -12,28 +12,45 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) :
     actionPotential = 0;
     color = WHITE;
     timer = {ID, 60};
+    timeSinceSpike = 0;
 }
 
 void Neuron::spike(Neuron* neuron) {
     // scheduler_.toAdd.push_back(ID);
-    for (Neuron* n : receiver) {n->impulse(this);}
+    for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID);}
+    for (Neuron* n : sender) {n->backprop(ID);}
+    timeSinceSpike = 0;
     color = RED;
     scheduler_.trackColor.push_back(timer);
 }
 
-void Neuron::impulse(Neuron* neuron) {
-    actionPotential += 30;
+void Neuron::forward(int n) {
+    actionPotential += 30 * connectionMatrix[n][ID];
     if (actionPotential > 100) {
         actionPotential = 0;
         scheduler_.toSpike.push_back(ID);
     }
 }
 
+void Neuron::backprop(int n) {
+    if (connectionMatrix[ID][n] > 10) {
+        if (timeSinceSpike > 30) {
+            connectionMatrix[ID][n] -= 0.01;
+        } else {
+            connectionMatrix[ID][n] += (-(timeSinceSpike-30)/100);
+        }
+    } else {
+        // TODO need be removed
+    }
+}
+
 void Neuron::connect(Neuron* n) {
     if (n == nullptr) {
-        receiver.push_back(manager_.trackConnection(*this)); 
+        std::pair<Neuron*, float> p = {manager_.randomConnection(*this), 1};
+        receiver.push_back(p); 
     } else {
-        receiver.push_back(n);
+        std::pair<Neuron*, float> p = {n, 1};
+        receiver.push_back(p);
     }
 }
 

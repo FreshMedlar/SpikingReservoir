@@ -20,7 +20,7 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
-    SetTargetFPS(60);
+    SetTargetFPS(0);
     int frameCounter = 0;
     // for (int i = 0; i < 1500; i++) {manager.applyForces();};
 
@@ -31,6 +31,10 @@ int main() {
         scheduler.changeColor();
         BeginDrawing();
         ClearBackground(BLACK); // Black background
+        // FPS
+        int fps = GetFPS();
+        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN);
+        
         scheduler.update();
         manager.draw();
         // manager.applyForces();
