@@ -35,7 +35,8 @@ public:
 
 private:
     int ID;
-    std::vector<Neuron*> sender;   // neuron send to me
+    // neuron send to me
+    std::vector<Neuron*> sender;   
     Manager& manager_;
     Scheduler& scheduler_;
 };

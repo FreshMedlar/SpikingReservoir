@@ -15,6 +15,7 @@ public:
     // toAdd contains the ID of the neurons 
     // that have just spiked 
     std::vector<int> toSpike; 
+    std::vector<int> nextSpike;
     // toSpike contains the ID of the neurons
     // that have reached the threshold and
     // will spike next iteration

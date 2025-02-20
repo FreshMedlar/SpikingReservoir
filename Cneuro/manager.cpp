@@ -38,18 +38,18 @@ void Manager::initialConnections() {
     std::uniform_real_distribution<> dis(0.0,1.0);
     std::uniform_int_distribution<> intdis(0, size-1);
     // create connection matrix
-    for (auto& row : connectionMatrix) {
-        for (auto& elem : row) {
-            if (dis(gen) > 0.9999) {
-                elem = 1.0f;
-            } else {
-                elem = 0.0f;
-            }
-        }
-    }
+    // for (auto& row : connectionMatrix) {
+    //     for (auto& elem : row) {
+    //         if (dis(gen) > 0.99) {
+    //             elem = 1.0f;
+    //         } else {
+    //             elem = 0.0f;
+    //         }
+    //     }
+    // }
     //at least one connection per neuron
     for (auto& row : connectionMatrix) {
-        row[intdis(gen)] = 1;
+        row[intdis(gen)] = 1.0f;
     }
     // update neurons
     for (size_t row = 0; row < size; row++) {
@@ -64,9 +64,11 @@ void Manager::initialConnections() {
 }
 
 void Manager::draw() {
+    // std::cout << countNonZero(connectionMatrix) << std::endl;
+    // std::cout << "Drawing with matrix at: " << &connectionMatrix << std::endl;
     for (size_t n = 0; n < size; n++) {
         for (size_t a = 0; a < size; a++) {
-            if (!(connectionMatrix[n][a] == 0.0f)) {
+            if (connectionMatrix[n][a] != 0.0f) {
                 DrawLine(neurons[n].x, neurons[n].y, neurons[a].x, neurons[a].y, EXTRALIGHTGRAY);
             } 
         }

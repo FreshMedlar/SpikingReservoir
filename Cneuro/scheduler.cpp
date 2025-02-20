@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "global.h"
 #include <iostream>
+#include <algorithm>
 
 Scheduler::Scheduler(int size) : size(size) {}
 
@@ -15,9 +16,11 @@ void Scheduler::update() {
         for (int n : toSpike) {
             neurons[n].spike(nullptr);
         }
-        std::cout << "here?" << std::endl;
+        // std::cout << "here?" << std::endl;
         toSpike.clear();
-        std::cout << "clean" << std::endl;
+        std::swap(toSpike, nextSpike);
+
+        // std::cout << "clean" << std::endl;
     }
 }
 

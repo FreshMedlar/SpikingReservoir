@@ -6,7 +6,7 @@
 #include "scheduler.h"
 #include "global.h"
 
-const int SIZE = 1000;
+const int SIZE = 300;
 
 int main() {
     Manager manager(SIZE);
@@ -27,30 +27,30 @@ int main() {
     std::uniform_real_distribution<> dis(0.0,1.0);
     std::uniform_real_distribution<> disreal(0, SIZE-1);
     while (!WindowShouldClose()) {
-        std::cout << "BEGIN" << std::endl;
+        // std::cout << "BEGIN" << std::endl;
         frameCounter++;
         scheduler.changeColor();
-        std::cout << "1" << std::endl;
+        // std::cout << "1" << std::endl;
         BeginDrawing();
         ClearBackground(BLACK); // Black background
         // FPS
         int fps = GetFPS();
         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN);
-        std::cout << "7" << std::endl;
+        // std::cout << "7" << std::endl;
         scheduler.update();
-        std::cout << "7.5" << std::endl;
-        // manager.draw();
+        // std::cout << "7.5" << std::endl;
+        manager.draw();
         // if (frameCounter%2 ==0) {manager.applyForces();}
 
         // if (frameCounter%400 ==0) {
         //     std::cout << manager.countNonZero(connectionMatrix) << std::endl;
         // }
-        std::cout << "8" << std::endl;
+        // std::cout << "8" << std::endl;
         if (dis(gen) > 0.8) {
             neurons[disreal(gen)].spike(nullptr);
         }
         EndDrawing();
-        std::cout << "END" << std::endl;
+        // std::cout << "END" << std::endl;
 
     }
 

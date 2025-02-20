@@ -17,39 +17,39 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) :
 
 void Neuron::spike(Neuron* neuron) {
     // scheduler_.toAdd.push_back(ID);
-    std::cout << "zoomba" << std::endl;
+    // std::cout << "zoomba" << std::endl;
     for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID);}
     for (Neuron* n : sender) {n->backprop(ID);}
-    std::cout << "half" << std::endl;
+    // std::cout << "half" << std::endl;
     timeSinceSpike = 0;
     color = RED;
-    std::cout << "Timer: " << timer.first << ", " << timer.second << std::endl;
-    std::cout << "Track color size: " << scheduler_.trackColor.size() << std::endl;
+    // std::cout << "Timer: " << timer.first << ", " << timer.second << std::endl;
+    // std::cout << "Track color size: " << scheduler_.trackColor.size() << std::endl;
     scheduler_.trackColor.push_back(timer);
-    std::cout << "psike" << std::endl;
+    // std::cout << "psike" << std::endl;
 }
 
 void Neuron::forward(int n) {
-    std::cout << "for" << std::endl;
+    // std::cout << "for" << std::endl;
     actionPotential += 30 * connectionMatrix[n][ID];
     if (actionPotential > 70) {
         actionPotential = 0;
-        scheduler_.toSpike.push_back(ID);
+        scheduler_.nextSpike.push_back(ID);
     }
 }
 
 void Neuron::backprop(int n) {
-    std::cout << "back" << std::endl;
+    // std::cout << "back" << std::endl;
     if (connectionMatrix[ID][n] > 0.8f) {
         if (connectionMatrix[ID][n] < 2.3f) {
-            if (timeSinceSpike > 30) {
-                // connectionMatrix[ID][n] -= 0.01f;
+            if (timeSinceSpike > 2) {
+                connectionMatrix[ID][n] -= 0.09f;
             } else {
                 connectionMatrix[ID][n] += (-(timeSinceSpike-30)/100);
             }
         }
     } else {
-        // disconnect(n);
+        disconnect(n);
     }
 }
 
@@ -64,7 +64,7 @@ void Neuron::connect(Neuron* n) {
 }
 
 void Neuron::disconnect(int n) {
-    // remove from sending (this) 
+    // remove the receiving neuron 
     for (int d = 0; d < receiver.size(); d++) {
         if (receiver[d].first == &neurons[n]) { 
             if ( d < receiver.size() - 1 )
@@ -73,13 +73,13 @@ void Neuron::disconnect(int n) {
             break;
         }
     }
-    // remove from receiving (next) 
-    for (int d = 0; d < neurons[d].sender.size(); d++) {
-        if (sender[d] == &neurons[n]) {
-            if (d < sender.size() - 1) {
-                sender[d] = std::move(sender.back());
+    // remove this neuron from sending
+    for (int jkl = 0; jkl < neurons[n].sender.size(); jkl++) {
+        if (neurons[n].sender[jkl] == this) {
+            if (jkl < neurons[n].sender.size() - 1) {
+                neurons[n].sender[jkl] = std::move(neurons[n].sender.back());
             }
-            sender.pop_back();
+            neurons[n].sender.pop_back();
             break;
         }
     }
