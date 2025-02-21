@@ -36,25 +36,15 @@ void Neuron::forward(int n) {
 void Neuron::backprop(int n) {
     if (connectionMatrix[ID][n] > 0.5f) {
         if (connectionMatrix[ID][n] < 2.3f) {
-            if (timeSinceSpike > 5) {
+            if (timeSinceSpike > 10) {
                 connectionMatrix[ID][n] -= 0.01f;
             } else {
-                connectionMatrix[ID][n] += (-(timeSinceSpike-30)/100);
+                connectionMatrix[ID][n] += (-(timeSinceSpike-10)/50);
             }
         }
     } else {
         disconnect(n);
     }
-}
-
-void Neuron::connect(Neuron* n) {
-    if (n == nullptr) {
-        n = manager_.randomConnection(*this);
-    }
-    n->new_sender(this);
-    std::pair<Neuron*, float> p = {n, 1};
-    receiver.push_back(p); 
-    connectionMatrix[ID][n->ID] = 1.0f;
 }
 
 void Neuron::disconnect(int n) {
@@ -81,6 +71,12 @@ void Neuron::disconnect(int n) {
     connectionMatrix[ID][n] = 0.0f;
 }
 
-void Neuron::new_sender(Neuron* n) {
-    sender.push_back(n);
+void Neuron::connect(Neuron* n) {
+    if (n == nullptr) {
+        n = manager_.randomConnection(this);
+    }
+    n->sender.push_back(this);
+    std::pair<Neuron*, float> p = {n, 1};
+    receiver.push_back(p); 
+    connectionMatrix[ID][n->ID] = 1.0f;
 }

@@ -24,13 +24,13 @@ void Manager::status() {
     std::cout << "# of neurons: " << neurons.size() << std::endl;
 }
 
-Neuron* Manager::randomConnection (Neuron& n) {
+Neuron* Manager::randomConnection (Neuron* n) {
     if (neurons.empty()) {
         throw std::runtime_error("No neurons available");
     }
     std::uniform_int_distribution<> dis(0, neurons.size() - 1);
     int randomIndex = dis(gen);
-    neurons[randomIndex].new_sender(&n); // receiving neuron gets notified
+    neurons[randomIndex].sender.push_back(n); // receiving neuron gets notified
     return &neurons[randomIndex]; // sending neuron tracks the connection
 }
 

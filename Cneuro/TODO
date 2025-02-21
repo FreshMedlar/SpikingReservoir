@@ -2,6 +2,9 @@
 - homeostasis
 - LTP, LTD, track past activity
 
+- make the potentiation and rewiring dynamic
+    lotta time between spikes -> become connection destination
+    thesis - we could see small-world by tuning the backpropagation parameters
 - move part of Neuron::disconnect to the rispective neuron
 
 DONE

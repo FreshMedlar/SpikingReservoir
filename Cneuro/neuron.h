@@ -15,14 +15,16 @@ public:
             Manager& manager, 
             Scheduler& scheduler);
 
+    std::vector<std::pair<Neuron*, float>> 
+                            receiver; // neuron I send to
+    std::vector<Neuron*>    sender;   // neuron send to me
     float                   x,y;
-    // neuron I send to
-    std::vector<std::pair<Neuron*, float>> receiver; 
     short                   actionPotential;
     Color                   color;
     std::pair<int, int>     timer;
+    int                     timeSinceSpike;
+    int                     ID;
 
-    void new_sender(Neuron* neuron);
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
     void connect(Neuron* neuron);   
@@ -31,12 +33,8 @@ public:
     void forward(int n);
     // update weight to next neuron (n)
     void backprop(int n);
-    int timeSinceSpike;
-    int ID;
 
 private:
-    // neuron send to me
-    std::vector<Neuron*> sender;   
     Manager& manager_;
     Scheduler& scheduler_;
 };
