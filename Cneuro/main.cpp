@@ -6,7 +6,7 @@
 #include "scheduler.h"
 #include "global.h"
 
-const int SIZE = 300;
+const int SIZE = 200;
 
 int main() {
     Manager manager(SIZE);
@@ -30,22 +30,18 @@ int main() {
         // std::cout << "BEGIN" << std::endl;
         frameCounter++;
         scheduler.changeColor();
-        // std::cout << "1" << std::endl;
         BeginDrawing();
         ClearBackground(BLACK); // Black background
         // FPS
         int fps = GetFPS();
         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN);
-        // std::cout << "7" << std::endl;
         scheduler.update();
-        // std::cout << "7.5" << std::endl;
         manager.draw();
-        // if (frameCounter%2 ==0) {manager.applyForces();}
+        if (frameCounter%2 ==0) {manager.applyForces();}
 
         // if (frameCounter%400 ==0) {
         //     std::cout << manager.countNonZero(connectionMatrix) << std::endl;
         // }
-        // std::cout << "8" << std::endl;
         if (dis(gen) > 0.8) {
             neurons[disreal(gen)].spike(nullptr);
         }

@@ -1,5 +1,8 @@
-- rewiring, neurongenesis and pruning
+- neurongenesis
 - homeostasis
 - LTP, LTD, track past activity
 
 - move part of Neuron::disconnect to the rispective neuron
+
+DONE
+- pruning

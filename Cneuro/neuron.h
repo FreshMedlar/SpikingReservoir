@@ -32,9 +32,9 @@ public:
     // update weight to next neuron (n)
     void backprop(int n);
     int timeSinceSpike;
+    int ID;
 
 private:
-    int ID;
     // neuron send to me
     std::vector<Neuron*> sender;   
     Manager& manager_;

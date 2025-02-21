@@ -4,6 +4,7 @@
 #include <random>
 #include "global.h"
 #include <cmath>
+#include <set>
 
 #define EXTRALIGHTGRAY CLITERAL(Color){ 100, 100, 100, 255 }
 
@@ -35,29 +36,16 @@ Neuron* Manager::randomConnection (Neuron& n) {
 
 void Manager::initialConnections() {
     connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
-    std::uniform_real_distribution<> dis(0.0,1.0);
     std::uniform_int_distribution<> intdis(0, size-1);
-    // create connection matrix
-    // for (auto& row : connectionMatrix) {
-    //     for (auto& elem : row) {
-    //         if (dis(gen) > 0.99) {
-    //             elem = 1.0f;
-    //         } else {
-    //             elem = 0.0f;
-    //         }
-    //     }
-    // }
-    //at least one connection per neuron
-    for (auto& row : connectionMatrix) {
-        row[intdis(gen)] = 1.0f;
-    }
-    // update neurons
-    for (size_t row = 0; row < size; row++) {
-        for (size_t col = 0; col < size; col++) {
-            if (connectionMatrix[row][col] == 1.0f) {
-                neurons[row].connect(&neurons[col]);
-                neurons[col].new_sender(&neurons[row]);
-            } 
+    for (Neuron& neuron : neurons) {
+        std::set<int> connected;
+        while (connected.size() < 2) {
+            int target = intdis(gen);
+            // Avoid self-connections and duplicates
+            if (target != neuron.ID && connected.find(target) == connected.end()) {
+                neuron.connect(&neurons[target]);
+                connected.insert(target);
+            }
         }
     }
     std::cout << "Connections initialized" << std::endl;
