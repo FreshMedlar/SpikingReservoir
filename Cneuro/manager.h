@@ -11,8 +11,10 @@ class Manager {
 public:
     Manager(int size);
     
-    int countNonZero(std::vector<std::vector<float>>& matrix);
+    void countConnections(int* connections);
+    void countFrequence(int* connections);
     void draw();
+    void drawGraph(std::vector<int> connectionsPerNeuron);
     void status();
     void applyForces();
     void initialConnections();

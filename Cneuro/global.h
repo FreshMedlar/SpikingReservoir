@@ -9,5 +9,6 @@ extern std::vector<std::vector<float>> connectionMatrix;
 extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
+extern int SIZE;
 
 #endif // GLOBALS_H

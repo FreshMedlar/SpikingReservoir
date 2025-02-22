@@ -5,8 +5,9 @@
 #include "vector"
 #include "scheduler.h"
 #include "global.h"
+#include <algorithm>
 
-const int SIZE = 200;
+int SIZE = 200;
 
 int main() {
     Manager manager(SIZE);
@@ -22,6 +23,7 @@ int main() {
     ToggleFullscreen();    
     SetTargetFPS(0);
     int frameCounter = 0;
+    std::vector<int> connectionsPerNeuron(SIZE, 0);
     // for (int i = 0; i < 1500; i++) {manager.applyForces();};
 
     std::uniform_real_distribution<> dis(0.0,1.0);
@@ -29,15 +31,23 @@ int main() {
     while (!WindowShouldClose()) {
         // std::cout << "BEGIN" << std::endl;
         frameCounter++;
-        scheduler.changeColor();
         BeginDrawing();
         ClearBackground(BLACK); // Black background
+        
         // FPS
         int fps = GetFPS();
-        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN);
+        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+
+        // NEURONS DRAWING 
+        scheduler.changeColor();
         scheduler.update();
         manager.draw();
         if (frameCounter%2 ==0) {manager.applyForces();}
+
+        // GRAPHS DRAWING
+        // manager.countConnections(connectionsPerNeuron.data());
+        manager.countFrequence(connectionsPerNeuron.data()); // Update connections
+        manager.drawGraph(connectionsPerNeuron); // Draw the plot
 
         // if (frameCounter%400 ==0) {
         //     std::cout << manager.countNonZero(connectionMatrix) << std::endl;
@@ -54,4 +64,3 @@ int main() {
 
     return 0;
 }
-

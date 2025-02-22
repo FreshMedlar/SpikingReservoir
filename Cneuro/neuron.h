@@ -15,9 +15,8 @@ public:
             Manager& manager, 
             Scheduler& scheduler);
 
-    std::vector<std::pair<Neuron*, float>> 
-                            receiver; // neuron I send to
-    std::vector<Neuron*>    sender;   // neuron send to me
+    std::vector<std::pair<Neuron*, float>> receiver; // neuron I send to
+    std::vector<Neuron*>    sender; // neuron send to me
     float                   x,y;
     short                   actionPotential;
     Color                   color;
