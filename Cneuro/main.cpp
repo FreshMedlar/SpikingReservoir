@@ -33,31 +33,32 @@ int main() {
         frameCounter++;
         BeginDrawing();
         ClearBackground(BLACK); // Black background
-        
-        // FPS
-        int fps = GetFPS();
-        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
 
         // NEURONS DRAWING 
-        scheduler.changeColor();
-        scheduler.update();
-        manager.draw();
-        if (frameCounter%2 ==0) {manager.applyForces();}
+        // scheduler.changeColor();
+        // manager.draw();
+        // if (frameCounter%2 ==0) {manager.applyForces();}
 
         // GRAPHS DRAWING
-        // manager.countConnections(connectionsPerNeuron.data());
-        manager.countFrequence(connectionsPerNeuron.data()); // Update connections
+        if (frameCounter%2 == 0) {
+            connectionsPerNeuron.clear();
+            connectionsPerNeuron.resize(SIZE, 0); 
+            manager.countFrequence(connectionsPerNeuron.data()); 
+        }
         manager.drawGraph(connectionsPerNeuron); // Draw the plot
 
-        // if (frameCounter%400 ==0) {
-        //     std::cout << manager.countNonZero(connectionMatrix) << std::endl;
-        // }
+        scheduler.update();
+        scheduler.synaptoGenesis();
         if (dis(gen) > 0.8) {
             neurons[disreal(gen)].spike(nullptr);
         }
+
+        // FPS
+        int fps = GetFPS();
+        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+        
         EndDrawing();
         // std::cout << "END" << std::endl;
-
     }
 
     CloseWindow();

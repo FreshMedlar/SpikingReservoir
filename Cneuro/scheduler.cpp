@@ -39,3 +39,12 @@ void Scheduler::changeColor() {
         }
     }
 }
+
+void Scheduler::synaptoGenesis() {
+    // if (!lonelyNeurons.empty()) {
+        for (Neuron* nen : lonelyNeurons) {
+            nen->connect(nullptr);
+        }
+        lonelyNeurons.clear();
+    // }
+}

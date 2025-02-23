@@ -22,6 +22,8 @@ public:
     void update();
     void changeColor();
     std::vector<std::pair<int,int>> trackColor;
+    std::vector<Neuron*> lonelyNeurons;
+    void synaptoGenesis();
 
 private:
     // std::vector<std::vector<Neuron*>*> toReceive;

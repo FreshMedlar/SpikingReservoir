@@ -39,7 +39,7 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 2) {
+        while (connected.size() < 4) {
             int target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
@@ -127,7 +127,7 @@ void Manager::countConnections(int* connections) {
 
 void Manager::countFrequence(int* connections) {
     for (int sos = 0; sos < SIZE; sos++) {
-        connections[neurons[sos].sender.size()]++;
+        connections[neurons[sos].receiver.size()]++;
     }
 }
 
@@ -135,11 +135,11 @@ void Manager::drawGraph(std::vector<int> conn) {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = plotWidth / SIZE;
-    int maxCount = *std::max_element(conn.begin(), conn.end());
+    // int maxCount = *std::max_element(conn.begin(), conn.end());
 
     DrawRectangle(10, 10, plotWidth, plotHeight, BLACK);
     for (int i = 0; i < conn.size(); i++) {
-        int barHeight = conn[i]/100;
+        int barHeight = conn[i]*3;
         DrawRectangle(10 + (i * barWidth), 10 + plotHeight - barHeight, barWidth, barHeight, BLUE);
 
     }

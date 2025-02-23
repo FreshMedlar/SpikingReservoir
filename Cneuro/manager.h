@@ -12,6 +12,7 @@ public:
     Manager(int size);
     
     void countConnections(int* connections);
+    // frequence of neurons with n outgoing connections 
     void countFrequence(int* connections);
     void draw();
     void drawGraph(std::vector<int> connectionsPerNeuron);
