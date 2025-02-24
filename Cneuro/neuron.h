@@ -13,7 +13,8 @@ class Neuron {
 public:
     Neuron( int id, 
             Manager& manager, 
-            Scheduler& scheduler);
+            Scheduler& scheduler,
+            float fren);
 
     std::vector<std::pair<Neuron*, float>> receiver; // neuron I send to
     std::vector<Neuron*>    sender; // neuron send to me
@@ -23,6 +24,7 @@ public:
     std::pair<int, int>     timer;
     int                     timeSinceSpike;
     int                     ID;
+    float                friendliness;
 
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron

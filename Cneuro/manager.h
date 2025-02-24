@@ -20,9 +20,8 @@ public:
     void applyForces();
     void initialConnections();
     void createNeurons(Scheduler* sched);
-    // given a pre-synaptic neuron, creates a connection
-    // to a random post-synaptic neuron
-    Neuron* randomConnection (Neuron* n);
+    // return a random neuron
+    Neuron* randomNeuron(Neuron* n);
 
 private:
     int size;

@@ -1,14 +1,19 @@
 - synaptogenesis
-    while the target neurons are easy to determine (low activity neurons)
-    the complex part is determining which and why a neurons should develop new synapses
+    while the target neurons are easy to determine (low activity neurons) the complex part is determining which and why a neurons should develop new synapses.
     This is also foundamental in creating a network with small-world properties
     NOTE: this could also be impossible without ordered data. Rand spike won't do it 
+    
+    THEORY - The # of outgoing connection per neuron follow a log-normal distribution, this
+    is an emergent property that we see when:
+    1 - nodes have a normally distributed variable X that indicate their capability in a tank 
+    2 - nodes compete (limited inputs are necessary/needed)on such task based, among many factors, on the current performance. This cause the resulting variable to compound, skewing the distribution (Example: normally distributed IQ, competition on salary)
 - homeostasis
 - LTP, LTD, track past activity
 
 - make the potentiation and rewiring dynamic
     thesis - we could see small-world by tuning the backpropagation parameters
 - move part of Neuron::disconnect to the rispective neuron
+- graph for distribution of synapses strength and firing rates
 
 DONE
 - pruning

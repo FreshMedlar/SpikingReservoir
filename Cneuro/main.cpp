@@ -35,8 +35,8 @@ int main() {
         ClearBackground(BLACK); // Black background
 
         // NEURONS DRAWING 
-        // scheduler.changeColor();
-        // manager.draw();
+        scheduler.changeColor();
+        manager.draw();
         // if (frameCounter%2 ==0) {manager.applyForces();}
 
         // GRAPHS DRAWING

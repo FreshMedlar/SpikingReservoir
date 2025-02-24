@@ -11,10 +11,16 @@
 Manager::Manager(int size) : size(size) { }
 
 void Manager::createNeurons(Scheduler* sched) {
+    int mean = 20;
+    int variance = 10;
+    double fren;
+    std::normal_distribution<float> d(mean, std::sqrt(variance));
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (int i = 0; i < size; i++) {
-        neurons.emplace_back(i, *this, *sched);  // Create Neuron with ID = i
+        fren = d(gen);
+        if (fren < 0) {fren = 0.0f;}
+        neurons.emplace_back(i, *this, *sched, fren);  // Create Neuron with ID = i
     }
     std::cout << "Neurons Created" << std::endl;
 }
@@ -24,14 +30,10 @@ void Manager::status() {
     std::cout << "# of neurons: " << neurons.size() << std::endl;
 }
 
-Neuron* Manager::randomConnection (Neuron* n) {
-    if (neurons.empty()) {
-        throw std::runtime_error("No neurons available");
-    }
+Neuron* Manager::randomNeuron (Neuron* nen) {
     std::uniform_int_distribution<> dis(0, neurons.size() - 1);
     int randomIndex = dis(gen);
-    neurons[randomIndex].sender.push_back(n); // receiving neuron gets notified
-    return &neurons[randomIndex]; // sending neuron tracks the connection
+    return &neurons[randomIndex]; 
 }
 
 void Manager::initialConnections() {
@@ -39,7 +41,7 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 4) {
+        while (connected.size() < 10) {
             int target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {

@@ -4,8 +4,8 @@
 #include "global.h"
 
 // Constructor definition
-Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler) : 
-                ID(id), manager_(manager), scheduler_(scheduler) {
+Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler, float fren) : 
+                ID(id), manager_(manager), scheduler_(scheduler), friendliness(fren) {
     std::uniform_real_distribution<> dis(0.0,1.0);
     x = 1920.0f*dis(gen);//460.0f + 1000.0f*dis(gen);
     y = 1080.0f*dis(gen);//250.0f + 580.0f*dis(gen); 
@@ -74,7 +74,7 @@ void Neuron::disconnect(int n) {
 
 void Neuron::connect(Neuron* n) {
     if (n == nullptr) {
-        n = manager_.randomConnection(this);
+        n = manager_.randomNeuron(this);
     }
     n->sender.push_back(this);
     std::pair<Neuron*, float> p = {n, 1};
