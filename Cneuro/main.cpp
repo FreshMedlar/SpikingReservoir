@@ -7,7 +7,7 @@
 #include "global.h"
 #include <algorithm>
 
-int SIZE = 100;
+int SIZE = 200;
 
 int main() {
     Manager manager(SIZE);
@@ -35,7 +35,7 @@ int main() {
         ClearBackground(BLACK); // Black background
 
         // NEURONS DRAWING 
-        scheduler.changeColor();
+        // scheduler.changeColor();
         manager.draw();
         // if (frameCounter%2 ==0) {manager.applyForces();}
 
@@ -43,9 +43,11 @@ int main() {
         if (frameCounter%2 == 0) {
             connectionsPerNeuron.clear();
             connectionsPerNeuron.resize(SIZE, 0); 
-            manager.countFrequence(connectionsPerNeuron.data()); 
+            // EITHER, NOT BOTH
+            manager.receiverFrequence(connectionsPerNeuron.data()); 
+            // manager.senderFrequence(connectionsPerNeuron.data());
         }
-        manager.drawGraph(connectionsPerNeuron); // Draw the plot
+        manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
 
         scheduler.update();
         scheduler.synaptoGenesis();

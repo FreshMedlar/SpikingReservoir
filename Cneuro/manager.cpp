@@ -11,15 +11,16 @@
 Manager::Manager(int size) : size(size) { }
 
 void Manager::createNeurons(Scheduler* sched) {
-    int mean = 20;
+    int mean = 10;
     int variance = 10;
     double fren;
     std::normal_distribution<float> d(mean, std::sqrt(variance));
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (int i = 0; i < size; i++) {
-        fren = d(gen);
-        if (fren < 0) {fren = 0.0f;}
+        do {
+            fren = d(gen);
+        } while (fren < 0);  
         neurons.emplace_back(i, *this, *sched, fren);  // Create Neuron with ID = i
     }
     std::cout << "Neurons Created" << std::endl;
@@ -127,16 +128,22 @@ void Manager::countConnections(int* connections) {
     }
 }
 
-void Manager::countFrequence(int* connections) {
+void Manager::receiverFrequence(int* connections) {
     for (int sos = 0; sos < SIZE; sos++) {
         connections[neurons[sos].receiver.size()]++;
     }
 }
 
-void Manager::drawGraph(std::vector<int> conn) {
+void Manager::senderFrequence(int* connections) {
+    for (int sos = 0; sos < SIZE; sos++) {
+        connections[neurons[sos].sender.size()]++;
+    }
+}
+
+void Manager::drawReceiverGraph(std::vector<int> conn) {
     int plotWidth = 500;
     int plotHeight = 250;
-    int barWidth = plotWidth / SIZE;
+    int barWidth = plotWidth / (SIZE/2);
     // int maxCount = *std::max_element(conn.begin(), conn.end());
 
     DrawRectangle(10, 10, plotWidth, plotHeight, BLACK);

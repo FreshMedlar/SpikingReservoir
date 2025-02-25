@@ -53,21 +53,21 @@ void Scheduler::synaptoGenesis() {
 
 Neuron& Scheduler::drawNeuron() {
     // Calculate the total friendliness
-    int totalFriendliness = std::accumulate(neurons.begin(), neurons.end(), 0,
+    int totalReceiver = std::accumulate(neurons.begin(), neurons.end(), 0,
                                             [](int sum, const Neuron& neuron) {
-                                                return sum + neuron.friendliness;
+                                                return sum + neuron.receiver.size();
                                             });
 
     // Generate a random number between 0 and totalFriendliness
-    std::uniform_int_distribution<> dis(0, totalFriendliness - 1);
+    std::uniform_int_distribution<> dis(0, totalReceiver - 1);
     int randomNumber = dis(gen);
 
     // Select a neuron based on the random number
     for (auto& neuron : neurons) {
-        if (randomNumber < neuron.friendliness) {
+        if (randomNumber < neuron.receiver.size()+2) {
             return neuron;
         }
-        randomNumber -= neuron.friendliness;
+        randomNumber -= neuron.receiver.size();
     }
 
     // In case of rounding errors or empty vector, return the last neuron

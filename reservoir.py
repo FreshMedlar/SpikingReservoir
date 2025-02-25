@@ -1,3 +1,5 @@
+# Single file with basic reservoir network
+
 import torch
 import torch.nn as nn
 from torch.nn import functional as F

@@ -13,9 +13,10 @@ public:
     
     void countConnections(int* connections);
     // frequence of neurons with n outgoing connections 
-    void countFrequence(int* connections);
+    void receiverFrequence(int* connections);
+    void senderFrequence(int* connections);
     void draw();
-    void drawGraph(std::vector<int> connectionsPerNeuron);
+    void drawReceiverGraph(std::vector<int> connectionsPerNeuron);
     void status();
     void applyForces();
     void initialConnections();

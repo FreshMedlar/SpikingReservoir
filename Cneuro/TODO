@@ -1,13 +1,8 @@
 - synaptogenesis
-    while the target neurons are easy to determine (low activity neurons) the complex part is determining which and why a neurons should develop new synapses.
-    This is also foundamental in creating a network with small-world properties
+    the development of new synapses is based on competition and various constraints.
     NOTE: this could also be impossible without ordered data. Rand spike won't do it 
     
-    THEORY - The # of outgoing connection per neuron follow a log-normal distribution, this is an emergent property that we see when:
-        1 - nodes have a normally distributed variable X that indicate their capability in a task 
-        2 - nodes compete (limited inputs are necessary/needed)on such task based, among many factors, on the current performance. This cause the resulting variable to compound, skewing the distribution (Example: normally distributed IQ, competition on salary)
-    OR JUST
-        1 - nodes compete on a limited task and successes compound.
+    THEORY - The # of outgoing connection per neuron follow a log-normal distribution, this is an emergent property that we see when nodes compete (limited inputs are necessary/needed)on such task based, among many factors, on their current performance. This cause the resulting variable to compound, skewing the distribution.
 
 - the synaptoGenesis function needs to be changed. Lonely neurons should remain such, and 
 
