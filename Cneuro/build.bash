@@ -9,8 +9,11 @@ mkdir -p $BUILD_DIR
 # Navigate to build directory
 cd $BUILD_DIR
 
-# Compile the project using g++ (or another compiler)
-g++ ~/SpikingReservoir/Cneuro/*.cpp -o program -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+# Run CMake configuration
+cmake -DCMAKE_PREFIX_PATH=/opt/libtorch ..
 
-# Run the program (optional)
+# Compile the project
+make -j$(nproc)
+
+# Run the program
 ./program
