@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <random>
 
 Scheduler::Scheduler(int size) : size(size) {}
 
@@ -42,14 +43,15 @@ void Scheduler::changeColor() {
 }
 
 void Scheduler::synaptoGenesis() {
-    Neuron neu = drawNeuron();
-    for (Neuron* toconnect : lonelyNeurons) {
-        neu.connect(toconnect); // TODO should be the opposite
+    if (lonelyNeurons.size() != 0) {
+        for (Neuron* toconnect : lonelyNeurons) {
+            drawNeuron().connect(toconnect); 
+        }
+        lonelyNeurons.clear();
     }
-    lonelyNeurons.clear();
 }
 
-Neuron Scheduler::drawNeuron() {
+Neuron& Scheduler::drawNeuron() {
     // Calculate the total friendliness
     int totalFriendliness = std::accumulate(neurons.begin(), neurons.end(), 0,
                                             [](int sum, const Neuron& neuron) {
@@ -57,10 +59,11 @@ Neuron Scheduler::drawNeuron() {
                                             });
 
     // Generate a random number between 0 and totalFriendliness
-    int randomNumber = rand() % totalFriendliness;
+    std::uniform_int_distribution<> dis(0, totalFriendliness - 1);
+    int randomNumber = dis(gen);
 
     // Select a neuron based on the random number
-    for (const auto& neuron : neurons) {
+    for (auto& neuron : neurons) {
         if (randomNumber < neuron.friendliness) {
             return neuron;
         }

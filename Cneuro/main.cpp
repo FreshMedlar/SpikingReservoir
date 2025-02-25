@@ -7,7 +7,7 @@
 #include "global.h"
 #include <algorithm>
 
-int SIZE = 200;
+int SIZE = 100;
 
 int main() {
     Manager manager(SIZE);
@@ -49,7 +49,7 @@ int main() {
 
         scheduler.update();
         scheduler.synaptoGenesis();
-        if (dis(gen) > 0.8) {
+        if (dis(gen) > 0.9) {
             neurons[disreal(gen)].spike(nullptr);
         }
 

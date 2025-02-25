@@ -18,7 +18,7 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler, float fren) :
 void Neuron::spike(Neuron* neuron) {
     for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID);}
     for (Neuron* n : sender) {n->backprop(ID);}
-    if (timeSinceSpike> 300){ scheduler_.lonelyNeurons.push_back(this);}
+    if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(this);}
     timeSinceSpike = 0;
     color = RED;
     // std::cout << "Timer: " << timer.first << ", " << timer.second << std::endl;
