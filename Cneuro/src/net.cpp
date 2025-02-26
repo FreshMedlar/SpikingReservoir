@@ -1,8 +1,21 @@
+#include "net.h"
+
+using namespace torch;
 
 
+// Net(int input, int output) : fc1_dims(input), out_dims(output) {
+//     // Construct and register two Linear submodules.
+//     fc1 = register_module("fc1", torch::nn::Linear(fc1_dims, out_dims));
+// }
 
-
-
+// // Implement the Net's algorithm.
+// torch::Tensor forward(torch::Tensor x) {
+//     // 1000x10
+//     x = torch::relu(fc1->forward(x.reshape({1, fc1_dims})));
+//     // x = torch::dropout(x, /*p=*/0.5, /*train=*/is_training());
+//     x = torch::log_softmax(x, /*dim=*/-1);
+//     return x;
+// }
 
 // class SingleLayerNN(nn.Module):
 //     def __init__(self, input_size, hidden_size ,output_size=65):
