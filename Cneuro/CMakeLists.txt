@@ -9,7 +9,9 @@ set(Torch_DIR "/opt/libtorch")
 find_package(Torch REQUIRED)
 
 # Add source files
-file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/*.cpp")
+file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
+
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 # Create executable
 add_executable(program ${SOURCES})
