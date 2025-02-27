@@ -1,11 +1,18 @@
 #include <iostream>
 #include <algorithm>
-#include <torch/torch.h>
 #include <vector>
 #include <fstream>
 #include <string>
 #include <set>
 #include <map>
+#include <armadillo>
+#include <ensmallen.hpp>
+#include <cereal/archives/json.hpp>
+// Define these to print extra informational output and warnings.
+#define MLPACK_PRINT_INFO
+#define MLPACK_PRINT_WARN
+#include <mlpack/methods/ann/ann.hpp>
+#include <mlpack/core.hpp>
 
 #include "neuron.h"
 #include "manager.h"
@@ -15,7 +22,12 @@
 #include "net.h"
 #include "encoder.h"
 
-using namespace torch;
+
+using namespace mlpack::ann;
+using namespace arma;
+using namespace mlpack;
+// using namespace mlpack::tree;
+using namespace std;
 
 int SIZE = 200;
 
@@ -49,6 +61,9 @@ int main() {
     std::vector<char> uniqueCharVector(uniqueChars.begin(), uniqueChars.end());
     std::vector<char> charVector(fileContent.begin(), fileContent.end());
 
+    int splitIndex = static_cast<int>(std::round(0.9*textLength));
+    std::string training = fileContent.substr(0, splitIndex);
+    std::string validation = fileContent.substr(splitIndex);
     // Print the vector of characters (optional)
     std::cout << "Characters in the vector: ";
     for (char c : uniqueCharVector) {
@@ -77,13 +92,72 @@ int main() {
     }
     std::cout << std::endl;
 
-    auto options =
-        torch::TensorOptions()
-            .dtype(torch::kFloat32);
-    torch::Tensor data = torch::tensor(encode(fileContent, stoi), options);
-    std::cout << data.dtype() << std::endl << data.sizes() << std::endl;
+    vector<int> sas = encode(training, stoi);
+    vector<double> encodedData(sas.begin(), sas.end());
+    sas.clear();
+    mat encodedMatrix(encodedData.data(), encodedData.size(), 1);
 
+    std::cout << "Dimensions: " << encodedMatrix.n_rows << " x " << encodedMatrix.n_cols << std::endl;
+
+
+//-----------------------------------MODEL DEFINITION----------------------------------------
+
+    // Define input and output dimensions
+    const int inputSize = 10000;
+    const int outputSize = 65;
+    // Create a neural network model
+    FFN<MeanSquaredError<>> model;
+    // Add layers
+    model.Add<Linear<>>(inputSize, 512); // First hidden layer (512 neurons)
+    model.Add<ReLU<>>();                 // Activation function
+    model.Add<Linear<>>(512, 256);       // Second hidden layer
+    model.Add<ReLU<>>();                 
+    model.Add<Linear<>>(256, outputSize);// Output layer
+    // Set up the optimizer (Adam)
+    ens::Adam optimizer(
+        0.001,  // Learning rate
+        32,     // Batch size
+        0.9,    // Beta1
+        0.999,  // Beta2
+        1e-8,   // Epsilon
+        10000,  // Max iterations
+        1e-5,   // Tolerance
+        false   // Shuffle
+    );
+    // Print model summary
+    model.Print();
+
+//----------------------------------RESERVOIR DEFINITION-----------------------------------
+    Manager manager(SIZE);
+    Scheduler scheduler(SIZE);
+    manager.createNeurons(&scheduler);
+    manager.initialConnections();
+    manager.status();
     
+    int frameCounter = 0;
+    std::vector<int> connectionsPerNeuron(SIZE, 0);
+    std::uniform_real_distribution<> dis(0.0,1.0);
+    std::uniform_real_distribution<> disreal(0, SIZE-1);
+//----------------------------------DATA--------------------------------------------------
+    vector<vector<int>> spikeHistory;//TODO preassign memory
+//----------------------------------TRAINING LOOP-----------------------------------------
+    for(auto& batch: data_loader) {
+        // the reservoir updated multiple times(spikeSampling) for each input 
+        for(int sample = 0; sample < spikeSampling; sample++) {
+            frameCounter++;
+            
+            //INPUT
+            // scheduler.toSpike.push_back(next input)
+            //X(t) FOR THE MODEL
+            spikeHistory.push_back(scheduler.toSpike)
+            //RESERVOIR
+            scheduler.update();
+            scheduler.synaptoGenesis();
+        }
+        //MODEL
+        //do by hand
+
+    }
     return 0;
 }
 
@@ -93,8 +167,6 @@ int main() {
 //     manager.createNeurons(&scheduler);
 //     manager.initialConnections();
 //     manager.status();
-//     auto net = std::make_shared<Net>(10, 10);
-//     torch::optim::SGD optimizer(net->parameters(), /*lr=*/0.01);
     
 //     int frameCounter = 0;
 //     std::vector<int> connectionsPerNeuron(SIZE, 0);

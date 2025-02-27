@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set build directory
-BUILD_DIR="build"
+BUILD_DIR="/home/medlar/SpikingReservoir/build"
 
 # Create build directory if it doesn't exist
 mkdir -p $BUILD_DIR
@@ -10,7 +10,7 @@ mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
 # Run CMake configuration
-cmake -DCMAKE_PREFIX_PATH=/opt/libtorch ..
+cmake .
 
 # Compile the project
 make -j$(nproc)
