@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Armadillo
 find_package(Armadillo REQUIRED)
 include_directories(/usr/local/include)
+include_directories(/usr/include/eigen3)
 
 # Add source files
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")

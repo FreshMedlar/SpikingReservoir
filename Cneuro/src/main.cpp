@@ -5,14 +5,13 @@
 #include <string>
 #include <set>
 #include <map>
+#include <Eigen/Dense>
 #include <armadillo>
 #include <ensmallen.hpp>
 #include <cereal/archives/json.hpp>
 // Define these to print extra informational output and warnings.
 #define MLPACK_PRINT_INFO
 #define MLPACK_PRINT_WARN
-#include <mlpack/methods/ann/ann.hpp>
-#include <mlpack/core.hpp>
 
 #include "neuron.h"
 #include "manager.h"
@@ -22,11 +21,7 @@
 #include "net.h"
 #include "encoder.h"
 
-
-using namespace mlpack::ann;
-using namespace arma;
-using namespace mlpack;
-// using namespace mlpack::tree;
+// using namespace arma;
 using namespace std;
 
 int SIZE = 200;
@@ -43,17 +38,29 @@ std::string decode(std::vector<int> i, std::map<int, char> itos) {
     return decoded;
 }
 
+Eigen::VectorXf vectorToEigen(const std::vector<int>& vec) {
+    // Create an Eigen vector of the same size
+    Eigen::VectorXf eigen_vec(vec.size());
+    
+    // Copy data from std::vector to Eigen::VectorXf
+    for (size_t i = 0; i < vec.size(); ++i) {
+        eigen_vec(i) = static_cast<float>(vec[i]);  // Cast int to float
+    }
+    
+    return eigen_vec;
+}
+
 int main() {
+//-----------------------READ INPUT FILE----------------------
     std::string filePath = "/home/medlar/SpikingReservoir/tinyshakespeare.txt";
     std::ifstream file(filePath);
     if (!file.is_open()) {
         std::cerr << "Error opening file." << std::endl;
         return 1;
     }
-    // Read the file content into a string
     std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     file.close();
-    // Calculate the length of the text
+//-----------------------DATA PROCESSING-----------------------------
     size_t textLength = fileContent.length();
     std::cout << "Length of the text: " << textLength << std::endl;
 
@@ -92,40 +99,47 @@ int main() {
     }
     std::cout << std::endl;
 
-    vector<int> sas = encode(training, stoi);
-    vector<double> encodedData(sas.begin(), sas.end());
-    sas.clear();
-    mat encodedMatrix(encodedData.data(), encodedData.size(), 1);
-
-    std::cout << "Dimensions: " << encodedMatrix.n_rows << " x " << encodedMatrix.n_cols << std::endl;
+    vector<int> encodedTraining = encode(training, stoi);
+    // vector<double> encodedData(encodedTraining.begin(), encodedTraining.end());
+    // encodedTraining.clear();
+    // TODO - from encodedTraining, create a list such that at each index there is 
+    // one letter encoded. In this way, each training cycle we will feed the encoded
+    // letter and confront the output with the next letter
 
 
 //-----------------------------------MODEL DEFINITION----------------------------------------
 
-    // Define input and output dimensions
-    const int inputSize = 10000;
-    const int outputSize = 65;
-    // Create a neural network model
-    FFN<MeanSquaredError<>> model;
-    // Add layers
-    model.Add<Linear<>>(inputSize, 512); // First hidden layer (512 neurons)
-    model.Add<ReLU<>>();                 // Activation function
-    model.Add<Linear<>>(512, 256);       // Second hidden layer
-    model.Add<ReLU<>>();                 
-    model.Add<Linear<>>(256, outputSize);// Output layer
-    // Set up the optimizer (Adam)
-    ens::Adam optimizer(
-        0.001,  // Learning rate
-        32,     // Batch size
-        0.9,    // Beta1
-        0.999,  // Beta2
-        1e-8,   // Epsilon
-        10000,  // Max iterations
-        1e-5,   // Tolerance
-        false   // Shuffle
-    );
-    // Print model summary
-    model.Print();
+    // // Define input and output dimensions
+    // const int INPUT_SIZE = 10000;
+    // const int OUTPUT_SIZE = 65;
+    // // Create a neural network model
+    // FFN<MeanSquaredError<>> model;
+    // // Add layers
+    // model.Add<Linear<>>(inputSize, 512); // First hidden layer (512 neurons)
+    // model.Add<ReLU<>>();                 // Activation function
+    // model.Add<Linear<>>(512, 256);       // Second hidden layer
+    // model.Add<ReLU<>>();                 
+    // model.Add<Linear<>>(256, outputSize);// Output layer
+    // // Set up the optimizer (Adam)
+    // ens::Adam optimizer(
+    //     0.001,  // Learning rate
+    //     32,     // Batch size
+    //     0.9,    // Beta1
+    //     0.999,  // Beta2
+    //     1e-8,   // Epsilon
+    //     10000,  // Max iterations
+    //     1e-5,   // Tolerance
+    //     false   // Shuffle
+    // );
+    // // Print model summary
+    // model.Print();
+//----------------------------------BY HAND MODEL------------------------------------------
+    const int INPUT_SIZE = 10000;
+    const int OUTPUT_SIZE = 65;
+    const float LR = 0.001;
+    const int NUM_SAMPLES = 1;  // Online learning
+
+    SingleLayerNetwork network(LR);
 
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
     Manager manager(SIZE);
@@ -134,30 +148,42 @@ int main() {
     manager.initialConnections();
     manager.status();
     
+    int SPIKE_SAMPLING = 10;
     int frameCounter = 0;
     std::vector<int> connectionsPerNeuron(SIZE, 0);
     std::uniform_real_distribution<> dis(0.0,1.0);
     std::uniform_real_distribution<> disreal(0, SIZE-1);
 //----------------------------------DATA--------------------------------------------------
-    vector<vector<int>> spikeHistory;//TODO preassign memory
+    Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
 //----------------------------------TRAINING LOOP-----------------------------------------
-    for(auto& batch: data_loader) {
-        // the reservoir updated multiple times(spikeSampling) for each input 
-        for(int sample = 0; sample < spikeSampling; sample++) {
-            frameCounter++;
-            
-            //INPUT
-            // scheduler.toSpike.push_back(next input)
-            //X(t) FOR THE MODEL
-            spikeHistory.push_back(scheduler.toSpike)
-            //RESERVOIR
-            scheduler.update();
-            scheduler.synaptoGenesis();
-        }
-        //MODEL
-        //do by hand
+    // for (int epoch = 0; epoch < 100000; ++epoch) {
+    //     float epoch_loss = 0;
+    //     // the reservoir updated multiple times(spikeSampling) for each input 
+    //     for (int circle = 0; circle < 1; ++circle) {
+    //         for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
+    //             frameCounter++;
+                
+    //             //INPUT
+    //             // scheduler.toSpike.push_back(next input)
+    //             //X(t) FOR THE MODEL
+    //             spikeHistory.row(sample) = vectorToEigen(scheduler.toSpike).transpose();
+    //             //RESERVOIR
+    //             scheduler.update();
+    //             scheduler.synaptoGenesis();
+    //         }
+    //         //MODEL BY HAND
+    //         spikeHistory.resize(1,10000);
+    //         Eigen::VectorXf output = network.forward(spikeHistory);
+    //         output = network.softmax(output);
+    //         epoch_loss += SingleLayerNetwork::compute_loss(output, target);
+    //         Eigen::VectorXf d_input = network.backward(spikeHistory, output, target);
+    //     }
+    //     std::cout << "Epoch " << epoch 
+    //              << " | Avg Loss: " << epoch_loss/1
+    //              << std::endl;
+    // }
 
-    }
+
     return 0;
 }
 
