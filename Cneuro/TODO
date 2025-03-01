@@ -1,10 +1,14 @@
+MOST IMPORTANT
+- graph for distribution of synapses strength, firing rates, firing per second
+    and in general need to study the stability of the system
+
 - synaptogenesis
     the development of new synapses is based on competition and various constraints.
     NOTE: this could also be impossible without ordered data. Rand spike won't do it 
     
     THEORY - The # of outgoing connection per neuron follow a log-normal distribution, this is an emergent property that we see when nodes compete (limited inputs are necessary/needed)on such task based, among many factors, on their current performance. This cause the resulting variable to compound, skewing the distribution.
 
-- the synaptoGenesis function needs to be changed. Lonely neurons should remain such, and 
+- the synaptoGenesis function needs to be changed. Lonely neurons should remain such
 
 - homeostasis
 
@@ -12,7 +16,7 @@
 
 - move part of Neuron::disconnect to the rispective neuron
 
-- graph for distribution of synapses strength and firing rates
+
 
 DONE
 - pruning

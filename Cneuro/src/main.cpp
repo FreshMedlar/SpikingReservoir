@@ -24,7 +24,7 @@
 // using namespace arma;
 using namespace std;
 
-int SIZE = 200;
+int SIZE = 1000;
 
 std::vector<int> encode(std::string s, std::map<char, int> stoi) {
     std::vector<int> encoded;
@@ -98,48 +98,21 @@ int main() {
         std::cout << stoi[c] << "";
     }
     std::cout << std::endl;
-
+//----------------------------------STUPID ENCODING------------------------------------------
     vector<int> encodedTraining = encode(training, stoi);
-    // vector<double> encodedData(encodedTraining.begin(), encodedTraining.end());
-    // encodedTraining.clear();
-    // TODO - from encodedTraining, create a list such that at each index there is 
-    // one letter encoded. In this way, each training cycle we will feed the encoded
-    // letter and confront the output with the next letter
-
-
-//-----------------------------------MODEL DEFINITION----------------------------------------
-
-    // // Define input and output dimensions
-    // const int INPUT_SIZE = 10000;
-    // const int OUTPUT_SIZE = 65;
-    // // Create a neural network model
-    // FFN<MeanSquaredError<>> model;
-    // // Add layers
-    // model.Add<Linear<>>(inputSize, 512); // First hidden layer (512 neurons)
-    // model.Add<ReLU<>>();                 // Activation function
-    // model.Add<Linear<>>(512, 256);       // Second hidden layer
-    // model.Add<ReLU<>>();                 
-    // model.Add<Linear<>>(256, outputSize);// Output layer
-    // // Set up the optimizer (Adam)
-    // ens::Adam optimizer(
-    //     0.001,  // Learning rate
-    //     32,     // Batch size
-    //     0.9,    // Beta1
-    //     0.999,  // Beta2
-    //     1e-8,   // Epsilon
-    //     10000,  // Max iterations
-    //     1e-5,   // Tolerance
-    //     false   // Shuffle
-    // );
-    // // Print model summary
-    // model.Print();
+    vector<vector<int>> inputReservoir;
+    inputReservoir.reserve(encodedTraining.size());
+    for (int letter : encodedTraining) {
+        vector<int> innerVec = {letter, letter+65, letter+130};
+        inputReservoir.emplace_back(innerVec);
+    }
 //----------------------------------BY HAND MODEL------------------------------------------
     const int INPUT_SIZE = 10000;
     const int OUTPUT_SIZE = 65;
     const float LR = 0.001;
     const int NUM_SAMPLES = 1;  // Online learning
 
-    SingleLayerNetwork network(LR);
+    SingleLayerNetwork network(LR, SIZE);
 
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
     Manager manager(SIZE);
@@ -153,39 +126,107 @@ int main() {
     std::vector<int> connectionsPerNeuron(SIZE, 0);
     std::uniform_real_distribution<> dis(0.0,1.0);
     std::uniform_real_distribution<> disreal(0, SIZE-1);
+//----------------------------------VISUALS-----------------------------------------------
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
+
+    InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
+    ToggleFullscreen();    
+    SetTargetFPS(0);
 //----------------------------------DATA--------------------------------------------------
-    Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
+    // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
+    vector<int> spikeHistory;
+    spikeHistory.reserve(SPIKE_SAMPLING);
 //----------------------------------TRAINING LOOP-----------------------------------------
-    // for (int epoch = 0; epoch < 100000; ++epoch) {
-    //     float epoch_loss = 0;
-    //     // the reservoir updated multiple times(spikeSampling) for each input 
-    //     for (int circle = 0; circle < 1; ++circle) {
-    //         for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
-    //             frameCounter++;
-                
-    //             //INPUT
-    //             // scheduler.toSpike.push_back(next input)
-    //             //X(t) FOR THE MODEL
-    //             spikeHistory.row(sample) = vectorToEigen(scheduler.toSpike).transpose();
-    //             //RESERVOIR
-    //             scheduler.update();
-    //             scheduler.synaptoGenesis();
-    //         }
-    //         //MODEL BY HAND
-    //         spikeHistory.resize(1,10000);
-    //         Eigen::VectorXf output = network.forward(spikeHistory);
-    //         output = network.softmax(output);
-    //         epoch_loss += SingleLayerNetwork::compute_loss(output, target);
-    //         Eigen::VectorXf d_input = network.backward(spikeHistory, output, target);
-    //     }
-    //     std::cout << "Epoch " << epoch 
-    //              << " | Avg Loss: " << epoch_loss/1
-    //              << std::endl;
-    // }
+    int epoch = 0;
+    while (!WindowShouldClose()) {
+        float epoch_loss = 0;
 
 
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        // NEURONS DRAWING 
+        // scheduler.changeColor();
+        manager.draw();
+        // if (frameCounter%3 ==0) {manager.applyForces();}
+        // GRAPHS DRAWING
+        if (frameCounter%3 == 0) {
+            connectionsPerNeuron.clear();
+            connectionsPerNeuron.resize(SIZE, 0); 
+            // EITHER, NOT BOTH
+            manager.receiverFrequence(connectionsPerNeuron.data()); 
+            // manager.senderFrequence(connectionsPerNeuron.data());
+        }
+        manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
+        
+        // FPS
+        int fps = GetFPS();
+        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+
+
+
+        // the reservoir updated multiple times(spikeSampling) for each input 
+        for (int circle = 0; circle < 1; ++circle) {
+            for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
+                frameCounter++;
+                //INPUT
+                for(int ins : inputReservoir[epoch]) {
+                    scheduler.toSpike.push_back(ins);
+                }
+                //X(t) FOR THE MODEL
+                for (int ins : scheduler.toSpike){
+                    spikeHistory.push_back(ins+(SIZE*sample));
+                }
+                //RESERVOIR
+                scheduler.update();
+                scheduler.synaptoGenesis();
+            }
+            //MODEL BY HAND
+            Eigen::VectorXf output = network.forward_sparse(spikeHistory);
+            output = network.softmax(output);
+            epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
+            Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
+            spikeHistory.clear();
+        }
+        std::cout << "Epoch " << epoch 
+                 << " | Avg Loss: " << epoch_loss/1
+                 << std::endl;
+
+        EndDrawing();
+        epoch++;
+    }
+    CloseWindow();
     return 0;
 }
+
+    
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // int ordered_main() {
 //     Manager manager(SIZE);
@@ -235,6 +276,29 @@ int main() {
 //     }
 // }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // int main() {
 //     Manager manager(SIZE);
 //     Scheduler scheduler(SIZE);
@@ -261,9 +325,9 @@ int main() {
 //         ClearBackground(BLACK); // Black background
 
 //         // NEURONS DRAWING 
-//         // scheduler.changeColor();
+//         scheduler.changeColor();
 //         manager.draw();
-//         // if (frameCounter%2 ==0) {manager.applyForces();}
+//         // if (frameCounter%3 ==0) {manager.applyForces();}
 
 //         // GRAPHS DRAWING
 //         if (frameCounter%2 == 0) {

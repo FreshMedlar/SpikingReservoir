@@ -38,7 +38,7 @@ void Neuron::forward(int n) {
 void Neuron::backprop(int n) {
     if (connectionMatrix[ID][n] > 0.3f) {
         if (connectionMatrix[ID][n] < 10.0f) {
-            connectionMatrix[ID][n] += (-log10(x + 1) + 2) / 10;
+            connectionMatrix[ID][n] += (-log10(timeSinceSpike + 1) + 2) / 10;
                                         // (-(timeSinceSpike-40)/50); 
         }
     } else {
