@@ -68,7 +68,6 @@ float Neuron::disconnect(int n) {
     //remove from connectionMatrix
     float strength = connectionMatrix[ID][n];
     connectionMatrix[ID][n] = 0.0f;
-    std::cout << "disconnected" << std::endl;
     return strength;
 }
 

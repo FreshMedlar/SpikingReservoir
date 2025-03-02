@@ -182,6 +182,9 @@ int main() {
     spikeNumber.reserve(500);
     spikeNumber.push_back(0);
     spikeNumber.resize(500);
+    vector<float> totalWeight;
+    totalWeight.reserve(500);
+    totalWeight.resize(500);
 //---------------------------------KEY---------------------------------------------------
     float growthProb = 0.7;
     int toRemove;
@@ -194,8 +197,8 @@ int main() {
     bool train = false;
     bool draw = true;
     bool graph = true;
-    // while (!WindowShouldClose()) {
-    for (int s = 0; s < 1; s++) {
+    while (!WindowShouldClose()) {
+    // for (int s = 0; s < 1; s++) {
         float epoch_loss = 0;
 
         BeginDrawing();
@@ -218,6 +221,7 @@ int main() {
             }
             manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
             manager.drawSpikesGraph(spikeNumber);
+            manager.drawTotalWeight(totalWeight);
         }
         // FPS
         int fps = GetFPS();
@@ -229,7 +233,7 @@ int main() {
         for (const auto& row : connectionMatrix) {
             totalSum = std::accumulate(row.begin(), row.end(), totalSum);
         }
-        std::cout << totalSum << std::endl;
+        totalWeight[(epoch)%500] = totalSum;
 
         // the reservoir updated multiple times(spikeSampling) for each input 
         for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
@@ -237,43 +241,31 @@ int main() {
 
 
 
-            
-            toRemove = disreal(gen);
-            fromRemove = neurons[toRemove].receiver.size();
-            if (fromRemove != 0) {
-                fromRemove = getRandomInt(fromRemove);//index in receiver
-                fromRemove = neurons[toRemove].receiver[fromRemove].first->ID;
+        
+            toRemove = disreal(gen) % neurons.size();
+            if (!neurons[toRemove].receiver.empty()) {
+                fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get valid index
+                Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
+                fromRemove = targetNeuron->ID;
                 toDistribute = neurons[toRemove].disconnect(fromRemove);
             }
-            if (neurons.empty()) break; // Avoid segfault if no neurons exist
-            std::cout << "primo" << std::endl;
-            toRemove = disreal(gen) % neurons.size(); // Ensure valid index
-            if (neurons[toRemove].receiver.empty()) break; // Ensure non-empty receiver
-            std::cout << "sec" << std::endl;
-            fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get valid index
-            std::cout << "2.5" << std::endl;
-            Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
-            if (!targetNeuron) break; // Avoid null pointer access
-            std::cout << "terzo" << std::endl;
-            fromRemove = targetNeuron->ID;
-            toDistribute = neurons[toRemove].disconnect(fromRemove);
-
             int sjdfo = static_cast<int>(toDistribute);
-            // for (int a = 0; a < sjdfo; a++) {
-            //     if (dis(gen) < growthProb) {
-            //         float weight = static_cast<float>(SIZE);
-            //         auto [row, col] = selectWeightedRandom(connectionMatrix, weight);
-            //         connectionMatrix[row][col] += 1.0f;
-            //     } else {
-            //         from = disreal(gen);
-            //         to = disreal(gen);
-            //         if (connectionMatrix[from][to] != 0.0f){
-            //             connectionMatrix[from][to] += 1.0f;
-            //         } else {
-            //             neurons[from].connect(to, 1.0f);
-            //         }
-            //     }
-            // }
+            for (int a = 0; a < sjdfo; a++) {
+                if (dis(gen) < growthProb) {
+                    float weight = static_cast<float>(SIZE);
+                    auto [row, col] = selectWeightedRandom(connectionMatrix, weight);
+                    connectionMatrix[row][col] += 1.0f;
+                } else {
+                    from = disreal(gen);
+                    to = disreal(gen);
+                    if (connectionMatrix[from][to] != 0.0f){
+                        connectionMatrix[from][to] += 1.0f;
+                    } else {
+                        neurons[from].connect(to, 1.0f);
+                    }
+                }
+            }
+            toDistribute = 0.0f;
 
             //INPUT
             for(int ins : inputReservoir[epoch]) {
@@ -306,12 +298,6 @@ int main() {
         EndDrawing();
         epoch++;
         
-        
-        totalSum = 0.0f;
-        for (const auto& row : connectionMatrix) {
-            totalSum = std::accumulate(row.begin(), row.end(), totalSum);
-        }
-        std::cout << totalSum << std::endl;
     }
     CloseWindow();
     return 0;

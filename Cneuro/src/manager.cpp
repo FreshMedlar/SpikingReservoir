@@ -168,3 +168,14 @@ void Manager::drawSpikesGraph(std::vector<int> spikeNumber) {
     }
 }
 
+void Manager::drawTotalWeight(std::vector<float> totalWeight) {
+    int plotWidth = 500;
+    int plotHeight = 250;
+    int barWidth = 1;
+
+    for (int i = 0; i < totalWeight.size(); i++) {
+        int barHeight = totalWeight[i]/5;
+        DrawRectangle(10 + (i%1920), 10 + plotHeight*3 - barHeight, barWidth, barHeight, BLUE);
+
+    }
+}
