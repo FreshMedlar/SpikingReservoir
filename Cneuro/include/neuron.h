@@ -28,8 +28,8 @@ public:
 
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
-    void connect(int n);   
-    void disconnect(int n); 
+    void connect(int n, float weight = 1.0f);   
+    float disconnect(int n); 
     void spike(Neuron* neuron);
     void forward(int n);
     // update weight to next neuron (n)

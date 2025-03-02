@@ -36,18 +36,19 @@ void Neuron::forward(int n) {
 void Neuron::backprop(int n) {
     if (connectionMatrix[ID][n] > 0.3f) {
         if (connectionMatrix[ID][n] < 10.0f) {
-            connectionMatrix[ID][n] += (-log10(timeSinceSpike + 1) + 2) / 10;
+            // connectionMatrix[ID][n] += (-log10(timeSinceSpike + 1) + 2) / 10;
                                         // (-(timeSinceSpike-40)/50); 
         }
     } else {
-        disconnect(n);
+        // disconnect(n);
     }
 }
 
-void Neuron::disconnect(int n) {
+float Neuron::disconnect(int n) {
     // remove the receiving neuron 
     for (int d = 0; d < receiver.size(); d++) {
         if (receiver[d].first == &neurons[n]) { 
+            receiver[d].first = nullptr;
             if ( d < receiver.size() - 1 )
                 receiver[d] = std::move( receiver.back() );
             receiver.pop_back();
@@ -65,15 +66,18 @@ void Neuron::disconnect(int n) {
         }
     }
     //remove from connectionMatrix
+    float strength = connectionMatrix[ID][n];
     connectionMatrix[ID][n] = 0.0f;
+    std::cout << "disconnected" << std::endl;
+    return strength;
 }
 
-void Neuron::connect(int n) {
-    if (n == -1) {
-        n = manager_.randomNeuron(this)->ID;
+void Neuron::connect(int enne, float weight) {
+    if (enne == -1) {
+        enne = manager_.randomNeuron(this)->ID;
     }
-    neurons[n].sender.push_back(this);
-    std::pair<Neuron*, float> p = {&neurons[n], 1};
+    neurons[enne].sender.push_back(this);
+    std::pair<Neuron*, float> p = {&neurons[enne], 1.0f};
     receiver.push_back(p); 
-    connectionMatrix[ID][neurons[n].ID] = 1.0f;
+    connectionMatrix[ID][neurons[enne].ID] = weight;
 }

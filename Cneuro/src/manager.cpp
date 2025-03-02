@@ -129,13 +129,13 @@ void Manager::countConnections(int* connections) {
 }
 
 void Manager::receiverFrequence(int* connections) {
-    for (int sos = 0; sos < SIZE; sos++) {
+    for (int sos = 0; sos < size; sos++) {
         connections[neurons[sos].receiver.size()]++;
     }
 }
 
 void Manager::senderFrequence(int* connections) {
-    for (int sos = 0; sos < SIZE; sos++) {
+    for (int sos = 0; sos < size; sos++) {
         connections[neurons[sos].sender.size()]++;
     }
 }
@@ -167,3 +167,4 @@ void Manager::drawSpikesGraph(std::vector<int> spikeNumber) {
 
     }
 }
+

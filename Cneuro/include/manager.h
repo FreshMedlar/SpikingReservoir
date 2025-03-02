@@ -18,6 +18,7 @@ public:
     void draw();
     void drawReceiverGraph(std::vector<int> connectionsPerNeuron);
     void drawSpikesGraph(std::vector<int> spikeNumber);
+    void drawCumulativeWeightGraph();
     void status();
     void applyForces();
     void initialConnections();
