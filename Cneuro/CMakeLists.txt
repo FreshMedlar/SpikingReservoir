@@ -32,7 +32,7 @@ endif()
 
 # Enable profiling with gprof
 # terminal:: gprof program gmon.out | gprof2dot -w | dot -Tpng -o output.png
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -O0")
 
 # Set rpath so the program can find the shared libraries
 set_property(TARGET program PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

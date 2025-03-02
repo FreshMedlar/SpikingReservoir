@@ -19,12 +19,10 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler, float fren) :
 void Neuron::spike(Neuron* neuron) {
     for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID);}
     for (Neuron* n : sender) {n->backprop(ID);}
-    if (timeSinceSpike> 5000){ scheduler_.lonelyNeurons.push_back(this);}
+    if (timeSinceSpike> 5000){ scheduler_.lonelyNeurons.push_back(ID);}
     timeSinceSpike = 0;
-    color = RED;
-    // std::cout << "Timer: " << timer.first << ", " << timer.second << std::endl;
-    // std::cout << "Track color size: " << scheduler_.trackColor.size() << std::endl;
-    scheduler_.trackColor.push_back(timer);
+    // color = RED;
+    // scheduler_.trackColor.push_back(timer);
 }
 
 void Neuron::forward(int n) {
@@ -70,12 +68,12 @@ void Neuron::disconnect(int n) {
     connectionMatrix[ID][n] = 0.0f;
 }
 
-void Neuron::connect(Neuron* n) {
-    if (n == nullptr) {
-        n = manager_.randomNeuron(this);
+void Neuron::connect(int n) {
+    if (n == -1) {
+        n = manager_.randomNeuron(this)->ID;
     }
-    n->sender.push_back(this);
-    std::pair<Neuron*, float> p = {n, 1};
+    neurons[n].sender.push_back(this);
+    std::pair<Neuron*, float> p = {&neurons[n], 1};
     receiver.push_back(p); 
-    connectionMatrix[ID][n->ID] = 1.0f;
+    connectionMatrix[ID][neurons[n].ID] = 1.0f;
 }

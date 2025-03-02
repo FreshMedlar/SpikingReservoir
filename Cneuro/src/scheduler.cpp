@@ -5,7 +5,9 @@
 #include <numeric>
 #include <random>
 
-Scheduler::Scheduler(int size) : size(size) {}
+Scheduler::Scheduler(int size) : size(size) {
+    toSpike.resize(1000);
+}
 
 void Scheduler::update() {
     // if (toAdd.size() > 0) {for (int n : toAdd) {for (Neuron* toadd : neurons[n].receiver){toadd->impulse(&(neurons[n]));}}}
@@ -44,7 +46,7 @@ void Scheduler::changeColor() {
 
 void Scheduler::synaptoGenesis() {
     if (lonelyNeurons.size() != 0) {
-        for (Neuron* toconnect : lonelyNeurons) {
+        for (int toconnect : lonelyNeurons) {
             drawNeuron().connect(toconnect); 
         }
         lonelyNeurons.clear();
@@ -73,3 +75,11 @@ Neuron& Scheduler::drawNeuron() {
     // In case of rounding errors or empty vector, return the last neuron
     return neurons.back();
 }
+
+std::vector<int> Scheduler::lonelyNeurons;
+// std::atomic<size_t> Scheduler::index{0};
+
+// void Scheduler::parallel_push_back(int value) {
+//     size_t idx = index.fetch_add(1, std::memory_order_relaxed);
+//     lonelyNeurons[idx] = value;
+// }

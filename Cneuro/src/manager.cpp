@@ -46,7 +46,7 @@ void Manager::initialConnections() {
             int target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
-                neuron.connect(&neurons[target]);
+                neuron.connect(target);
                 connected.insert(target);
             }
         }
@@ -146,9 +146,23 @@ void Manager::drawReceiverGraph(std::vector<int> conn) {
     int barWidth = plotWidth / (SIZE/2);
     // int maxCount = *std::max_element(conn.begin(), conn.end());
 
-    DrawRectangle(10, 10, plotWidth, plotHeight, BLACK);
+    // DrawRectangle(10, 10, plotWidth, plotHeight, BLACK);
     for (int i = 0; i < conn.size(); i++) {
         int barHeight = conn[i]*3;
+        DrawRectangle(10 + (i * barWidth), 10 + plotHeight - barHeight, barWidth, barHeight, BLUE);
+
+    }
+}
+
+void Manager::drawSpikesGraph(std::vector<int> spikeNumber) {
+    int plotWidth = 500;
+    int plotHeight = 250;
+    int barWidth = 1;
+    // int maxCount = *std::max_element(conn.begin(), conn.end());
+
+    // DrawRectangle(10, 260, plotWidth, plotHeight, BLACK);
+    for (int i = 0; i < spikeNumber.size(); i++) {
+        int barHeight = spikeNumber[i]*3;
         DrawRectangle(10 + (i * barWidth), 10 + plotHeight - barHeight, barWidth, barHeight, BLUE);
 
     }

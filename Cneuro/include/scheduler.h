@@ -5,6 +5,8 @@
 #include "neuron.h"
 #include <utility>
 #include <algorithm> 
+#include <thread>
+#include <atomic>
 
 class Neuron;
 
@@ -22,12 +24,14 @@ public:
     void update();
     void changeColor();
     std::vector<std::pair<int,int>> trackColor;
-    std::vector<Neuron*> lonelyNeurons;
+    static std::vector<int> lonelyNeurons;
+    static std::atomic<size_t> index;
     void synaptoGenesis();
     Neuron& drawNeuron();
+    std::vector<std::thread> threads;
+    // static void parallel_push_back(int value);
 
 private:
-    // std::vector<std::vector<Neuron*>*> toReceive;
     int size;
     
 };
