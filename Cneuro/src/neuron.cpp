@@ -29,7 +29,7 @@ void Neuron::forward(int n) {
     actionPotential += 30 * connectionMatrix[n][ID];
     if (actionPotential > 70) {
         actionPotential = 0;
-        scheduler_.nextSpike.push_back(ID);
+        scheduler_.swapSpike.insert(ID);
     }
 }
 

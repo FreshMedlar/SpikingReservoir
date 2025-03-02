@@ -162,8 +162,8 @@ void Manager::drawSpikesGraph(std::vector<int> spikeNumber) {
 
     // DrawRectangle(10, 260, plotWidth, plotHeight, BLACK);
     for (int i = 0; i < spikeNumber.size(); i++) {
-        int barHeight = spikeNumber[i]*3;
-        DrawRectangle(10 + (i * barWidth), 10 + plotHeight - barHeight, barWidth, barHeight, BLUE);
+        int barHeight = spikeNumber[i];
+        DrawRectangle(10 + (i%1920), 10 + plotHeight*2 - barHeight, barWidth, barHeight, BLUE);
 
     }
 }

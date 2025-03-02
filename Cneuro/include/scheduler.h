@@ -7,6 +7,7 @@
 #include <algorithm> 
 #include <thread>
 #include <atomic>
+#include <set>
 
 class Neuron;
 
@@ -16,8 +17,8 @@ public:
     // std::vector<int> toAdd; 
     // toAdd contains the ID of the neurons 
     // that have just spiked 
-    std::vector<int> toSpike; 
-    std::vector<int> nextSpike;
+    std::set<int> toSpike; 
+    std::set<int> swapSpike;
     // toSpike contains the ID of the neurons
     // that have reached the threshold and
     // will spike next iteration

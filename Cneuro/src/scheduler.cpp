@@ -6,7 +6,6 @@
 #include <random>
 
 Scheduler::Scheduler(int size) : size(size) {
-    toSpike.resize(1000);
 }
 
 void Scheduler::update() {
@@ -22,8 +21,8 @@ void Scheduler::update() {
         }
         // std::cout << "here?" << std::endl;
         toSpike.clear();
-        std::swap(toSpike, nextSpike);
-
+        std::swap(toSpike, swapSpike);
+        swapSpike.clear();
         // std::cout << "clean" << std::endl;
     }
 }

@@ -138,8 +138,9 @@ int main() {
     vector<int> spikeHistory;
     spikeHistory.reserve(SPIKE_SAMPLING);
     vector<int> spikeNumber;
-    spikeNumber.reserve(100000);
+    spikeNumber.reserve(500);
     spikeNumber.push_back(0);
+    spikeNumber.resize(500);
 //----------------------------------TRAINING LOOP-----------------------------------------
     int epoch = 0;
     bool train = false;
@@ -154,14 +155,14 @@ int main() {
         if (draw) {
             // scheduler.changeColor();
             manager.draw();
-            // if (frameCounter%3 ==0) {manager.applyForces();}
+            if (frameCounter%1 ==0) {manager.applyForces();}
             // GRAPHS DRAWING
             if (frameCounter%1 == 0) {
                 connectionsPerNeuron.clear();
                 connectionsPerNeuron.resize(SIZE, 0); 
                 // EITHER, NOT BOTH
-                manager.receiverFrequence(connectionsPerNeuron.data()); 
-                // manager.senderFrequence(connectionsPerNeuron.data());
+                // manager.receiverFrequence(connectionsPerNeuron.data()); 
+                manager.senderFrequence(connectionsPerNeuron.data());
             }
             manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
             manager.drawSpikesGraph(spikeNumber);
@@ -178,7 +179,7 @@ int main() {
             frameCounter++;
             //INPUT
             for(int ins : inputReservoir[epoch]) {
-                scheduler.toSpike.push_back(ins);
+                scheduler.toSpike.insert(ins);
             }
             //X(t) FOR THE MODEL
             if (train) {
@@ -187,7 +188,7 @@ int main() {
                 }
             }
             //RESERVOIR
-            spikeNumber.push_back(scheduler.toSpike.size());
+            spikeNumber[((epoch*10)+sample)%500] = scheduler.toSpike.size();
             scheduler.update();
             scheduler.synaptoGenesis();
         }
