@@ -23,10 +23,7 @@ public:
     // that have reached the threshold and
     // will spike next iteration
     void update();
-    void changeColor();
-    std::vector<std::pair<int,int>> trackColor;
     static std::vector<int> lonelyNeurons;
-    static std::atomic<size_t> index;
     void synaptoGenesis();
     Neuron& drawNeuron();
     std::vector<std::thread> threads;

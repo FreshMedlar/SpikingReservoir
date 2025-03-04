@@ -16,9 +16,9 @@ public:
     void receiverFrequence(int* connections);
     void senderFrequence(int* connections);
     void draw();
-    void drawReceiverGraph(std::vector<int> connectionsPerNeuron);
-    void drawSpikesGraph(std::vector<int> spikeNumber);
-    void drawTotalWeight(std::vector<float> totalWeight);
+    void drawReceiverGraph(const std::vector<int>& connectionsPerNeuron);
+    void drawSpikesGraph(const std::vector<int>& spikeNumber);
+    void drawTotalWeight(const std::vector<float>& totalWeight);
     void status();
     void applyForces();
     void initialConnections();

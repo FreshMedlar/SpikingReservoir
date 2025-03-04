@@ -15,13 +15,18 @@ void Manager::createNeurons(Scheduler* sched) {
     int variance = 10;
     double fren;
     std::normal_distribution<float> d(mean, std::sqrt(variance));
+    std::uniform_real_distribution<> randum(0.0f, 1.0f);
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (int i = 0; i < size; i++) {
         do {
             fren = d(gen);
         } while (fren < 0);  
-        neurons.emplace_back(i, *this, *sched, fren);  // Create Neuron with ID = i
+        if (randum(gen) < 0.8) { 
+            neurons.emplace_back(i, *this, *sched, fren, 1); // excitatory  
+        } else { 
+            neurons.emplace_back(i, *this, *sched, fren, -1); // inhibitory
+        }
     }
     std::cout << "Neurons Created" << std::endl;
 }
@@ -42,7 +47,7 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 1) {
+        while (connected.size() < 4) {
             int target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
@@ -71,7 +76,7 @@ void Manager::draw() {
 
 void Manager::applyForces() {
     float repulsionStrength = 100.0f;
-    float attractionStrength = 0.05f;
+    float attractionStrength = 0.1f;
 
     // Iterate through each neuron to compute its net force
     for (auto& neuron : neurons) {
@@ -140,7 +145,7 @@ void Manager::senderFrequence(int* connections) {
     }
 }
 
-void Manager::drawReceiverGraph(std::vector<int> conn) {
+void Manager::drawReceiverGraph(const std::vector<int>& conn) {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = plotWidth / (SIZE/2);
@@ -154,7 +159,7 @@ void Manager::drawReceiverGraph(std::vector<int> conn) {
     }
 }
 
-void Manager::drawSpikesGraph(std::vector<int> spikeNumber) {
+void Manager::drawSpikesGraph(const std::vector<int>& spikeNumber) {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = 1;
@@ -168,14 +173,20 @@ void Manager::drawSpikesGraph(std::vector<int> spikeNumber) {
     }
 }
 
-void Manager::drawTotalWeight(std::vector<float> totalWeight) {
+void Manager::drawTotalWeight(const std::vector<float>& totalWeight) {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = 1;
 
-    for (int i = 0; i < totalWeight.size(); i++) {
-        int barHeight = totalWeight[i]/5;
-        DrawRectangle(10 + (i%1920), 10 + plotHeight*3 - barHeight, barWidth, barHeight, BLUE);
+    for (size_t i = 0; i < totalWeight.size(); i++) {
+        if (std::isnan(totalWeight[i]) || std::isinf(totalWeight[i])) {
+            continue;  // Skip invalid values
+        }
 
+        int barHeight = static_cast<int>(totalWeight[i] / 5);
+        if (barHeight < 0) barHeight = 0;  // Avoid negative heights
+
+        DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);
     }
 }
+

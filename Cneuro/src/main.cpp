@@ -50,34 +50,32 @@ Eigen::VectorXf vectorToEigen(const std::vector<int>& vec) {
     return eigen_vec;
 }
 
-std::pair<size_t, size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, float totalSum) {
+std::pair<size_t, size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, 
+                                                                            float totalSum) {
     // Flatten the matrix and store non-zero values and their indices
     std::vector<float> weights;
     std::vector<std::pair<size_t, size_t>> indices;
-
-    for (size_t i = 0; i < matrix.size(); ++i) {
-        for (size_t j = 0; j < matrix[i].size(); ++j) {
+    for (size_t i = 0; i < SIZE; ++i) {
+        for (size_t j = 0; j < SIZE; ++j) {
             if (matrix[i][j] != 0.0f) {
                 weights.push_back(matrix[i][j]);
                 indices.emplace_back(i, j);
             }
         }
     }
-
     // Compute cumulative distribution
     std::vector<float> cumulative;
+    cumulative.reserve(weights.size());
     std::partial_sum(weights.begin(), weights.end(), std::back_inserter(cumulative));
-
+    float actualTotal = cumulative.back();
     // Generate a random number between 0 and totalSum
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0f, totalSum);
+    std::uniform_real_distribution<> dis(0.0f, actualTotal);
     float randomValue = dis(gen);
 
     // Find the corresponding index using binary search
     auto it = std::lower_bound(cumulative.begin(), cumulative.end(), randomValue);
-    size_t selectedIndex = std::distance(cumulative.begin(), it);
 
+    size_t selectedIndex = (it == cumulative.end()) ? weights.size() - 1 : std::distance(cumulative.begin(), it);
     // Return the 2D coordinates of the selected value
     return indices[selectedIndex];
 }
@@ -186,7 +184,7 @@ int main() {
     totalWeight.reserve(500);
     totalWeight.resize(500);
 //---------------------------------KEY---------------------------------------------------
-    float growthProb = 0.7;
+    float growthProb = 0.66f;
     int toRemove;
     int fromRemove;
     float toDistribute = 0.0f;
@@ -221,7 +219,7 @@ int main() {
             }
             manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
             manager.drawSpikesGraph(spikeNumber);
-            manager.drawTotalWeight(totalWeight);
+            // manager.drawTotalWeight(totalWeight);
         }
         // FPS
         int fps = GetFPS();
@@ -230,44 +228,55 @@ int main() {
         // RANDOM PRUNING
 
         float totalSum = 0.0f;
-        for (const auto& row : connectionMatrix) {
-            totalSum = std::accumulate(row.begin(), row.end(), totalSum);
+        for (const auto& wor : connectionMatrix) {
+            totalSum = std::accumulate(wor.begin(), wor.end(), totalSum);
         }
         totalWeight[(epoch)%500] = totalSum;
-
-        // the reservoir updated multiple times(spikeSampling) for each input 
+//----------------------------RESERVOIR UPDATE-----------------------------------
         for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
             frameCounter++;
+//----------------------------REFRACTORY PERIOD------------------------------
+            for (Neuron* obj : disableBuffer[currentFrameIndex]) {
+                obj->active = true;
+                obj->color = WHITE;
+            }
+            disableBuffer[currentFrameIndex].clear(); // Reset the slot
+            // Advance the ring buffer index
+            currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
 
 
-
-        
-            toRemove = disreal(gen) % neurons.size();
+//------------------------------RANDOM RESTRUCTURING---------------------------
+            toRemove = disreal(gen);
             if (!neurons[toRemove].receiver.empty()) {
-                fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get valid index
+                // get the ID of the neuron we disconnect from
+                fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get connection index 
                 Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
                 fromRemove = targetNeuron->ID;
+                // disconnect and get connection strength
                 toDistribute = neurons[toRemove].disconnect(fromRemove);
-            }
-            int sjdfo = static_cast<int>(toDistribute);
-            for (int a = 0; a < sjdfo; a++) {
-                if (dis(gen) < growthProb) {
-                    float weight = static_cast<float>(SIZE);
-                    auto [row, col] = selectWeightedRandom(connectionMatrix, weight);
-                    connectionMatrix[row][col] += 1.0f;
-                } else {
-                    from = disreal(gen);
-                    to = disreal(gen);
-                    if (connectionMatrix[from][to] != 0.0f){
-                        connectionMatrix[from][to] += 1.0f;
+
+                // if a connection has been removed, distribute its strength
+                int sjdfo = static_cast<int>(toDistribute); 
+                for (int a = 0; a < sjdfo; a++) {
+                    if (dis(gen) < growthProb) {
+                        float weight = static_cast<float>(SIZE);
+                        auto [row, col] = selectWeightedRandom(connectionMatrix, totalSum);
+                        connectionMatrix[row][col] += 1.0f;
+                        // connectionMatrix[toRemove][] += 1.0f;
                     } else {
-                        neurons[from].connect(to, 1.0f);
+                        from = disreal(gen);
+                        to = disreal(gen);
+                        if (connectionMatrix[from][to] != 0.0f){
+                            connectionMatrix[from][to] += 1.0f;
+                        } else {
+                            neurons[from].connect(to, 1.0f);
+                        }
                     }
                 }
             }
             toDistribute = 0.0f;
 
-            //INPUT
+//------------------------INPUT----------------------------
             for(int ins : inputReservoir[epoch]) {
                 scheduler.toSpike.insert(ins);
             }
@@ -282,7 +291,7 @@ int main() {
             scheduler.update();
             // scheduler.synaptoGenesis();
         }
-        //MODEL BY HAND
+//-----------------------------MODEL BY HAND-------------------------------
         if (train) {
             Eigen::VectorXf output = network.forward_sparse(spikeHistory);
             output = network.softmax(output);
@@ -304,81 +313,3 @@ int main() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// int main() {
-//     Manager manager(SIZE);
-//     Scheduler scheduler(SIZE);
-//     manager.createNeurons(&scheduler);
-//     manager.initialConnections();
-//     manager.status();
-
-//     const int screenWidth = 1920;
-//     const int screenHeight = 1080;
-
-//     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-//     ToggleFullscreen();    
-//     SetTargetFPS(0);
-//     int frameCounter = 0;
-//     std::vector<int> connectionsPerNeuron(SIZE, 0);
-//     // for (int i = 0; i < 1500; i++) {manager.applyForces();};
-
-//     std::uniform_real_distribution<> dis(0.0,1.0);
-//     std::uniform_real_distribution<> disreal(0, SIZE-1);
-//     while (!WindowShouldClose()) {
-//         // std::cout << "BEGIN" << std::endl;
-//         frameCounter++;
-//         BeginDrawing();
-//         ClearBackground(BLACK); // Black background
-
-//         // NEURONS DRAWING 
-//         scheduler.changeColor();
-//         manager.draw();
-//         // if (frameCounter%3 ==0) {manager.applyForces();}
-
-//         // GRAPHS DRAWING
-//         if (frameCounter%2 == 0) {
-//             connectionsPerNeuron.clear();
-//             connectionsPerNeuron.resize(SIZE, 0); 
-//             // EITHER, NOT BOTH
-//             manager.receiverFrequence(connectionsPerNeuron.data()); 
-//             // manager.senderFrequence(connectionsPerNeuron.data());
-//         }
-//         manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
-
-//         scheduler.update();
-//         scheduler.synaptoGenesis();
-        // if (dis(gen) > 0.9) {
-        //     neurons[disreal(gen)].spike(nullptr);
-        // }
-
-//         // FPS
-//         int fps = GetFPS();
-//         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
-        
-//         EndDrawing();
-//         // std::cout << "END" << std::endl;
-//     }
-
-//     CloseWindow();
-
-//     return 0;
-// }

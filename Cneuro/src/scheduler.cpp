@@ -27,30 +27,14 @@ void Scheduler::update() {
     }
 }
 
-void Scheduler::changeColor() {
-    if (!trackColor.empty()) {
-        for (auto it = trackColor.begin(); it != trackColor.end();) {
-            if (it->second == 0) {
-                if (it->first < neurons.size()) {
-                    neurons[it->first].color = WHITE;
-                }
-                it = trackColor.erase(it);  // Safe erase-while-iterating
-            } else {
-                --(it->second);
-                ++it;
-            }
-        }
-    }
-}
-
-void Scheduler::synaptoGenesis() {
-    if (lonelyNeurons.size() != 0) {
-        for (int toconnect : lonelyNeurons) {
-            drawNeuron().connect(toconnect); 
-        }
-        lonelyNeurons.clear();
-    }
-}
+// void Scheduler::synaptoGenesis() {
+//     if (lonelyNeurons.size() != 0) {
+//         for (int toconnect : lonelyNeurons) {
+//             drawNeuron().connect(toconnect); 
+//         }
+//         lonelyNeurons.clear();
+//     }
+// }
 
 Neuron& Scheduler::drawNeuron() {
     // Calculate the total friendliness
@@ -74,11 +58,3 @@ Neuron& Scheduler::drawNeuron() {
     // In case of rounding errors or empty vector, return the last neuron
     return neurons.back();
 }
-
-std::vector<int> Scheduler::lonelyNeurons;
-// std::atomic<size_t> Scheduler::index{0};
-
-// void Scheduler::parallel_push_back(int value) {
-//     size_t idx = index.fetch_add(1, std::memory_order_relaxed);
-//     lonelyNeurons[idx] = value;
-// }
