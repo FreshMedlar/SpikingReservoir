@@ -19,7 +19,7 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler, float fren, int i
 
 void Neuron::spike(Neuron* neuron) {
     for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID, inhibitory);}
-    for (Neuron* n : sender) {n->backprop(ID);}
+    // for (Neuron* n : sender) {n->backprop(ID);}
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
     timeSinceSpike = 0;
     this->DisableObject();

@@ -23,8 +23,8 @@ public:
     // that have reached the threshold and
     // will spike next iteration
     void update();
-    static std::vector<int> lonelyNeurons;
-    void synaptoGenesis();
+    // static std::vector<int> lonelyNeurons;
+    // void synaptoGenesis();
     Neuron& drawNeuron();
     std::vector<std::thread> threads;
     // static void parallel_push_back(int value);

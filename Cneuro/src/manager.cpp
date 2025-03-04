@@ -47,7 +47,7 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 4) {
+        while (connected.size() < 5) {
             int target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
@@ -57,6 +57,35 @@ void Manager::initialConnections() {
         }
     }
     std::cout << "Connections initialized" << std::endl;
+}
+
+std::pair<size_t, size_t> Manager::selectWeightedRandom(const std::vector<std::vector<float>>& matrix,float totalSum) {
+    // Flatten the matrix and store non-zero values and their indices
+    std::vector<float> weights;
+    std::vector<std::pair<size_t, size_t>> indices;
+    for (size_t i = 0; i < SIZE; ++i) {
+        for (size_t j = 0; j < SIZE; ++j) {
+            if (matrix[i][j] != 0.0f) {
+                weights.push_back(matrix[i][j]);
+                indices.emplace_back(i, j);
+            }
+        }
+    }
+    // Compute cumulative distribution
+    std::vector<float> cumulative;
+    cumulative.reserve(weights.size());
+    std::partial_sum(weights.begin(), weights.end(), std::back_inserter(cumulative));
+    float actualTotal = cumulative.back();
+    // Generate a random number between 0 and totalSum
+    std::uniform_real_distribution<> dis(0.0f, actualTotal);
+    float randomValue = dis(gen);
+
+    // Find the corresponding index using binary search
+    auto it = std::lower_bound(cumulative.begin(), cumulative.end(), randomValue);
+
+    size_t selectedIndex = (it == cumulative.end()) ? weights.size() - 1 : std::distance(cumulative.begin(), it);
+    // Return the 2D coordinates of the selected value
+    return indices[selectedIndex];
 }
 
 void Manager::draw() {

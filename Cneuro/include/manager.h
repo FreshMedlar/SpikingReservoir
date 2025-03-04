@@ -23,6 +23,7 @@ public:
     void applyForces();
     void initialConnections();
     void createNeurons(Scheduler* sched);
+    std::pair<std::size_t, std::size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, float totalSum);
     // return a random neuron
     Neuron* randomNeuron(Neuron* n);
 

@@ -50,36 +50,6 @@ Eigen::VectorXf vectorToEigen(const std::vector<int>& vec) {
     return eigen_vec;
 }
 
-std::pair<size_t, size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, 
-                                                                            float totalSum) {
-    // Flatten the matrix and store non-zero values and their indices
-    std::vector<float> weights;
-    std::vector<std::pair<size_t, size_t>> indices;
-    for (size_t i = 0; i < SIZE; ++i) {
-        for (size_t j = 0; j < SIZE; ++j) {
-            if (matrix[i][j] != 0.0f) {
-                weights.push_back(matrix[i][j]);
-                indices.emplace_back(i, j);
-            }
-        }
-    }
-    // Compute cumulative distribution
-    std::vector<float> cumulative;
-    cumulative.reserve(weights.size());
-    std::partial_sum(weights.begin(), weights.end(), std::back_inserter(cumulative));
-    float actualTotal = cumulative.back();
-    // Generate a random number between 0 and totalSum
-    std::uniform_real_distribution<> dis(0.0f, actualTotal);
-    float randomValue = dis(gen);
-
-    // Find the corresponding index using binary search
-    auto it = std::lower_bound(cumulative.begin(), cumulative.end(), randomValue);
-
-    size_t selectedIndex = (it == cumulative.end()) ? weights.size() - 1 : std::distance(cumulative.begin(), it);
-    // Return the 2D coordinates of the selected value
-    return indices[selectedIndex];
-}
-
 int getRandomInt(int n) {
     std::uniform_int_distribution<> randum(0, n-1);
     return randum(gen);
@@ -146,7 +116,7 @@ int main() {
         inputReservoir.emplace_back(innerVec);
     }
 //----------------------------------BY HAND MODEL------------------------------------------
-    const int INPUT_SIZE = 10000;
+    const int INPUT_SIZE = 5000;
     const int OUTPUT_SIZE = 65;
     const float LR = 0.001;
     const int NUM_SAMPLES = 1;  // Online learning
@@ -177,12 +147,12 @@ int main() {
     vector<int> spikeHistory;
     spikeHistory.reserve(SPIKE_SAMPLING);
     vector<int> spikeNumber;
-    spikeNumber.reserve(500);
+    spikeNumber.reserve(SIZE);
     spikeNumber.push_back(0);
-    spikeNumber.resize(500);
+    spikeNumber.resize(SIZE);
     vector<float> totalWeight;
-    totalWeight.reserve(500);
-    totalWeight.resize(500);
+    totalWeight.reserve(SIZE);
+    totalWeight.resize(SIZE);
 //---------------------------------KEY---------------------------------------------------
     float growthProb = 0.66f;
     int toRemove;
@@ -192,7 +162,7 @@ int main() {
     int to;
 //----------------------------------TRAINING LOOP-----------------------------------------
     int epoch = 0;
-    bool train = false;
+    bool train = true;
     bool draw = true;
     bool graph = true;
     while (!WindowShouldClose()) {
@@ -246,37 +216,37 @@ int main() {
 
 
 //------------------------------RANDOM RESTRUCTURING---------------------------
-            toRemove = disreal(gen);
-            if (!neurons[toRemove].receiver.empty()) {
-                // get the ID of the neuron we disconnect from
-                fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get connection index 
-                Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
-                fromRemove = targetNeuron->ID;
-                // disconnect and get connection strength
-                toDistribute = neurons[toRemove].disconnect(fromRemove);
+            // toRemove = disreal(gen);
+            // if (!neurons[toRemove].receiver.empty()) {
+            //     // get the ID of the neuron we disconnect from
+            //     fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get connection index 
+            //     Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
+            //     fromRemove = targetNeuron->ID;
+            //     // disconnect and get connection strength
+            //     toDistribute = neurons[toRemove].disconnect(fromRemove);
 
-                // if a connection has been removed, distribute its strength
-                int sjdfo = static_cast<int>(toDistribute); 
-                for (int a = 0; a < sjdfo; a++) {
-                    if (dis(gen) < growthProb) {
-                        float weight = static_cast<float>(SIZE);
-                        auto [row, col] = selectWeightedRandom(connectionMatrix, totalSum);
-                        connectionMatrix[row][col] += 1.0f;
-                        // connectionMatrix[toRemove][] += 1.0f;
-                    } else {
-                        from = disreal(gen);
-                        to = disreal(gen);
-                        if (connectionMatrix[from][to] != 0.0f){
-                            connectionMatrix[from][to] += 1.0f;
-                        } else {
-                            neurons[from].connect(to, 1.0f);
-                        }
-                    }
-                }
-            }
-            toDistribute = 0.0f;
+            //     // if a connection has been removed, distribute its strength
+            //     int sjdfo = static_cast<int>(toDistribute); 
+            //     for (int a = 0; a < sjdfo; a++) {
+            //         if (dis(gen) < growthProb) {
+            //             float weight = static_cast<float>(SIZE);
+            //             auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
+            //             connectionMatrix[row][col] += 1.0f;
+            //             // connectionMatrix[toRemove][] += 1.0f;
+            //         } else {
+            //             from = disreal(gen);
+            //             to = disreal(gen);
+            //             if (connectionMatrix[from][to] != 0.0f){
+            //                 connectionMatrix[from][to] += 1.0f;
+            //             } else {
+            //                 neurons[from].connect(to, 1.0f);
+            //             }
+            //         }
+            //     }
+            // }
+            // toDistribute = 0.0f;
 
-//------------------------INPUT----------------------------
+//-------------------------------INPUT----------------------------------------------
             for(int ins : inputReservoir[epoch]) {
                 scheduler.toSpike.insert(ins);
             }
