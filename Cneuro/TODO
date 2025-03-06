@@ -2,6 +2,8 @@ MOST IMPORTANT
 - graph for distribution of synapses strength, firing rates, firing per second
     and in general need to study the stability of the system
 
+- data oriented design, performance are slowing down excessively
+
 - synaptogenesis
     the development of new synapses is based on competition and various constraints.
     NOTE: this could also be impossible without ordered data. Rand spike won't do it 
