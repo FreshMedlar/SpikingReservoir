@@ -1,5 +1,12 @@
 #include "net.h"
 
+SingleLayerNetwork::SingleLayerNetwork(float lr, int size) : learning_rate(lr), size(size) {
+    weights.setRandom(65, size*10);
+    weights_transposed = weights.transpose(); 
+    weights *= sqrtf(2.0f / size*10); 
+    biases.setZero(65);
+}
+
 // Multithreaded matrix-vector operations
 Eigen::VectorXf SingleLayerNetwork::parallel_matvec(const Eigen::MatrixXf& W, 
                                                     const Eigen::VectorXf& x) {
@@ -52,12 +59,6 @@ Eigen::VectorXf SingleLayerNetwork::softmax(const Eigen::VectorXf& logits) {
     return exp_logits / exp_logits.sum();
 }
 
-SingleLayerNetwork::SingleLayerNetwork(float lr, int size) : learning_rate(lr), size(size) {
-    weights.setRandom(65, size*10);
-    weights_transposed = weights.transpose(); 
-    weights *= sqrtf(2.0f / size*10); 
-    biases.setZero(65);
-}
 
 // Forward pass
 // Eigen::VectorXf SingleLayerNetwork::forward(const Eigen::VectorXf& input) {
@@ -99,8 +100,7 @@ Eigen::VectorXf SingleLayerNetwork::backward(const std::vector<int>& input, // 1
 
 // Utility function to compute CrossEntropy loss
 float SingleLayerNetwork::compute_loss(const Eigen::VectorXf& output, int target) {
-    // Ensure output is after softmax (probabilities)
     float loss = 0.0f;
-    loss -= std::log(output(target));  // Cross-entropy for the correct class
+    loss -= std::log(output(target));  
     return loss;
 }

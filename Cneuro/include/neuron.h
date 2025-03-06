@@ -5,17 +5,17 @@
 #include "scheduler.h"
 #include "raylib.h"
 #include <utility>
+#include <stdint.h>
 
 class Manager;
 class Scheduler;
 
 class Neuron {
 public:
-    Neuron( int id, 
+    Neuron( short id, 
             Manager& manager, 
             Scheduler& scheduler,
-            float fren,
-            int inhi);
+            uint8_t inhi);
 
     std::vector<std::pair<Neuron*, float>> receiver; // neuron I send to
     std::vector<Neuron*>    sender; // neuron send to me
@@ -24,19 +24,18 @@ public:
     Color                   color;
     std::pair<int, int>     timer;
     int                     timeSinceSpike;
-    int                     ID;
-    float                   friendliness;
-    int                     inhibitory;
+    short                   ID;
+    uint8_t                 inhibitory;
     bool                    active;
 
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
-    void connect(int toConnect, float weight = 1.0f);   
-    float disconnect(int n); 
+    void connect(short toConnect, float weight = 1.0f);   
+    float disconnect(short n); 
     void spike(Neuron* neuron);
-    void forward(int n, int inhi);
+    void forward(short n, uint8_t inhi);
     // update weight to next neuron (n)
-    void backprop(int n);
+    void backprop(short n);
     void DisableObject();
 
 private:

@@ -5,11 +5,11 @@
 #include <cmath>
 
 // Constructor definition
-Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler, float fren, int inhi) : 
-                ID(id), manager_(manager), scheduler_(scheduler), friendliness(fren), inhibitory(inhi) {
+Neuron::Neuron(short id, Manager& manager, Scheduler& scheduler, uint8_t inhi) : 
+                ID(id), manager_(manager), scheduler_(scheduler), inhibitory(inhi) {
     std::uniform_real_distribution<> dis(0.0,1.0);
-    x = 1920.0f*dis(gen);//460.0f + 1000.0f*dis(gen);
-    y = 1080.0f*dis(gen);//250.0f + 580.0f*dis(gen); 
+    x = 1920.0f*dis(gen);
+    y = 1080.0f*dis(gen);
     actionPotential = 0;
     color = WHITE;
     timer = {ID, 60};
@@ -19,32 +19,31 @@ Neuron::Neuron(int id, Manager& manager, Scheduler& scheduler, float fren, int i
 
 void Neuron::spike(Neuron* neuron) {
     for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID, inhibitory);}
-    // for (Neuron* n : sender) {n->backprop(ID);}
+    for (Neuron* n : sender) { n->backprop(ID); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
     timeSinceSpike = 0;
     this->DisableObject();
 }
 
-void Neuron::forward(int n, int inhi) {
-    actionPotential += 30 * connectionMatrix[n][ID] * inhi;
-    if (actionPotential > 70) {
-        actionPotential = 0;
-        scheduler_.swapSpike.insert(ID);
-    }
-}
-
-void Neuron::backprop(int n) {
-    if (connectionMatrix[ID][n] > 0.3f) {
-        if (connectionMatrix[ID][n] < 10.0f) {
-            // connectionMatrix[ID][n] += (-log10(timeSinceSpike + 1) + 2) / 10;
-                                        // (-(timeSinceSpike-40)/50); 
+void Neuron::forward(short n, uint8_t inhi) {
+    if (active) {
+        actionPotential += 5 * connectionMatrix[n][ID] * inhi;
+        if (actionPotential > 70) {
+            actionPotential = 0;
+            scheduler_.swapSpike.insert(ID);
         }
     } else {
-        // disconnect(n);
+        connectionMatrix[n][ID] -= 0.01;
     }
 }
 
-float Neuron::disconnect(int n) {
+void Neuron::backprop(short n) {
+    if (timeSinceSpike < 2 && connectionMatrix[ID][n] < 10.0f) {
+        connectionMatrix[ID][n] += 0.01;
+    }
+}
+
+float Neuron::disconnect(short n) {
     // remove the receiving neuron 
     for (int d = 0; d < receiver.size(); d++) {
         if (receiver[d].first == &neurons[n]) { 
@@ -71,7 +70,7 @@ float Neuron::disconnect(int n) {
     return strength;
 }
 
-void Neuron::connect(int toConnect, float weight) {
+void Neuron::connect(short toConnect, float weight) {
     if (toConnect == -1) {
         toConnect = manager_.randomNeuron(this)->ID;
     }

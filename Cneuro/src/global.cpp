@@ -6,6 +6,6 @@ std::vector<Neuron> neurons;
 std::random_device rd;
 std::mt19937 gen(rd());
 // buffer for refractory period
-const size_t COOLDOWN_FRAMES = 4;
+const size_t COOLDOWN_FRAMES = 10;
 std::array<std::vector<Neuron*>, COOLDOWN_FRAMES> disableBuffer;
 int currentFrameIndex = 0; // Tracks the current slot in the ring buffer

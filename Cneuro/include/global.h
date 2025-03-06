@@ -14,7 +14,7 @@ extern int SIZE;
 
 // refractory period
 extern const size_t COOLDOWN_FRAMES;
-extern std::array<std::vector<Neuron*>, 4> disableBuffer;
+extern std::array<std::vector<Neuron*>, 10> disableBuffer;
 extern int currentFrameIndex; // Tracks the current slot in the ring buffer
 
 

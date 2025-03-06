@@ -18,14 +18,14 @@ void Manager::createNeurons(Scheduler* sched) {
     std::uniform_real_distribution<> randum(0.0f, 1.0f);
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
-    for (int i = 0; i < size; i++) {
+    for (short i = 0; i < size; i++) {
         do {
             fren = d(gen);
         } while (fren < 0);  
         if (randum(gen) < 0.8) { 
-            neurons.emplace_back(i, *this, *sched, fren, 1); // excitatory  
+            neurons.emplace_back(i, *this, *sched, 1); // excitatory  
         } else { 
-            neurons.emplace_back(i, *this, *sched, fren, -1); // inhibitory
+            neurons.emplace_back(i, *this, *sched, -1); // inhibitory
         }
     }
     std::cout << "Neurons Created" << std::endl;
@@ -47,8 +47,8 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 5) {
-            int target = intdis(gen);
+        while (connected.size() < 2) {
+            short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
                 neuron.connect(target);
@@ -212,7 +212,7 @@ void Manager::drawTotalWeight(const std::vector<float>& totalWeight) {
             continue;  // Skip invalid values
         }
 
-        int barHeight = static_cast<int>(totalWeight[i] / 5);
+        int barHeight = static_cast<int>(totalWeight[i] / 100);
         if (barHeight < 0) barHeight = 0;  // Avoid negative heights
 
         DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);

@@ -17,8 +17,8 @@ public:
     // std::vector<int> toAdd; 
     // toAdd contains the ID of the neurons 
     // that have just spiked 
-    std::set<int> toSpike; 
-    std::set<int> swapSpike;
+    std::set<short> toSpike; 
+    std::set<short> swapSpike;
     // toSpike contains the ID of the neurons
     // that have reached the threshold and
     // will spike next iteration
