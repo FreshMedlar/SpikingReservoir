@@ -13,10 +13,10 @@ public:
     
     void countConnections(int* connections);
     // frequence of neurons with n outgoing connections 
-    void receiverFrequence(int* connections);
+    void receiversFrequence(int* connections);
     void senderFrequence(int* connections);
     void draw();
-    void drawReceiverGraph(const std::vector<int>& connectionsPerNeuron);
+    void drawreceiversGraph(const std::vector<int>& connectionsPerNeuron);
     void drawSpikesGraph(const std::vector<int>& spikeNumber);
     void drawTotalWeight(const std::vector<float>& totalWeight);
     void status();

@@ -10,14 +10,13 @@
 class Manager;
 class Scheduler;
 
-class Neuron {
-public:
+struct Neuron {
     Neuron( short id, 
             Manager& manager, 
             Scheduler& scheduler,
             uint8_t inhi);
 
-    std::vector<std::pair<Neuron*, float>> receiver; // neuron I send to
+    std::vector<std::pair<Neuron*, float>> receivers; // neuron I send to
     std::vector<Neuron*>    sender; // neuron send to me
     float                   x,y;
     short                   actionPotential;
@@ -31,16 +30,17 @@ public:
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
     void connect(short toConnect, float weight = 1.0f);   
+    // disconnect from sending to n
     float disconnect(short n); 
     void spike(Neuron* neuron);
-    void forward(short n, uint8_t inhi);
     // update weight to next neuron (n)
-    void backprop(short n);
     void DisableObject();
 
-private:
     Manager& manager_;
     Scheduler& scheduler_;
 };
+
+void backprop(short from, short to, int timeSinceSpike);
+void forward(short from, short to, bool active, short actionPotential, Scheduler scheduler_, uint8_t inhi);
 
 #endif // NEURON_H

@@ -5,8 +5,8 @@
 #include "neuron.h"
 #include <utility>
 #include <algorithm> 
-#include <thread>
-#include <atomic>
+// #include <thread>
+// #include <atomic>
 #include <set>
 
 class Neuron;
@@ -26,7 +26,7 @@ public:
     // static std::vector<int> lonelyNeurons;
     // void synaptoGenesis();
     Neuron& drawNeuron();
-    std::vector<std::thread> threads;
+    // std::vector<std::thread> threads;
     // static void parallel_push_back(int value);
 
 private:

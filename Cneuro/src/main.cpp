@@ -10,8 +10,8 @@
 #include <ensmallen.hpp>
 #include <cereal/archives/json.hpp>
 // Define these to print extra informational output and warnings.
-#define MLPACK_PRINT_INFO
-#define MLPACK_PRINT_WARN
+// #define MLPACK_PRINT_INFO
+// #define MLPACK_PRINT_WARN
 
 #include "neuron.h"
 #include "manager.h"
@@ -188,9 +188,9 @@ int main() {
 //----------------------------------TRAINING LOOP-----------------------------------------
     int epoch = 0;
     bool train = false;
-    bool draw = false;
+    bool draw = true;
     bool graph = true;
-    bool restructure = true;
+    bool restructure = false;
     while (!WindowShouldClose()) {
         float epoch_loss = 0;
         for (int pass = 0; pass < 100; pass++) {
@@ -210,10 +210,10 @@ int main() {
                     connectionsPerNeuron.clear();
                     connectionsPerNeuron.resize(SIZE, 0); 
                     // EITHER, NOT BOTH
-                    manager.receiverFrequence(connectionsPerNeuron.data()); 
+                    manager.receiversFrequence(connectionsPerNeuron.data()); 
                     // manager.senderFrequence(connectionsPerNeuron.data());
                 }
-                manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
+                manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
                 manager.drawSpikesGraph(spikeNumber);
                 manager.drawTotalWeight(totalWeight);
             }
@@ -245,10 +245,10 @@ int main() {
                 if (restructure) {
                     for (int restruct = 0; restruct < 10000; restruct++) {
                         toRemove = disreal(gen);
-                        if (!neurons[toRemove].receiver.empty()) {
+                        if (!neurons[toRemove].receivers.empty()) {
                             // get the ID of the neuron we disconnect from
-                            fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get connection index 
-                            Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
+                            fromRemove = getRandomInt(neurons[toRemove].receivers.size()); // Get connection index 
+                            Neuron* targetNeuron = neurons[toRemove].receivers[fromRemove].first;
                             fromRemove = targetNeuron->ID;
                             // disconnect and get connection strength
                             toDistribute = neurons[toRemove].disconnect(fromRemove);
@@ -342,10 +342,10 @@ int main() {
 //                     connectionsPerNeuron.clear();
 //                     connectionsPerNeuron.resize(SIZE, 0); 
 //                     // EITHER, NOT BOTH
-//                     manager.receiverFrequence(connectionsPerNeuron.data()); 
+//                     manager.receiversFrequence(connectionsPerNeuron.data()); 
 //                     // manager.senderFrequence(connectionsPerNeuron.data());
 //                 }
-//                 manager.drawReceiverGraph(connectionsPerNeuron); // Draw the plot
+//                 manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
 //                 manager.drawSpikesGraph(spikeNumber);
 //                 manager.drawTotalWeight(totalWeight);
 //             }
@@ -377,10 +377,10 @@ int main() {
 //                 if (restructure) {
 //                     for (int restruct = 0; restruct < 1000; restruct++) {
 //                         toRemove = disreal(gen);
-//                         if (!neurons[toRemove].receiver.empty()) {
+//                         if (!neurons[toRemove].receivers.empty()) {
 //                             // get the ID of the neuron we disconnect from
-//                             fromRemove = getRandomInt(neurons[toRemove].receiver.size()); // Get connection index 
-//                             Neuron* targetNeuron = neurons[toRemove].receiver[fromRemove].first;
+//                             fromRemove = getRandomInt(neurons[toRemove].receivers.size()); // Get connection index 
+//                             Neuron* targetNeuron = neurons[toRemove].receivers[fromRemove].first;
 //                             fromRemove = targetNeuron->ID;
 //                             // disconnect and get connection strength
 //                             toDistribute = neurons[toRemove].disconnect(fromRemove);

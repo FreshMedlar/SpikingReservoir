@@ -18,39 +18,39 @@ Neuron::Neuron(short id, Manager& manager, Scheduler& scheduler, uint8_t inhi) :
 }
 
 void Neuron::spike(Neuron* neuron) {
-    for (std::pair<Neuron*, float> n: receiver) {n.first->forward(ID, inhibitory);}
-    for (Neuron* n : sender) { n->backprop(ID); }
+    for (std::pair<Neuron*, float> n: receivers) {forward(ID, n.first->ID, n.first->active, n.first->actionPotential, scheduler_, inhibitory);}
+    for (Neuron* n : sender) { backprop(n->ID, ID, n->timeSinceSpike); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
     timeSinceSpike = 0;
     this->DisableObject();
 }
 
-void Neuron::forward(short n, uint8_t inhi) {
+void forward(short from, short to, bool active, short actionPotential, Scheduler scheduler_, uint8_t inhi) {
     if (active) {
-        actionPotential += 5 * connectionMatrix[n][ID] * inhi;
+        actionPotential += 30 * connectionMatrix[from][to] * inhi;
         if (actionPotential > 70) {
             actionPotential = 0;
-            scheduler_.swapSpike.insert(ID);
+            scheduler_.swapSpike.insert(to);
         }
     } else {
-        connectionMatrix[n][ID] -= 0.01;
+        // connectionMatrix[n][ID] -= 0.01;
     }
 }
 
-void Neuron::backprop(short n) {
-    if (timeSinceSpike < 2 && connectionMatrix[ID][n] < 10.0f) {
-        connectionMatrix[ID][n] += 0.01;
+void backprop(short from, short to, int timeSinceSpike) {
+    if (timeSinceSpike < 2 && connectionMatrix[from][to] < 10.0f) {
+        // connectionMatrix[ID][n] += 0.01;
     }
 }
 
 float Neuron::disconnect(short n) {
     // remove the receiving neuron 
-    for (int d = 0; d < receiver.size(); d++) {
-        if (receiver[d].first == &neurons[n]) { 
-            receiver[d].first = nullptr;
-            if ( d < receiver.size() - 1 )
-                receiver[d] = std::move( receiver.back() );
-            receiver.pop_back();
+    for (int d = 0; d < receivers.size(); d++) {
+        if (receivers[d].first == &neurons[n]) { 
+            receivers[d].first = nullptr;
+            if ( d < receivers.size() - 1 )
+                receivers[d] = std::move( receivers.back() );
+            receivers.pop_back();
             break;
         }
     }
@@ -76,7 +76,7 @@ void Neuron::connect(short toConnect, float weight) {
     }
     neurons[toConnect].sender.push_back(this);
     std::pair<Neuron*, float> p = {&neurons[toConnect], 1.0f};
-    receiver.push_back(p); 
+    receivers.push_back(p); 
     connectionMatrix[ID][neurons[toConnect].ID] = weight;
 }
 

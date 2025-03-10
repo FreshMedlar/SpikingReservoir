@@ -127,7 +127,7 @@ void Manager::applyForces() {
         }
         // std::cout << force.x << std::endl;
         // --- Attraction: Pull connected neurons together ---
-        for (std::pair<Neuron*, float> connected : neuron.receiver) {
+        for (std::pair<Neuron*, float> connected : neuron.receivers) {
             float dx = connected.first->x - neuron.x;
             float dy = connected.first->y - neuron.y;
             float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
@@ -162,9 +162,9 @@ void Manager::countConnections(int* connections) {
     }
 }
 
-void Manager::receiverFrequence(int* connections) {
+void Manager::receiversFrequence(int* connections) {
     for (int sos = 0; sos < size; sos++) {
-        connections[neurons[sos].receiver.size()]++;
+        connections[neurons[sos].receivers.size()]++;
     }
 }
 
@@ -174,7 +174,7 @@ void Manager::senderFrequence(int* connections) {
     }
 }
 
-void Manager::drawReceiverGraph(const std::vector<int>& conn) {
+void Manager::drawreceiversGraph(const std::vector<int>& conn) {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = plotWidth / (SIZE/2);
