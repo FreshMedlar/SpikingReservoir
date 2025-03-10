@@ -25,6 +25,7 @@ public:
     void update();
     // static std::vector<int> lonelyNeurons;
     // void synaptoGenesis();
+    //
     Neuron& drawNeuron();
     // std::vector<std::thread> threads;
     // static void parallel_push_back(int value);

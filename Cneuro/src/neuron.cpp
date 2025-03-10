@@ -7,6 +7,7 @@
 std::vector<std::vector<Neuron*>> senders(SIZE); // neurons that send to me
 std::vector<std::vector<Neuron*>> receivers(SIZE); // neuron I send to
 Color colors[SIZE];
+int timeSinceSpike[SIZE];
 
 void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
     pre.ID = id;
@@ -16,16 +17,16 @@ void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
     pre.y = 1080.0f*dis(gen);
     pre.actionPotential = 0;
     colors[id] = WHITE;
-    pre.timeSinceSpike = 0;
+    timeSinceSpike[id] = 0;
     pre.active = true;
 }
 
-void spike(Neuron& neuron) {
-    for (Neuron* n: receivers[neuron.ID]) {forward(neuron.ID, n->ID, n->active, n->actionPotential, neuron.inhibitory);}
-    for (Neuron* n : senders[neuron.ID]) { backprop(n->ID, neuron.ID, n->timeSinceSpike); }
+void spike(int neur) {
+    for (Neuron* n: receivers[neur]) {forward(neur, n->ID, n->active, n->actionPotential, neurons[neur].inhibitory);}
+    for (Neuron* n : senders[neur]) { backprop(n->ID, neur, timeSinceSpike[n->ID]); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
-    neuron.timeSinceSpike = 0;
-    DisableObject(neuron);
+    timeSinceSpike[neur] = 0;
+    DisableObject(neurons[neur]);
 }
 
 void forward(short from, short to, bool active, short actionPotential, uint8_t inhi) {
@@ -37,12 +38,14 @@ void forward(short from, short to, bool active, short actionPotential, uint8_t i
         }
     } else {
         // connectionMatrix[n][ID] -= 0.01;
+        // totalSum -= 0.01;
     }
 }
 
 void backprop(short from, short to, int timeSinceSpike) {
     if (timeSinceSpike < 2 && connectionMatrix[from][to] < 10.0f) {
         // connectionMatrix[ID][n] += 0.01;
+        // totalSum += 0.01;
     }
 }
 
@@ -69,6 +72,7 @@ float disconnect(short pre, short post) {
     }
     //remove from connectionMatrix
     float strength = connectionMatrix[pre][post];
+    totalSum -= strength;
     connectionMatrix[pre][post] = 0.0f;
     return strength;
 }
@@ -81,6 +85,7 @@ void connect(Neuron& pre, short toConnect, float weight) {
     senders[toConnect].push_back(&pre);
     receivers[pre.ID].push_back(&neurons[toConnect]); 
     connectionMatrix[pre.ID][neurons[toConnect].ID] = weight;
+    totalSum += weight;
 }
 
 void DisableObject(Neuron& pre) {

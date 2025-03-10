@@ -197,36 +197,30 @@ int main() {
         ClearBackground(BLACK);
         
         // //DRAW
-        // manager.draw();
-        // manager.applyForces();
+        manager.draw();
+        manager.applyForces();
 
-        // //GRAPH
+        //GRAPH
+            connectionsPerNeuron.clear();
+            connectionsPerNeuron.resize(SIZE, 0); 
+            // EITHER, NOT BOTH
+            manager.receiversFrequence(connectionsPerNeuron.data()); 
+            // manager.sendersFrequence(connectionsPerNeuron.data());
 
-        //     connectionsPerNeuron.clear();
-        //     connectionsPerNeuron.resize(SIZE, 0); 
-        //     // EITHER, NOT BOTH
-        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
-        //     // manager.sendersFrequence(connectionsPerNeuron.data());
-
-        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-        // manager.drawSpikesGraph(spikeNumber);
-        // manager.drawTotalWeight(totalWeight);
+        manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+        manager.drawSpikesGraph(spikeNumber);
+        totalWeight[(epoch)%500] = totalSum;
+        manager.drawTotalWeight(totalWeight);
 
         // FPS
         int fps = GetFPS();
         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
         EndDrawing();
-//------------------------------TOTAL SUM--------------------------------------------------------------------
-        float totalSum = 0.0f;
-        for (const auto& wor : connectionMatrix) {
-            totalSum = std::accumulate(wor.begin(), wor.end(), totalSum);
-        }
-        totalWeight[(epoch)%500] = totalSum;
+        
 //--------------------------------------------------------------------------------------------------------
 //----------------------------RESERVOIR UPDATE------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------
         // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
-            frameCounter++;
     //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
             for (Neuron* obj : disableBuffer[currentFrameIndex]) {
                 obj->active = true;

@@ -9,15 +9,14 @@ Scheduler::Scheduler(int size) : size(size) {
 }
 
 void Scheduler::update() {
-    // if (toAdd.size() > 0) {for (int n : toAdd) {for (Neuron* toadd : neurons[n].receivers){toadd->impulse(&(neurons[n]));}}}
     // update timeSinceSpike timer for all neurons
-    for (Neuron& neuron : neurons) {
-        neuron.timeSinceSpike += 1;
+    for (int neu = 0; neu < SIZE; neu++) {
+        timeSinceSpike[neu] += 1;
     } 
     // check if neurons have spiked
     if (toSpike.size() > 0) {
         for (int n : toSpike) {
-            spike(neurons[n]);
+            spike(n);
         }
         // std::cout << "here?" << std::endl;
         toSpike.clear();
