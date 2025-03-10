@@ -7,7 +7,6 @@
 #include <vector>
 
 struct Neuron {
-    Color                   color;
     float                   x,y;
     int                     timeSinceSpike;
     short                   ID;

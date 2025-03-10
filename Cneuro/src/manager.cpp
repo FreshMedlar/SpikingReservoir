@@ -193,11 +193,10 @@ void Manager::drawreceiversGraph(const std::vector<int>& conn) {
     }
 }
 
-void Manager::drawSpikesGraph(const std::vector<int>& spikeNumber) {
+void Manager::drawSpikesGraph(std::vector<int>& spikeNumber) {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = 1;
-    // int maxCount = *std::max_element(conn.begin(), conn.end());
 
     // DrawRectangle(10, 260, plotWidth, plotHeight, BLACK);
     for (int i = 0; i < spikeNumber.size(); i++) {

@@ -171,9 +171,9 @@ int main() {
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
     spikeHistory.reserve(SPIKE_SAMPLING);
-    vector<int> spikeNumber;
-    spikeNumber.reserve(SIZE);
-    spikeNumber.push_back(0);
+    std::vector<int> spikeNumber(500, 0); // Initialize with size 500 and default value 0
+
+
     vector<float> totalWeight;
     totalWeight.reserve(SIZE);
     totalWeight.resize(SIZE);
@@ -195,21 +195,22 @@ int main() {
 //------------------------------ NEURONS DRAWING ------------------------------------ 
         BeginDrawing();
         ClearBackground(BLACK);
-        //DRAW
-        manager.draw();
-        manager.applyForces();
+        
+        // //DRAW
+        // manager.draw();
+        // manager.applyForces();
 
-        //GRAPH
+        // //GRAPH
 
-            connectionsPerNeuron.clear();
-            connectionsPerNeuron.resize(SIZE, 0); 
-            // EITHER, NOT BOTH
-            manager.receiversFrequence(connectionsPerNeuron.data()); 
-            // manager.sendersFrequence(connectionsPerNeuron.data());
+        //     connectionsPerNeuron.clear();
+        //     connectionsPerNeuron.resize(SIZE, 0); 
+        //     // EITHER, NOT BOTH
+        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
+        //     // manager.sendersFrequence(connectionsPerNeuron.data());
 
-        manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-        manager.drawSpikesGraph(spikeNumber);
-        manager.drawTotalWeight(totalWeight);
+        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+        // manager.drawSpikesGraph(spikeNumber);
+        // manager.drawTotalWeight(totalWeight);
 
         // FPS
         int fps = GetFPS();
@@ -224,13 +225,11 @@ int main() {
 //--------------------------------------------------------------------------------------------------------
 //----------------------------RESERVOIR UPDATE------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------
-        for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
+        // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
             frameCounter++;
     //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
             for (Neuron* obj : disableBuffer[currentFrameIndex]) {
                 obj->active = true;
-                obj->color = WHITE;
-                // std::cout << obj->ID << std::endl;
                 colors[obj->ID] = WHITE;
             }
             disableBuffer[currentFrameIndex].clear(); // Reset the slot
@@ -273,17 +272,17 @@ int main() {
 
 //-------------------------------INPUT----------------------------------------------
             // we queue N neurons to spike next
-            for (short ll : inputReservoir[epoch][sample]){
+            for (short ll : inputReservoir[epoch/10][epoch%10]){
                 scheduler.toSpike.insert(ll);
             }
             //X(t) FOR THE MODEL
             if (train) {
                 for (auto ins : scheduler.toSpike){
-                    spikeHistory.push_back(ins+(SIZE*sample));
+                    spikeHistory.push_back(ins+(SIZE*(epoch)));
                 }
             }
             //RESERVOIR
-            spikeNumber[((epoch*10)+sample)%500] = scheduler.toSpike.size();
+            spikeNumber[epoch%500] = scheduler.toSpike.size();
             scheduler.update();
             // scheduler.synaptoGenesis();
             
@@ -291,7 +290,7 @@ int main() {
             for (Neuron neur : neurons) {
                 neur.actionPotential -= 5;
             }
-        }
+        // }
 //-----------------------------MODEL BY HAND-------------------------------
         // Eigen::VectorXf output = network.forward_sparse(spikeHistory);
         // output = network.softmax(output);
@@ -307,134 +306,3 @@ int main() {
     CloseWindow();
     return 0;
 }
-
-
-//     while (!WindowShouldClose()) {
-//         float epoch_loss = 0;
-//         for (int pass = 0; pass < 100; pass++) {
-
-//             BeginDrawing();
-//             ClearBackground(BLACK);
-
-//             // NEURONS DRAWING 
-//             if (draw) {
-//                 // scheduler.changeColor();
-//                 manager.draw();
-//                 if (frameCounter%1 ==0) {manager.applyForces();}
-//             }
-//             if (graph) {
-//                 // GRAPHS DRAWING
-//                 if (frameCounter%1 == 0) {
-//                     connectionsPerNeuron.clear();
-//                     connectionsPerNeuron.resize(SIZE, 0); 
-//                     // EITHER, NOT BOTH
-//                     manager.receiversFrequence(connectionsPerNeuron.data()); 
-//                     // manager.sendersFrequence(connectionsPerNeuron.data());
-//                 }
-//                 manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-//                 manager.drawSpikesGraph(spikeNumber);
-//                 manager.drawTotalWeight(totalWeight);
-//             }
-//             // FPS
-//             int fps = GetFPS();
-//             DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
-
-//             // RANDOM PRUNING
-
-//             float totalSum = 0.0f;
-//             for (const auto& wor : connectionMatrix) {
-//                 totalSum = std::accumulate(wor.begin(), wor.end(), totalSum);
-//             }
-//             totalWeight[(epoch)%500] = totalSum;
-// // std::cout << totalSum << std::endl;
-
-//     //----------------------------RESERVOIR UPDATE-----------------------------------
-//             for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
-//                 frameCounter++;
-//     //----------------------------REFRACTORY PERIOD------------------------------
-//                 for (Neuron* obj : disableBuffer[currentFrameIndex]) {
-//                     obj->active = true;
-//                     obj->color = WHITE;
-//                 }
-//                 disableBuffer[currentFrameIndex].clear(); // Reset the slot
-//                 // Advance the ring buffer index
-//                 currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
-//     //------------------------------RANDOM RESTRUCTURING---------------------------
-//                 if (restructure) {
-//                     for (int restruct = 0; restruct < 1000; restruct++) {
-//                         toRemove = disreal(gen);
-//                         if (!neurons[toRemove].receivers.empty()) {
-//                             // get the ID of the neuron we disconnect from
-//                             fromRemove = getRandomInt(neurons[toRemove].receivers.size()); // Get connection index 
-//                             Neuron* targetNeuron = neurons[toRemove].receivers[fromRemove].first;
-//                             fromRemove = targetNeuron->ID;
-//                             // disconnect and get connection strength
-//                             toDistribute = neurons[toRemove].disconnect(fromRemove);
-
-//                             // if a connection has been removed, distribute its strength
-//                             int sjdfo = static_cast<int>(toDistribute); 
-//                             for (int a = 0; a < sjdfo; a++) {
-//                                 if (dis(gen) < growthProb) {
-//                                     float weight = static_cast<float>(SIZE);
-//                                     auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
-//                                     connectionMatrix[row][col] += 1.0f;
-//                                     // connectionMatrix[toRemove][] += 1.0f;
-//                                 } else {
-//                                     from = disreal(gen);
-//                                     to = disreal(gen);
-//                                     if (connectionMatrix[from][to] != 0.0f){
-//                                         connectionMatrix[from][to] += 1.0f;
-//                                     } else {
-//                                         neurons[from].connect(to, 1.0f);
-//                                     }
-//                                 }
-//                             }
-//                         }
-//                         toDistribute = 0.0f;
-//                     }
-//                     restructure = false; 
-//                 }
-//     //-------------------------------INPUT----------------------------------------------
-//                 // we queue N neurons to spike next
-//                 if (sample%2==0) {
-//                     scheduler.toSpike.insert(inputReservoir[epoch][0]);
-//                     scheduler.toSpike.insert(inputReservoir[epoch][2]);
-//                 } else {
-//                     scheduler.toSpike.insert(inputReservoir[epoch][1]);
-//                 } 
-//                 //X(t) FOR THE MODEL
-//                 if (train) {
-//                     for (int ins : scheduler.toSpike){
-//                         spikeHistory.push_back(ins+(SIZE*sample));
-//                     }
-//                 }
-//                 //RESERVOIR
-//                 spikeNumber[((epoch*10)+sample)%500] = scheduler.toSpike.size();
-//                 scheduler.update();
-//                 // scheduler.synaptoGenesis();
-                
-//                 // DECAY
-//                 for (Neuron neur : neurons) {
-//                     neur.actionPotential -= 6;
-//                 }
-//             }
-//     //-----------------------------MODEL BY HAND-------------------------------
-//             if (train) {
-//                 Eigen::VectorXf output = network.forward_sparse(spikeHistory);
-//                 output = network.softmax(output);
-//                 epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
-//                 Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
-//                 spikeHistory.clear();
-//             }
-//             EndDrawing();
-//             epoch++;
-//         }    
-//         if (train) {
-//         std::cout << "Epoch " << epoch/100 
-//                 << " | Avg Loss: " << epoch_loss/100
-//                 << std::endl;
-//         }
-//     }
-//     CloseWindow();
-//     return 0;
-// }
