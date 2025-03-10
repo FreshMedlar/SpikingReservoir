@@ -196,7 +196,7 @@ int main() {
         BeginDrawing();
         ClearBackground(BLACK);
         
-        // //DRAW
+        //DRAW
         manager.draw();
         manager.applyForces();
 
@@ -223,7 +223,7 @@ int main() {
         // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
     //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
             for (Neuron* obj : disableBuffer[currentFrameIndex]) {
-                obj->active = true;
+                active[obj->ID] = true;
                 colors[obj->ID] = WHITE;
             }
             disableBuffer[currentFrameIndex].clear(); // Reset the slot
@@ -281,8 +281,8 @@ int main() {
             // scheduler.synaptoGenesis();
             
             // DECAY
-            for (Neuron neur : neurons) {
-                neur.actionPotential -= 5;
+            for (int ooo = 0; ooo < SIZE; ooo++) {
+                actionPotential[ooo] -= 5;
             }
         // }
 //-----------------------------MODEL BY HAND-------------------------------

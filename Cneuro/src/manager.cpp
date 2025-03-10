@@ -5,6 +5,7 @@
 #include "global.h"
 #include <cmath>
 #include <set>
+#include "neuron.h"
 
 #define EXTRALIGHTGRAY CLITERAL(Color){ 100, 100, 100, 255 }
 
@@ -26,11 +27,9 @@ void Manager::createNeurons() {
         if (randum(gen) < 0.8) { 
             constructorNeuron(so, i, 1);
             neurons.push_back(so);
-            // neurons.emplace_back(i, *this, *sched, 1); // excitatory  
         } else { 
             constructorNeuron(so, i, -1);
             neurons.push_back(so);
-            // neurons.emplace_back(i, *this, *sched, -1); // inhibitory
         }
     }
     std::cout << "Neurons Created" << std::endl;
@@ -99,12 +98,12 @@ void Manager::draw() {
     for (size_t n = 0; n < size; n++) {
         for (size_t a = 0; a < size; a++) {
             if (connectionMatrix[n][a] != 0.0f) {
-                DrawLine(neurons[n].x, neurons[n].y, neurons[a].x, neurons[a].y, EXTRALIGHTGRAY);
+                DrawLine(xCoord[n], yCoord[n], xCoord[a], yCoord[a], EXTRALIGHTGRAY);
             } 
         }
     }
-    for (const Neuron& neuron : neurons) {
-        DrawCircle(neuron.x, neuron.y, 8, colors[neuron.ID]);  
+    for (size_t n = 0; n < size; n++) {
+        DrawCircle(xCoord[n], yCoord[n], 8, colors[n]);  
     }
 }
 
@@ -113,14 +112,14 @@ void Manager::applyForces() {
     float attractionStrength = 0.1f;
 
     // Iterate through each neuron to compute its net force
-    for (auto& neuron : neurons) {
+    for (size_t neuron = 0; neuron < SIZE; neuron++) {
         Vector2 force = {0.0f, 0.0f};
 
         // --- Repulsion: All neurons push each other away ---
-        for (auto& other : neurons) {
-            if (&neuron != &other) {  // Avoid self-interaction
-                float dx = neuron.x - other.x;
-                float dy = neuron.y - other.y;
+        for (size_t other = 0; other < SIZE; other++) {
+            if (neuron != other) {  // Avoid self-interaction
+                float dx = xCoord[neuron] - xCoord[other];
+                float dy = yCoord[neuron] - yCoord[other];
                 // Compute distance (avoid division by zero with a small offset)
                 float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
                 // Calculate repulsive force components (inversely proportional to distance squared)
@@ -130,11 +129,10 @@ void Manager::applyForces() {
                 // }
             }
         }
-        // std::cout << force.x << std::endl;
         // --- Attraction: Pull connected neurons together ---
-        for (Neuron* connected : receivers[neuron.ID]) {
-            float dx = connected->x - neuron.x;
-            float dy = connected->y - neuron.y;
+        for (Neuron* connected : receivers[neuron]) {
+            float dx = xCoord[connected->ID] - xCoord[neuron];
+            float dy = yCoord[connected->ID] - yCoord[neuron];
             float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
             
             float attractionStrength = Manager::calculateAttractionForce(distance, 10.0f);
@@ -144,11 +142,9 @@ void Manager::applyForces() {
                 force.y += dy * attractionStrength;
             // }
         }
-
-        // std::cout << force.x << std::endl;
         // --- Update neuron's position with the calculated net force ---
-        neuron.x += force.x;
-        neuron.y += force.y;
+        xCoord[neuron] += force.x;
+        yCoord[neuron] += force.y;
     }
 }
 

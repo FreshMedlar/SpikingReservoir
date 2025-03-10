@@ -8,32 +8,39 @@ std::vector<std::vector<Neuron*>> senders(SIZE); // neurons that send to me
 std::vector<std::vector<Neuron*>> receivers(SIZE); // neuron I send to
 Color colors[SIZE];
 int timeSinceSpike[SIZE];
+bool active[SIZE];
+int8_t actionPotential[SIZE];
+int8_t inhibitory[SIZE];
+float xCoord[SIZE];
+float yCoord[SIZE];
 
 void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
     pre.ID = id;
-    pre.inhibitory = inhi;
+    inhibitory[id] = inhi;
     std::uniform_real_distribution<> dis(0.0,1.0);
-    pre.x = 1920.0f*dis(gen);
-    pre.y = 1080.0f*dis(gen);
-    pre.actionPotential = 0;
+
+    xCoord[id] = 1920.0f*dis(gen);
+    yCoord[id] = 1080.0f*dis(gen);
+    
+    actionPotential[id] = 0;
     colors[id] = WHITE;
     timeSinceSpike[id] = 0;
-    pre.active = true;
+    active[id] = true;
 }
 
-void spike(int neur) {
-    for (Neuron* n: receivers[neur]) {forward(neur, n->ID, n->active, n->actionPotential, neurons[neur].inhibitory);}
-    for (Neuron* n : senders[neur]) { backprop(n->ID, neur, timeSinceSpike[n->ID]); }
+void spike(int post) {
+    for (Neuron* n: receivers[post]) {forward(post, n->ID);}
+    for (Neuron* pre : senders[post]) { backprop(pre->ID, post); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
-    timeSinceSpike[neur] = 0;
-    DisableObject(neurons[neur]);
+    timeSinceSpike[post] = 0;
+    DisableObject(neurons[post]);
 }
 
-void forward(short from, short to, bool active, short actionPotential, uint8_t inhi) {
-    if (active) {
-        actionPotential += 70 * connectionMatrix[from][to] * inhi;
-        if (actionPotential > 70) {
-            actionPotential = 0;
+void forward(short spiked, short to) {
+    if (active[spiked]) {
+        actionPotential[spiked] += 20 * connectionMatrix[spiked][to] * inhibitory[spiked];
+        if (actionPotential[spiked] > 70) {
+            actionPotential[spiked] = 0;
             scheduler.swapSpike.insert(to);
         }
     } else {
@@ -42,9 +49,9 @@ void forward(short from, short to, bool active, short actionPotential, uint8_t i
     }
 }
 
-void backprop(short from, short to, int timeSinceSpike) {
-    if (timeSinceSpike < 2 && connectionMatrix[from][to] < 10.0f) {
-        // connectionMatrix[ID][n] += 0.01;
+void backprop(short pre, short post) {
+    if (timeSinceSpike[pre] < 2 && connectionMatrix[pre][post] < 10.0f) {
+        // connectionMatrix[pre][post] += 0.01;
         // totalSum += 0.01;
     }
 }
@@ -91,7 +98,7 @@ void connect(Neuron& pre, short toConnect, float weight) {
 void DisableObject(Neuron& pre) {
     int targetSlot = (currentFrameIndex + COOLDOWN_FRAMES) % COOLDOWN_FRAMES;
     disableBuffer[targetSlot].push_back(&pre);
-    pre.active = false; // Immediately disable the object
+    active[pre.ID] = false; // Immediately disable the object
     colors[pre.ID] = RED;
 }
 
