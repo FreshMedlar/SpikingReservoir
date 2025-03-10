@@ -12,11 +12,11 @@ extern std::vector<std::vector<float>> connectionMatrix;
 extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
-extern short SIZE;
+constexpr short SIZE = 1000;
 
 // refractory period
 extern const size_t COOLDOWN_FRAMES;
-extern std::array<std::vector<Neuron*>, 10> disableBuffer;
+extern std::array<std::vector<Neuron*>, 100> disableBuffer;
 extern int currentFrameIndex; // Tracks the current slot in the ring buffer
 
 // manager and scheduler

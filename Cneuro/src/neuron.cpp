@@ -6,6 +6,7 @@
 
 std::vector<std::vector<Neuron*>> senders(SIZE); // neurons that send to me
 std::vector<std::vector<Neuron*>> receivers(SIZE); // neuron I send to
+Color colors[SIZE];
 
 void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
     pre.ID = id;
@@ -15,6 +16,7 @@ void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
     pre.y = 1080.0f*dis(gen);
     pre.actionPotential = 0;
     pre.color = WHITE;
+    colors[id] = WHITE;
     pre.timeSinceSpike = 0;
     pre.active = true;
 }
@@ -29,7 +31,7 @@ void spike(Neuron& neuron) {
 
 void forward(short from, short to, bool active, short actionPotential, uint8_t inhi) {
     if (active) {
-        actionPotential += 30 * connectionMatrix[from][to] * inhi;
+        actionPotential += 1 * connectionMatrix[from][to] * inhi;
         if (actionPotential > 70) {
             actionPotential = 0;
             scheduler.swapSpike.insert(to);
@@ -82,10 +84,11 @@ void connect(Neuron& pre, short toConnect, float weight) {
     connectionMatrix[pre.ID][neurons[toConnect].ID] = weight;
 }
 
-void DisableObject(Neuron pre) {
+void DisableObject(Neuron& pre) {
     int targetSlot = (currentFrameIndex + COOLDOWN_FRAMES) % COOLDOWN_FRAMES;
     disableBuffer[targetSlot].push_back(&pre);
     pre.active = false; // Immediately disable the object
     pre.color = RED;
+    colors[pre.ID] = RED;
 }
 

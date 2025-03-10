@@ -18,9 +18,10 @@ struct Neuron {
 
 extern std::vector<std::vector<Neuron*>> receivers; // neuron I send to
 extern std::vector<std::vector<Neuron*>> senders; // neuron send to me
+extern Color colors[];
 
 void constructorNeuron(Neuron& pre, short id, uint8_t inhi);
-void DisableObject(Neuron pre);
+void DisableObject(Neuron& pre);
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
 void connect(Neuron& pre, short toConnect, float weight = 1.0f);   
