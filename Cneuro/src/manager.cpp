@@ -10,7 +10,7 @@
 
 Manager::Manager(int size) : size(size) { }
 
-void Manager::createNeurons(Scheduler* sched) {
+void Manager::createNeurons() {
     int mean = 10;
     int variance = 10;
     double fren;
@@ -22,10 +22,15 @@ void Manager::createNeurons(Scheduler* sched) {
         do {
             fren = d(gen);
         } while (fren < 0);  
+        Neuron so;
         if (randum(gen) < 0.8) { 
-            neurons.emplace_back(i, *this, *sched, 1); // excitatory  
+            constructorNeuron(so, i, 1);
+            neurons.push_back(so);
+            // neurons.emplace_back(i, *this, *sched, 1); // excitatory  
         } else { 
-            neurons.emplace_back(i, *this, *sched, -1); // inhibitory
+            constructorNeuron(so, i, -1);
+            neurons.push_back(so);
+            // neurons.emplace_back(i, *this, *sched, -1); // inhibitory
         }
     }
     std::cout << "Neurons Created" << std::endl;
@@ -51,7 +56,7 @@ void Manager::initialConnections() {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
-                neuron.connect(target);
+                connect(neuron, target);
                 connected.insert(target);
             }
         }
@@ -127,9 +132,9 @@ void Manager::applyForces() {
         }
         // std::cout << force.x << std::endl;
         // --- Attraction: Pull connected neurons together ---
-        for (std::pair<Neuron*, float> connected : neuron.receivers) {
-            float dx = connected.first->x - neuron.x;
-            float dy = connected.first->y - neuron.y;
+        for (Neuron* connected : receivers[neuron.ID]) {
+            float dx = connected->x - neuron.x;
+            float dy = connected->y - neuron.y;
             float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
             
             float attractionStrength = Manager::calculateAttractionForce(distance, 10.0f);
@@ -158,19 +163,19 @@ float Manager::calculateAttractionForce(float distance, float maxForce, float mi
 
 void Manager::countConnections(int* connections) {
     for (int sos = 0; sos < SIZE; sos++) {
-        connections[sos] = neurons[sos].sender.size();
+        connections[sos] = senders[sos].size();
     }
 }
 
 void Manager::receiversFrequence(int* connections) {
     for (int sos = 0; sos < size; sos++) {
-        connections[neurons[sos].receivers.size()]++;
+        connections[receivers[sos].size()]++;
     }
 }
 
-void Manager::senderFrequence(int* connections) {
+void Manager::sendersFrequence(int* connections) {
     for (int sos = 0; sos < size; sos++) {
-        connections[neurons[sos].sender.size()]++;
+        connections[senders[sos].size()]++;
     }
 }
 

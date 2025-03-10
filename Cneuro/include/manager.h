@@ -14,7 +14,7 @@ public:
     void countConnections(int* connections);
     // frequence of neurons with n outgoing connections 
     void receiversFrequence(int* connections);
-    void senderFrequence(int* connections);
+    void sendersFrequence(int* connections);
     void draw();
     void drawreceiversGraph(const std::vector<int>& connectionsPerNeuron);
     void drawSpikesGraph(const std::vector<int>& spikeNumber);
@@ -22,7 +22,7 @@ public:
     void status();
     void applyForces();
     void initialConnections();
-    void createNeurons(Scheduler* sched);
+    void createNeurons();
     std::pair<std::size_t, std::size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, float totalSum);
     // return a random neuron
     Neuron* randomNeuron(Neuron* n);

@@ -17,7 +17,7 @@ void Scheduler::update() {
     // check if neurons have spiked
     if (toSpike.size() > 0) {
         for (int n : toSpike) {
-            neurons[n].spike(nullptr);
+            spike(neurons[n]);
         }
         // std::cout << "here?" << std::endl;
         toSpike.clear();
@@ -40,7 +40,7 @@ Neuron& Scheduler::drawNeuron() {
     // Calculate the total friendliness
     int totalreceivers = std::accumulate(neurons.begin(), neurons.end(), 0,
                                             [](int sum, const Neuron& neuron) {
-                                                return sum + neuron.receivers.size();
+                                                return sum + receivers[neuron.ID].size();
                                             });
 
     // Generate a random number between 0 and totalFriendliness
@@ -49,10 +49,10 @@ Neuron& Scheduler::drawNeuron() {
 
     // Select a neuron based on the random number
     for (auto& neuron : neurons) {
-        if (randomNumber < neuron.receivers.size()+2) {
+        if (randomNumber < receivers[neuron.ID].size()+2) {
             return neuron;
         }
-        randomNumber -= neuron.receivers.size();
+        randomNumber -= receivers[neuron.ID].size();
     }
 
     // In case of rounding errors or empty vector, return the last neuron

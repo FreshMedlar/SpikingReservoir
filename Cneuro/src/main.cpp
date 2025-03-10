@@ -6,7 +6,7 @@
 #include <set>
 #include <map>
 #include <Eigen/Dense>
-#include <armadillo>
+// #include <armadillo>
 #include <ensmallen.hpp>
 #include <cereal/archives/json.hpp>
 // Define these to print extra informational output and warnings.
@@ -24,7 +24,7 @@
 // using namespace arma;
 using namespace std;
 
-int SIZE = 1000;
+// int SIZE = 1000;
 
 // The text to encode in input, in output a vector with the letters encoded in integers
 std::vector<short> encode(std::string s, std::map<char, short> stoi) {
@@ -109,11 +109,13 @@ int main() {
     }
     std::cout << std::endl;
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
-    Manager manager(SIZE);
-    Scheduler scheduler(SIZE);
-    manager.createNeurons(&scheduler);
+// SENDER INITIALIZATION
+    // senders.resize(SIZE);
+
+    manager.createNeurons();
     manager.initialConnections();
     manager.status();
+
     
     int SPIKE_SAMPLING = 10;
     int frameCounter = 0;
@@ -211,7 +213,7 @@ int main() {
                     connectionsPerNeuron.resize(SIZE, 0); 
                     // EITHER, NOT BOTH
                     manager.receiversFrequence(connectionsPerNeuron.data()); 
-                    // manager.senderFrequence(connectionsPerNeuron.data());
+                    // manager.sendersFrequence(connectionsPerNeuron.data());
                 }
                 manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
                 manager.drawSpikesGraph(spikeNumber);
@@ -245,13 +247,13 @@ int main() {
                 if (restructure) {
                     for (int restruct = 0; restruct < 10000; restruct++) {
                         toRemove = disreal(gen);
-                        if (!neurons[toRemove].receivers.empty()) {
+                        if (!receivers[toRemove].empty()) {
                             // get the ID of the neuron we disconnect from
-                            fromRemove = getRandomInt(neurons[toRemove].receivers.size()); // Get connection index 
-                            Neuron* targetNeuron = neurons[toRemove].receivers[fromRemove].first;
+                            fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
+                            Neuron* targetNeuron = receivers[toRemove][fromRemove];
                             fromRemove = targetNeuron->ID;
                             // disconnect and get connection strength
-                            toDistribute = neurons[toRemove].disconnect(fromRemove);
+                            toDistribute = disconnect(fromRemove, toRemove);
 
                             // if a connection has been removed, distribute its strength
                             int sjdfo = static_cast<int>(toDistribute); 
@@ -267,7 +269,7 @@ int main() {
                                     if (connectionMatrix[from][to] != 0.0f){
                                         connectionMatrix[from][to] += 1.0f;
                                     } else {
-                                        neurons[from].connect(to, 1.0f);
+                                        connect(neurons[from], to, 1.0f);
                                     }
                                 }
                             }
@@ -343,7 +345,7 @@ int main() {
 //                     connectionsPerNeuron.resize(SIZE, 0); 
 //                     // EITHER, NOT BOTH
 //                     manager.receiversFrequence(connectionsPerNeuron.data()); 
-//                     // manager.senderFrequence(connectionsPerNeuron.data());
+//                     // manager.sendersFrequence(connectionsPerNeuron.data());
 //                 }
 //                 manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
 //                 manager.drawSpikesGraph(spikeNumber);

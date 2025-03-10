@@ -1,46 +1,33 @@
 #ifndef NEURON_H
 #define NEURON_H
 
-#include "manager.h"
-#include "scheduler.h"
 #include "raylib.h"
 #include <utility>
 #include <stdint.h>
-
-class Manager;
-class Scheduler;
+#include <vector>
 
 struct Neuron {
-    Neuron( short id, 
-            Manager& manager, 
-            Scheduler& scheduler,
-            uint8_t inhi);
-
-    std::vector<std::pair<Neuron*, float>> receivers; // neuron I send to
-    std::vector<Neuron*>    sender; // neuron send to me
-    float                   x,y;
-    short                   actionPotential;
     Color                   color;
-    std::pair<int, int>     timer;
+    float                   x,y;
     int                     timeSinceSpike;
     short                   ID;
+    short                   actionPotential;
     uint8_t                 inhibitory;
     bool                    active;
-
-    // if nullptr is given in input it connect to a 
-    // random neuron, otherwise to given neuron
-    void connect(short toConnect, float weight = 1.0f);   
-    // disconnect from sending to n
-    float disconnect(short n); 
-    void spike(Neuron* neuron);
-    // update weight to next neuron (n)
-    void DisableObject();
-
-    Manager& manager_;
-    Scheduler& scheduler_;
 };
 
+extern std::vector<std::vector<Neuron*>> receivers; // neuron I send to
+extern std::vector<std::vector<Neuron*>> senders; // neuron send to me
+
+void constructorNeuron(Neuron& pre, short id, uint8_t inhi);
+void DisableObject(Neuron pre);
+    // if nullptr is given in input it connect to a 
+    // random neuron, otherwise to given neuron
+void connect(Neuron& pre, short toConnect, float weight = 1.0f);   
+void spike(Neuron& neuron);
+// disconnect pre from post
+float disconnect(short pre, short post); 
 void backprop(short from, short to, int timeSinceSpike);
-void forward(short from, short to, bool active, short actionPotential, Scheduler scheduler_, uint8_t inhi);
+void forward(short from, short to, bool active, short actionPotential, uint8_t inhi);
 
 #endif // NEURON_H

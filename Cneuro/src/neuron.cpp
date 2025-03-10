@@ -4,33 +4,35 @@
 #include "global.h"
 #include <cmath>
 
-// Constructor definition
-Neuron::Neuron(short id, Manager& manager, Scheduler& scheduler, uint8_t inhi) : 
-                ID(id), manager_(manager), scheduler_(scheduler), inhibitory(inhi) {
+std::vector<std::vector<Neuron*>> senders(SIZE); // neurons that send to me
+std::vector<std::vector<Neuron*>> receivers(SIZE); // neuron I send to
+
+void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
+    pre.ID = id;
+    pre.inhibitory = inhi;
     std::uniform_real_distribution<> dis(0.0,1.0);
-    x = 1920.0f*dis(gen);
-    y = 1080.0f*dis(gen);
-    actionPotential = 0;
-    color = WHITE;
-    timer = {ID, 60};
-    timeSinceSpike = 0;
-    active = true;
+    pre.x = 1920.0f*dis(gen);
+    pre.y = 1080.0f*dis(gen);
+    pre.actionPotential = 0;
+    pre.color = WHITE;
+    pre.timeSinceSpike = 0;
+    pre.active = true;
 }
 
-void Neuron::spike(Neuron* neuron) {
-    for (std::pair<Neuron*, float> n: receivers) {forward(ID, n.first->ID, n.first->active, n.first->actionPotential, scheduler_, inhibitory);}
-    for (Neuron* n : sender) { backprop(n->ID, ID, n->timeSinceSpike); }
+void spike(Neuron& neuron) {
+    for (Neuron* n: receivers[neuron.ID]) {forward(neuron.ID, n->ID, n->active, n->actionPotential, neuron.inhibitory);}
+    for (Neuron* n : senders[neuron.ID]) { backprop(n->ID, neuron.ID, n->timeSinceSpike); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
-    timeSinceSpike = 0;
-    this->DisableObject();
+    neuron.timeSinceSpike = 0;
+    DisableObject(neuron);
 }
 
-void forward(short from, short to, bool active, short actionPotential, Scheduler scheduler_, uint8_t inhi) {
+void forward(short from, short to, bool active, short actionPotential, uint8_t inhi) {
     if (active) {
         actionPotential += 30 * connectionMatrix[from][to] * inhi;
         if (actionPotential > 70) {
             actionPotential = 0;
-            scheduler_.swapSpike.insert(to);
+            scheduler.swapSpike.insert(to);
         }
     } else {
         // connectionMatrix[n][ID] -= 0.01;
@@ -43,47 +45,47 @@ void backprop(short from, short to, int timeSinceSpike) {
     }
 }
 
-float Neuron::disconnect(short n) {
+float disconnect(short pre, short post) {
     // remove the receiving neuron 
-    for (int d = 0; d < receivers.size(); d++) {
-        if (receivers[d].first == &neurons[n]) { 
-            receivers[d].first = nullptr;
-            if ( d < receivers.size() - 1 )
-                receivers[d] = std::move( receivers.back() );
-            receivers.pop_back();
+    for (int d = 0; d < receivers[pre].size(); d++) {
+        if (receivers[pre][d] == &neurons[post]) { 
+            receivers[pre][d] = nullptr;
+            if ( d < receivers[pre].size() - 1 )
+                receivers[pre][d] = std::move( receivers[pre].back() );
+            receivers[pre].pop_back();
             break;
         }
     }
     // remove this neuron from sending
-    for (int jkl = 0; jkl < neurons[n].sender.size(); jkl++) {
-        if (neurons[n].sender[jkl] == this) {
-            if (jkl < neurons[n].sender.size() - 1) {
-                neurons[n].sender[jkl] = std::move(neurons[n].sender.back());
+    for (int jkl = 0; jkl < senders[post].size(); jkl++) {
+        if (senders[post][jkl] == &neurons[pre]) {
+            if (jkl < senders[post].size() - 1) {
+                senders[post][jkl] = std::move(senders[post].back());
             }
-            neurons[n].sender.pop_back();
+            senders[post].pop_back();
             break;
         }
     }
     //remove from connectionMatrix
-    float strength = connectionMatrix[ID][n];
-    connectionMatrix[ID][n] = 0.0f;
+    float strength = connectionMatrix[pre][post];
+    connectionMatrix[pre][post] = 0.0f;
     return strength;
 }
 
-void Neuron::connect(short toConnect, float weight) {
+void connect(Neuron& pre, short toConnect, float weight) {
     if (toConnect == -1) {
-        toConnect = manager_.randomNeuron(this)->ID;
+        toConnect = manager.randomNeuron(&pre)->ID;
     }
-    neurons[toConnect].sender.push_back(this);
-    std::pair<Neuron*, float> p = {&neurons[toConnect], 1.0f};
-    receivers.push_back(p); 
-    connectionMatrix[ID][neurons[toConnect].ID] = weight;
+
+    senders[toConnect].push_back(&pre);
+    receivers[pre.ID].push_back(&neurons[toConnect]); 
+    connectionMatrix[pre.ID][neurons[toConnect].ID] = weight;
 }
 
-void Neuron::DisableObject() {
+void DisableObject(Neuron pre) {
     int targetSlot = (currentFrameIndex + COOLDOWN_FRAMES) % COOLDOWN_FRAMES;
-    disableBuffer[targetSlot].push_back(this);
-    active = false; // Immediately disable the object
-    color = RED;
+    disableBuffer[targetSlot].push_back(&pre);
+    pre.active = false; // Immediately disable the object
+    pre.color = RED;
 }
 
