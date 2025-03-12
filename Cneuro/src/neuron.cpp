@@ -44,8 +44,8 @@ void forward(short spiked, short to) {
         actionPotential[to] = 0;
         scheduler.swapSpike.insert(to);
     }
-    connectionMatrix[spiked][to] += (LR/TEMP)*(1-(2*active[to]));
-    biases[to] += (LR/TEMP) * (1-(2*active[to]));
+    // connectionMatrix[spiked][to] += (LR/TEMP)*(1-(2*active[to]));
+    // biases[to] += (LR/TEMP) * (1-(2*active[to]));
 }
 
 void backprop(short pre, short post) {

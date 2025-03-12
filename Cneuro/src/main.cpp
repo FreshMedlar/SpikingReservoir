@@ -163,7 +163,7 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
-    SetTargetFPS(60);
+    SetTargetFPS(300);
 //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
@@ -191,6 +191,7 @@ int main() {
     static std::vector<int> fpsHistory;
     static long totalFPS = 0;
     while (!WindowShouldClose()) {
+    // for (int nun = 0; nun < 100; nun++) {
 //------------------------------ NEURONS DRAWING ------------------------------------ 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -200,29 +201,32 @@ int main() {
         manager.applyForces();
 
         //GRAPH
-            connectionsPerNeuron.clear();
-            connectionsPerNeuron.resize(SIZE, 0); 
-            // EITHER, NOT BOTH
-            manager.receiversFrequence(connectionsPerNeuron.data()); 
-            // manager.sendersFrequence(connectionsPerNeuron.data());
+        connectionsPerNeuron.clear();
+        connectionsPerNeuron.resize(SIZE, 0); 
+        // EITHER, NOT BOTH
+        manager.receiversFrequence(connectionsPerNeuron.data()); 
+        // manager.sendersFrequence(connectionsPerNeuron.data());
 
-        manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
         manager.drawSpikesGraph(spikeNumber);
         totalWeight[(epoch)%500] = totalSum;
         manager.drawTotalWeight(totalWeight);
 
-        // FPS
+        // FPS  
         int fps = GetFPS();
         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+
         EndDrawing();
+        
         fpsHistory.push_back(fps);
         totalFPS += fps;
-        
+
+
 //--------------------------------------------------------------------------------------------------------
 //----------------------------RESERVOIR UPDATE------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------
         // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
     //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
+
             for (short obj : disableBuffer[currentFrameIndex]) {
                 active[obj] = true;
                 colors[obj] = WHITE;
@@ -230,6 +234,7 @@ int main() {
             disableBuffer[currentFrameIndex].clear(); // Reset the slot
             // Advance the ring buffer index
             currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
+
     //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
 
             // for (int restruct = 0; restruct < 10000; restruct++) {

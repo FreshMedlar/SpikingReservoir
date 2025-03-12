@@ -51,7 +51,7 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 2) {
+        while (connected.size() < 0) {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
@@ -218,4 +218,4 @@ void Manager::drawTotalWeight(const std::vector<float>& totalWeight) {
         DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);
     }
 }
-
+ 
