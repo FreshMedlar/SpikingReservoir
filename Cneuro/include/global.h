@@ -13,15 +13,17 @@ extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
 extern float totalSum;
-constexpr short SIZE = 2000;
+constexpr short SIZE = 1000;
 
 // refractory period
 extern const size_t COOLDOWN_FRAMES;
-extern std::array<std::vector<Neuron*>, 50> disableBuffer;
+extern std::array<std::vector<short>, 50> disableBuffer;
 extern int currentFrameIndex; // Tracks the current slot in the ring buffer
 
 // manager and scheduler
 extern Manager manager;
 extern Scheduler scheduler;
+extern float LR;
+extern float TEMP;
 
 #endif // GLOBALS_H

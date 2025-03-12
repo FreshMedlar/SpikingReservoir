@@ -4,49 +4,48 @@
 #include "global.h"
 #include <cmath>
 
+float biases[SIZE];
 std::vector<std::vector<Neuron*>> senders(SIZE); // neurons that send to me
 std::vector<std::vector<Neuron*>> receivers(SIZE); // neuron I send to
 Color colors[SIZE];
 int timeSinceSpike[SIZE];
 bool active[SIZE];
-int8_t actionPotential[SIZE];
-int8_t inhibitory[SIZE];
+short actionPotential[SIZE];
+short inhibitory[SIZE];
 float xCoord[SIZE];
 float yCoord[SIZE];
 
-void constructorNeuron(Neuron& pre, short id, uint8_t inhi) {
+void constructorNeuron(Neuron& pre, short id, short inhi) {
     pre.ID = id;
-    inhibitory[id] = inhi;
-    std::uniform_real_distribution<> dis(0.0,1.0);
 
-    xCoord[id] = 1920.0f*dis(gen);
-    yCoord[id] = 1080.0f*dis(gen);
-    
-    actionPotential[id] = 0;
-    colors[id] = WHITE;
-    timeSinceSpike[id] = 0;
-    active[id] = true;
+    std::uniform_real_distribution<> dis(0.0,1.0);
+    xCoord[id] =            1920.0f*dis(gen);
+    yCoord[id] =            1080.0f*dis(gen);
+    biases[id] =            1.0f;
+    colors[id] =            WHITE;
+    active[id] =            true;
+    inhibitory[id] =        inhi;
+    actionPotential[id] =   0;
+    timeSinceSpike[id] =    0;
 }
 
-void spike(int post) {
-    for (Neuron* n: receivers[post]) {forward(post, n->ID);}
-    for (Neuron* pre : senders[post]) { backprop(pre->ID, post); }
+void spike(short pre) {
+    for (Neuron* n: receivers[pre]) {forward(pre, n->ID);}
+    for (Neuron* prepre : senders[pre]) { backprop(prepre->ID, pre); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
-    timeSinceSpike[post] = 0;
-    DisableObject(neurons[post]);
+    timeSinceSpike[pre] = 0;
+    DisableObject(pre);
 }
 
 void forward(short spiked, short to) {
-    if (active[spiked]) {
-        actionPotential[spiked] += 20 * connectionMatrix[spiked][to] * inhibitory[spiked];
-        if (actionPotential[spiked] > 70) {
-            actionPotential[spiked] = 0;
-            scheduler.swapSpike.insert(to);
-        }
-    } else {
-        // connectionMatrix[n][ID] -= 0.01;
-        // totalSum -= 0.01;
+    // 1 or -1 based on activity of postsynaptic neuron
+    actionPotential[to] += (connectionMatrix[spiked][to] + biases[to]) * inhibitory[spiked];
+    if (actionPotential[to] > 70) {
+        actionPotential[to] = 0;
+        scheduler.swapSpike.insert(to);
     }
+    connectionMatrix[spiked][to] += (LR/TEMP)*(1-(2*active[to]));
+    biases[to] += (LR/TEMP) * (1-(2*active[to]));
 }
 
 void backprop(short pre, short post) {
@@ -95,10 +94,10 @@ void connect(Neuron& pre, short toConnect, float weight) {
     totalSum += weight;
 }
 
-void DisableObject(Neuron& pre) {
+void DisableObject(short pre) {
     int targetSlot = (currentFrameIndex + COOLDOWN_FRAMES) % COOLDOWN_FRAMES;
-    disableBuffer[targetSlot].push_back(&pre);
-    active[pre.ID] = false; // Immediately disable the object
-    colors[pre.ID] = RED;
+    disableBuffer[targetSlot].push_back(pre);
+    active[pre] = false; // Immediately disable the object
+    colors[pre] = RED;
 }
 

@@ -107,9 +107,6 @@ int main() {
     }
     std::cout << std::endl;
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
-// SENDER INITIALIZATION
-    // senders.resize(SIZE);
-
     manager.createNeurons();
     manager.initialConnections();
     manager.status();
@@ -156,17 +153,17 @@ int main() {
 //----------------------------------BY HAND MODEL------------------------------------------
     const int INPUT_SIZE = 5000;
     const int OUTPUT_SIZE = 65;
-    const float LR = 0.0001;
+    const float LR_M = 0.0001;
     const int NUM_SAMPLES = 1;  // Online learning
 
-    SingleLayerNetwork network(LR, SIZE);
+    SingleLayerNetwork network(LR_M, SIZE);
 //----------------------------------VISUALS-----------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
-    SetTargetFPS(0);
+    SetTargetFPS(60);
 //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
@@ -177,7 +174,7 @@ int main() {
     vector<float> totalWeight;
     totalWeight.reserve(SIZE);
     totalWeight.resize(SIZE);
-//---------------------------------KEY---------------------------------------------------
+//---------------------------------REGROWTH---------------------------------------------------
     float growthProb = 0.66f;
     int toRemove;
     int fromRemove;
@@ -191,6 +188,8 @@ int main() {
     bool draw = true;
     bool graph = true;
     bool restructure = false;
+    static std::vector<int> fpsHistory;
+    static long totalFPS = 0;
     while (!WindowShouldClose()) {
 //------------------------------ NEURONS DRAWING ------------------------------------ 
         BeginDrawing();
@@ -216,15 +215,17 @@ int main() {
         int fps = GetFPS();
         DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
         EndDrawing();
+        fpsHistory.push_back(fps);
+        totalFPS += fps;
         
 //--------------------------------------------------------------------------------------------------------
 //----------------------------RESERVOIR UPDATE------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------
         // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
     //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
-            for (Neuron* obj : disableBuffer[currentFrameIndex]) {
-                active[obj->ID] = true;
-                colors[obj->ID] = WHITE;
+            for (short obj : disableBuffer[currentFrameIndex]) {
+                active[obj] = true;
+                colors[obj] = WHITE;
             }
             disableBuffer[currentFrameIndex].clear(); // Reset the slot
             // Advance the ring buffer index
@@ -266,9 +267,9 @@ int main() {
 
 //-------------------------------INPUT----------------------------------------------
             // we queue N neurons to spike next
-            for (short ll : inputReservoir[epoch/10][epoch%10]){
-                scheduler.toSpike.insert(ll);
-            }
+            // for (short ll : inputReservoir[epoch/10][epoch%10]){
+            //     scheduler.toSpike.insert(ll);
+            // }
             //X(t) FOR THE MODEL
             if (train) {
                 for (auto ins : scheduler.toSpike){
@@ -281,9 +282,9 @@ int main() {
             // scheduler.synaptoGenesis();
             
             // DECAY
-            for (int ooo = 0; ooo < SIZE; ooo++) {
-                actionPotential[ooo] -= 5;
-            }
+            // for (int ooo = 0; ooo < SIZE; ooo++) {
+            //     actionPotential[ooo] -= 5;
+            // }
         // }
 //-----------------------------MODEL BY HAND-------------------------------
         // Eigen::VectorXf output = network.forward_sparse(spikeHistory);
@@ -298,5 +299,8 @@ int main() {
         epoch++;
     }
     CloseWindow();
+
+    int averageFPS = totalFPS / fpsHistory.size();
+    std::cout << averageFPS << std::endl;
     return 0;
 }
