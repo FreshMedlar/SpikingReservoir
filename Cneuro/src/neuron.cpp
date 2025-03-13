@@ -14,6 +14,7 @@ short actionPotential[SIZE];
 short inhibitory[SIZE];
 float xCoord[SIZE];
 float yCoord[SIZE];
+short excitability[SIZE];
 
 void constructorNeuron(Neuron& pre, short id, short inhi) {
     pre.ID = id;
@@ -25,34 +26,44 @@ void constructorNeuron(Neuron& pre, short id, short inhi) {
     colors[id] =            WHITE;
     active[id] =            true;
     inhibitory[id] =        inhi;
+    excitability[id] =      1;
+    timeSinceSpike[id] =    1000; // to ignore the first spike
     actionPotential[id] =   0;
-    timeSinceSpike[id] =    0;
 }
 
 void spike(short pre) {
-    for (Neuron* n: receivers[pre]) {forward(pre, n->ID);}
+    for (Neuron* n: receivers[pre]) { if (active[n->ID]) {forward(pre, n->ID);}}
     for (Neuron* prepre : senders[pre]) { backprop(prepre->ID, pre); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
     timeSinceSpike[pre] = 0;
-    DisableObject(pre);
 }
 
-void forward(short spiked, short to) {
-    // 1 or -1 based on activity of postsynaptic neuron
-    actionPotential[to] += (connectionMatrix[spiked][to] + biases[to]) * inhibitory[spiked];
-    if (actionPotential[to] > 70) {
-        actionPotential[to] = 0;
-        scheduler.swapSpike.insert(to);
+void forward(short spiked, short post) {
+    // w[spiked][post] depends on timeSinceSpike[post]
+    // if timeSinceSpike[post] small, w go down :(
+    actionPotential[post] += (connectionMatrix[spiked][post] + biases[post]) 
+                            * inhibitory[spiked] 
+                            * excitability[post];
+    
+    if (actionPotential[post] > 70) {
+        actionPotential[post] = 0;
+        short targetSlot = (currentSpikeIndex + SPIKE_FRAMES) % SPIKE_BUFFER_SIZE;
+        spikeBuffer[targetSlot].insert(post);
+        DisableObject(post);
+        excitability[post] = 1;
+    } else {
+        excitability[post]++;
     }
-    // connectionMatrix[spiked][to] += (LR/TEMP)*(1-(2*active[to]));
-    // biases[to] += (LR/TEMP) * (1-(2*active[to]));
+    connectionMatrix[spiked][post] -= LR/exp(timeSinceSpike[post]/TEMP);
+    totalSum -= LR/exp(timeSinceSpike[post]/TEMP);
+    biases[post] -= LR/exp(TEMP);
 }
-
 void backprop(short pre, short post) {
-    if (timeSinceSpike[pre] < 2 && connectionMatrix[pre][post] < 10.0f) {
-        // connectionMatrix[pre][post] += 0.01;
-        // totalSum += 0.01;
-    }
+    // w[pre][post] depends on timeSinceSpike[pre] 
+    // if timeSinceSpike[pre] small, w go up :)
+    connectionMatrix[pre][post] += LR/exp(timeSinceSpike[pre]/TEMP);
+    totalSum += LR/exp(timeSinceSpike[pre]/TEMP);
+    biases[post] += LR/exp(TEMP);
 }
 
 float disconnect(short pre, short post) {
@@ -87,15 +98,14 @@ void connect(Neuron& pre, short toConnect, float weight) {
     if (toConnect == -1) {
         toConnect = manager.randomNeuron(&pre)->ID;
     }
-
     senders[toConnect].push_back(&pre);
     receivers[pre.ID].push_back(&neurons[toConnect]); 
     connectionMatrix[pre.ID][neurons[toConnect].ID] = weight;
     totalSum += weight;
 }
 
-void DisableObject(short pre) {
-    int targetSlot = (currentFrameIndex + COOLDOWN_FRAMES) % COOLDOWN_FRAMES;
+void DisableObject(short pre, short time) {
+    int targetSlot = (currentFrameIndex + time) % COOLDOWN_FRAMES;
     disableBuffer[targetSlot].push_back(pre);
     active[pre] = false; // Immediately disable the object
     colors[pre] = RED;

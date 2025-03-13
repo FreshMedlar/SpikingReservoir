@@ -12,32 +12,33 @@
 Manager::Manager(int size) : size(size) { }
 
 void Manager::createNeurons() {
-    int mean = 10;
-    int variance = 10;
-    double fren;
-    std::normal_distribution<float> d(mean, std::sqrt(variance));
     std::uniform_real_distribution<> randum(0.0f, 1.0f);
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (short i = 0; i < size; i++) {
-        do {
-            fren = d(gen);
-        } while (fren < 0);  
+ 
         Neuron so;
         if (randum(gen) < 0.8) { 
             constructorNeuron(so, i, 1);
-            neurons.push_back(so);
         } else { 
             constructorNeuron(so, i, -1);
-            neurons.push_back(so);
         }
+        neurons.push_back(so);
     }
     std::cout << "Neurons Created" << std::endl;
+}
+
+void Manager::createSingle(short id, bool inhibitory) {
+    Neuron so;
+    if (inhibitory) {constructorNeuron(so, id, -1);}
+    else {constructorNeuron(so, id, 1);}
+    neurons.push_back(so);
 }
 
 void Manager::status() {
     std::cout << "--------Manager Status--------" << std::endl;
     std::cout << "# of neurons: " << neurons.size() << std::endl;
+    std::cout << connectionMatrix.size() << std::endl;
 }
 
 Neuron* Manager::randomNeuron (Neuron* nen) {
@@ -51,7 +52,7 @@ void Manager::initialConnections() {
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 0) {
+        while (connected.size() < 10) {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
@@ -61,6 +62,14 @@ void Manager::initialConnections() {
         }
     }
     std::cout << "Connections initialized" << std::endl;
+}
+
+void Manager::removeInputConnections(short nInput) {
+    for (int neu = 0; neu < nInput; neu++) {
+        for (Neuron* incoming : senders[neu]) {
+            disconnect(incoming->ID, neu);
+        }
+    }
 }
 
 std::pair<size_t, size_t> Manager::selectWeightedRandom(const std::vector<std::vector<float>>& matrix,float totalSum) {
@@ -97,7 +106,7 @@ void Manager::draw() {
     // std::cout << "Drawing with matrix at: " << &connectionMatrix << std::endl;
     for (size_t n = 0; n < size; n++) {
         for (size_t a = 0; a < size; a++) {
-            if (connectionMatrix[n][a] != 0.0f) {
+            if (connectionMatrix[n][a] > 0.0f) {
                 DrawLine(xCoord[n], yCoord[n], xCoord[a], yCoord[a], EXTRALIGHTGRAY);
             } 
         }

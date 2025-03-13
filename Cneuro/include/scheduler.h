@@ -27,8 +27,7 @@ public:
     // void synaptoGenesis();
     //
     Neuron& drawNeuron();
-    // std::vector<std::thread> threads;
-    // static void parallel_push_back(int value);
+    void pruningAndDecay();
 
 private:
     int size;

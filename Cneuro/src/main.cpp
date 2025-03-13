@@ -76,6 +76,7 @@ int main() {
     manager.createNeurons();
     manager.initialConnections();
     manager.status();
+    manager.removeInputConnections(65);
 
     
     int SPIKE_SAMPLING = 10;
@@ -129,7 +130,7 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
-    SetTargetFPS(300);
+    SetTargetFPS(-1);
 //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
@@ -163,8 +164,8 @@ int main() {
         ClearBackground(BLACK);
         
         //DRAW
-        manager.draw();
-        manager.applyForces();
+        // manager.draw();
+        // manager.applyForces();
 
         //GRAPH
         connectionsPerNeuron.clear();
@@ -175,7 +176,7 @@ int main() {
 
         manager.drawSpikesGraph(spikeNumber);
         totalWeight[(epoch)%500] = totalSum;
-        manager.drawTotalWeight(totalWeight);
+        // manager.drawTotalWeight(totalWeight);
 
         // FPS  
         int fps = GetFPS();
@@ -237,9 +238,10 @@ int main() {
 
 //-------------------------------INPUT----------------------------------------------
             // we queue N neurons to spike next
-            // for (short ll : inputReservoir[epoch/10][epoch%10]){
-            //     scheduler.toSpike.insert(ll);
-            // }
+            for (short ll : inputReservoir[epoch/10][epoch%10]){
+                spikeBuffer[currentSpikeIndex].insert(ll);
+                DisableObject(ll, 5); // 5 = COOLDOWN_FRAMES - SPIKE_FRAMES
+            }
             //X(t) FOR THE MODEL
             if (train) {
                 for (auto ins : scheduler.toSpike){
@@ -247,14 +249,11 @@ int main() {
                 }
             }
             //RESERVOIR
-            spikeNumber[epoch%500] = scheduler.toSpike.size();
+            spikeNumber[epoch%500] = spikeBuffer[currentSpikeIndex].size();
             scheduler.update();
+            scheduler.pruningAndDecay();
             // scheduler.synaptoGenesis();
-            
-            // DECAY
-            // for (int ooo = 0; ooo < SIZE; ooo++) {
-            //     actionPotential[ooo] -= 5;
-            // }
+
         // }
 //-----------------------------MODEL BY HAND-------------------------------
         // Eigen::VectorXf output = network.forward_sparse(spikeHistory);
@@ -274,3 +273,135 @@ int main() {
     cout << averageFPS << endl;
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// #include <iostream>
+// #include <algorithm>
+// #include <vector>
+// #include <fstream>
+// #include <string>
+// #include <set>
+// #include <map>
+// #include <Eigen/Dense>
+// #include <ensmallen.hpp>
+// #include <cereal/archives/json.hpp>
+
+// // Define these to print extra informational output and warnings.
+// // #define MLPACK_PRINT_INFO
+// // #define MLPACK_PRINT_WARN
+
+// #include "neuron.h"
+// #include "manager.h"
+// #include "raylib.h"
+// #include "scheduler.h"
+// #include "global.h"
+// #include "net.h"
+// #include "encoder.h"
+// #include "utilities.h"
+
+// // using namespace arma;
+// using namespace std;
+
+// int main() {
+// //----------------------------------RESERVOIR DEFINITION-----------------------------------
+//     manager.createSingle(0, false);
+//     manager.createSingle(1, false);
+//     manager.initialConnections(); // matrix init
+//     connect(neurons[0], 1);
+    
+//     connectionMatrix[0][1] = 1.0f;
+//     biases[0] = 1.0f;
+//     biases[1] = 1.0f;
+    
+//     spikeBuffer[1].push_back(0);
+//     spikeBuffer[3].push_back(1);
+//     spikeBuffer[10].push_back(0);
+//     spikeBuffer[13].push_back(1);
+//     spikeBuffer[20].push_back(0);
+//     spikeBuffer[23].push_back(1);
+//     spikeBuffer[30].push_back(0);
+//     spikeBuffer[33].push_back(1);
+//     spikeBuffer[40].push_back(0);
+//     spikeBuffer[43].push_back(1);
+//     for (int step = 0; step < 100; step++) {
+//         scheduler.update();
+//     }
+//     cout << connectionMatrix[0][1] << endl;
+
+//     // z[0] = biases[0]
+//     // z[1] = connectionMatrix[0][1] * active[0] + biases[1]
+//     // lambda[0] = exp(sigma[0]*z[0]/TEMP)
+//     // lambda[1] = exp(sigma[1]*z[1]/TEMP)
+//     // sigma is 1 if active, -1 if not active
+//     // fixed biases, weigth updated based on formula
+
+
+
+// //     int SPIKE_SAMPLING = 10;
+// //     int frameCounter = 0;
+// //     vector<int> connectionsPerNeuron(SIZE, 0);
+// //     uniform_real_distribution<> dis(0.0,1.0);
+// //     uniform_int_distribution<> disreal(0, SIZE-1);
+// // //----------------------------------TRAINING LOOP-----------------------------------------
+// //     int epoch = 0;
+// //     float epoch_loss = 0;
+
+// //     for (int nun = 0; nun < 100; nun++) {
+// // //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
+
+// //             for (short obj : disableBuffer[currentFrameIndex]) {
+// //                 active[obj] = true;
+// //                 colors[obj] = WHITE;
+// //             }
+// //             disableBuffer[currentFrameIndex].clear(); // Reset the slot
+// //             // Advance the ring buffer index
+// //             currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
+
+// // //-------------------------------INPUT----------------------------------------------
+// //             // we queue N neurons to spike next
+// //             // for (short ll : inputReservoir[epoch/10][epoch%10]){
+// //             //     scheduler.toSpike.insert(ll);
+// //             // }
+// //             //X(t) FOR THE MODEL
+  
+// //             //RESERVOIR
+// //             scheduler.update();
+
+// //         epoch++;
+// //     }
+// //     CloseWindow();
+
+//     return 0;
+// }

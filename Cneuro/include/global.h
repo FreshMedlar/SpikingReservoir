@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 #include <vector>
+#include <set>
 #include "neuron.h"
 #include <random>
 #include <array>
@@ -13,12 +14,18 @@ extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
 extern float totalSum;
-constexpr short SIZE = 1000;
+constexpr short SIZE = 500;
 
 // refractory period
 extern const size_t COOLDOWN_FRAMES;
-extern std::array<std::vector<short>, 50> disableBuffer;
+extern std::array<std::vector<short>, 7> disableBuffer;
 extern int currentFrameIndex; // Tracks the current slot in the ring buffer
+
+// buffer for spikes
+extern const short SPIKE_FRAMES; 
+extern const size_t SPIKE_BUFFER_SIZE;
+extern std::array<std::set<short>, 1000> spikeBuffer;
+extern int currentSpikeIndex;
 
 // manager and scheduler
 extern Manager manager;

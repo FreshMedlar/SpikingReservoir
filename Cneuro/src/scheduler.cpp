@@ -13,19 +13,27 @@ void Scheduler::update() {
     for (int neu = 0; neu < SIZE; neu++) {
         timeSinceSpike[neu] += 1;
     } 
-    // check if neurons have spiked
-    if (toSpike.size() > 0) {
-        for (int n : toSpike) {
-            spike(n);
-        }
-        // std::cout << "here?" << std::endl;
-        toSpike.clear();
-        std::swap(toSpike, swapSpike);
-        swapSpike.clear();
-        // std::cout << "clean" << std::endl;
+    for (short neur : spikeBuffer[currentSpikeIndex]) {
+        spike(neur);
     }
+    spikeBuffer[currentSpikeIndex].clear(); // Reset the slot
+    // Advance the ring buffer index
+    currentSpikeIndex = (currentSpikeIndex + 1) % SPIKE_BUFFER_SIZE;
 }
 
+void Scheduler::pruningAndDecay() {
+    for (size_t row = 0; row < SIZE; row++) {
+        if (biases[row] < 0.1) {
+            for (size_t col = 0; col < SIZE; col++) {
+                if (connectionMatrix[col][row] < 0.1f){
+                    disconnect(col, row);
+                }
+                connectionMatrix[row][col] -= 0.001f;
+            }
+        } 
+        biases[row] -= 0.001f;
+    }
+}
 // void Scheduler::synaptoGenesis() {
 //     if (lonelyNeurons.size() != 0) {
 //         for (int toconnect : lonelyNeurons) {

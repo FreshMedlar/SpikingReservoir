@@ -20,9 +20,10 @@ extern short actionPotential[];
 extern short inhibitory[];
 extern float xCoord[];
 extern float yCoord[];
+extern short excitability[];
 
 void constructorNeuron(Neuron& pre, short id, short inhi);
-void DisableObject(short pre);
+void DisableObject(short pre, short time = 7);
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
 void connect(Neuron& pre, short toConnect, float weight = 1.0f);   
