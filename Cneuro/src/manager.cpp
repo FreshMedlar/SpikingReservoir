@@ -41,10 +41,10 @@ void Manager::status() {
     std::cout << connectionMatrix.size() << std::endl;
 }
 
-Neuron* Manager::randomNeuron (Neuron* nen) {
+short Manager::randomNeuron (Neuron* nen) {
     std::uniform_int_distribution<> dis(0, neurons.size() - 1);
     int randomIndex = dis(gen);
-    return &neurons[randomIndex]; 
+    return randomIndex; 
 }
 
 void Manager::initialConnections() {
@@ -56,7 +56,7 @@ void Manager::initialConnections() {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
-                connect(neuron, target);
+                connect(neuron.ID, target);
                 connected.insert(target);
             }
         }
@@ -66,8 +66,8 @@ void Manager::initialConnections() {
 
 void Manager::removeInputConnections(short nInput) {
     for (int neu = 0; neu < nInput; neu++) {
-        for (Neuron* incoming : senders[neu]) {
-            disconnect(incoming->ID, neu);
+        for (short incoming : senders[neu]) {
+            disconnect(incoming, neu);
         }
     }
 }
@@ -139,9 +139,9 @@ void Manager::applyForces() {
             }
         }
         // --- Attraction: Pull connected neurons together ---
-        for (Neuron* connected : receivers[neuron]) {
-            float dx = xCoord[connected->ID] - xCoord[neuron];
-            float dy = yCoord[connected->ID] - yCoord[neuron];
+        for (short connected : receivers[neuron]) {
+            float dx = xCoord[connected] - xCoord[neuron];
+            float dy = yCoord[connected] - yCoord[neuron];
             float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
             
             float attractionStrength = Manager::calculateAttractionForce(distance, 10.0f);

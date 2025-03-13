@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
+#include <omp.h>
 
 Scheduler::Scheduler(int size) : size(size) {
 }
@@ -22,6 +23,7 @@ void Scheduler::update() {
 }
 
 void Scheduler::pruningAndDecay() {
+    // #pragma omp parallel for
     for (size_t row = 0; row < SIZE; row++) {
         if (biases[row] < 0.1) {
             for (size_t col = 0; col < SIZE; col++) {

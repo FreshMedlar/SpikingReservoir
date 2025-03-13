@@ -15,7 +15,7 @@ int currentFrameIndex = 0; // Tracks the current slot in the ring buffer
 // buffer for spikes
 const short SPIKE_FRAMES = 2;
 const size_t SPIKE_BUFFER_SIZE = 1000;
-std::array<std::set<short>, SPIKE_BUFFER_SIZE> spikeBuffer;
+std::array<std::vector<short>, SPIKE_BUFFER_SIZE> spikeBuffer;
 int currentSpikeIndex = 0;
 
 //

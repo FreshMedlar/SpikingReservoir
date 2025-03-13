@@ -163,20 +163,20 @@ int main() {
         BeginDrawing();
         ClearBackground(BLACK);
         
-        //DRAW
-        // manager.draw();
-        // manager.applyForces();
-
-        //GRAPH
-        connectionsPerNeuron.clear();
-        connectionsPerNeuron.resize(SIZE, 0); 
-        // EITHER, NOT BOTH
-        manager.receiversFrequence(connectionsPerNeuron.data()); 
-        // manager.sendersFrequence(connectionsPerNeuron.data());
-
-        manager.drawSpikesGraph(spikeNumber);
-        totalWeight[(epoch)%500] = totalSum;
-        // manager.drawTotalWeight(totalWeight);
+        // //DRAW
+        // // manager.draw();
+        // // manager.applyForces();
+        // //GRAPH
+        // connectionsPerNeuron.clear();
+        // connectionsPerNeuron.resize(SIZE, 0); 
+        //     // EITHER, NOT BOTH
+        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
+        //     // manager.sendersFrequence(connectionsPerNeuron.data());
+        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+        // // SPIKES
+        // manager.drawSpikesGraph(spikeNumber);
+        // totalWeight[(epoch)%500] = totalSum;
+        // // manager.drawTotalWeight(totalWeight);
 
         // FPS  
         int fps = GetFPS();
@@ -239,7 +239,7 @@ int main() {
 //-------------------------------INPUT----------------------------------------------
             // we queue N neurons to spike next
             for (short ll : inputReservoir[epoch/10][epoch%10]){
-                spikeBuffer[currentSpikeIndex].insert(ll);
+                spikeBuffer[currentSpikeIndex].push_back(ll);
                 DisableObject(ll, 5); // 5 = COOLDOWN_FRAMES - SPIKE_FRAMES
             }
             //X(t) FOR THE MODEL
@@ -251,7 +251,7 @@ int main() {
             //RESERVOIR
             spikeNumber[epoch%500] = spikeBuffer[currentSpikeIndex].size();
             scheduler.update();
-            scheduler.pruningAndDecay();
+            // scheduler.pruningAndDecay();
             // scheduler.synaptoGenesis();
 
         // }
