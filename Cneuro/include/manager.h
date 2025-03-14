@@ -18,7 +18,7 @@ public:
     void draw();
     void drawreceiversGraph(const std::vector<int>& connectionsPerNeuron);
     void drawSpikesGraph(std::vector<int>& spikeNumber);
-    void drawTotalWeight(const std::vector<float>& totalWeight);
+    void drawTotalWeight();
     void status();
     void applyForces();
     void initialConnections();
@@ -28,6 +28,7 @@ public:
     std::pair<std::size_t, std::size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, float totalSum);
     // return a random neuron
     short randomNeuron(Neuron* n);
+    void clustering();
 
 private:
     int size;

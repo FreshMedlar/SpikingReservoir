@@ -2,7 +2,7 @@ MOST IMPORTANT
 - graph for distribution of synapses strength, firing rates, firing per second
     and in general need to study the stability of the system
 
-- data oriented design, performance are slowing down excessively
+- there may be douplicates in the spike buffer (from manual input)
 
 - synaptogenesis
     the development of new synapses is based on competition and various constraints.

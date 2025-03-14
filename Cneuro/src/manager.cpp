@@ -18,7 +18,7 @@ void Manager::createNeurons() {
     for (short i = 0; i < size; i++) {
  
         Neuron so;
-        if (randum(gen) < 0.8) { 
+        if (randum(gen) < 0.7) { 
             constructorNeuron(so, i, 1);
         } else { 
             constructorNeuron(so, i, -1);
@@ -199,32 +199,46 @@ void Manager::drawreceiversGraph(const std::vector<int>& conn) {
 }
 
 void Manager::drawSpikesGraph(std::vector<int>& spikeNumber) {
-    int plotWidth = 500;
-    int plotHeight = 250;
-    int barWidth = 1;
+    int barHeight = 3;
 
     // DrawRectangle(10, 260, plotWidth, plotHeight, BLACK);
     for (int i = 0; i < spikeNumber.size(); i++) {
-        int barHeight = spikeNumber[i];
-        DrawRectangle(10 + (i%1920), 10 + plotHeight*2 - barHeight, barWidth, barHeight, BLUE);
+        int barWidth = spikeNumber[i];
+        DrawRectangle(2 , 145 + 3*i, barWidth, barHeight, BLUE);
 
     }
 }
 
-void Manager::drawTotalWeight(const std::vector<float>& totalWeight) {
+void Manager::drawTotalWeight() {
     int plotWidth = 500;
     int plotHeight = 250;
     int barWidth = 1;
 
-    for (size_t i = 0; i < totalWeight.size(); i++) {
-        if (std::isnan(totalWeight[i]) || std::isinf(totalWeight[i])) {
-            continue;  // Skip invalid values
-        }
+    // for (size_t i = 0; i < totalWeight.size(); i++) {
+    //     if (std::isnan(totalWeight[i]) || std::isinf(totalWeight[i])) {
+    //         continue;  // Skip invalid values
+    //     }
 
-        int barHeight = static_cast<int>(totalWeight[i] / 100);
-        if (barHeight < 0) barHeight = 0;  // Avoid negative heights
+    //     int barHeight = static_cast<int>(totalWeight[i] / 100);
+    //     if (barHeight < 0) barHeight = 0;  // Avoid negative heights
 
-        DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);
-    }
+    //     DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);
+    // }
+    DrawRectangle(0, 80, totalSum/50, 35, ORANGE);
+    DrawText("TOTAL WEIGHT", 10, 84, 24, WHITE);
 }
  
+void Manager::clustering() {
+    for (short neu = 0; neu < SIZE; neu++) {
+        for (short node : receivers[neu]){
+            
+        }
+    }
+    float avgCluster = 0;
+    for (short i = 0; i < SIZE; i++) {
+        avgCluster += receivers[i].size();
+    }
+    avgCluster = avgCluster/SIZE;
+    DrawRectangle(0, 40, avgCluster*10, 35, RED);
+    DrawText("CLUSTERING", 10, 44, 24, WHITE);
+}

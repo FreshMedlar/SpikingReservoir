@@ -8,12 +8,12 @@ std::mt19937 gen(rd());
 float totalSum = 0.0f;
 
 // buffer for refractory period
-const size_t COOLDOWN_FRAMES = 7;
+const size_t COOLDOWN_FRAMES = 5;
 std::array<std::vector<short>, COOLDOWN_FRAMES> disableBuffer;
 int currentFrameIndex = 0; // Tracks the current slot in the ring buffer
 
 // buffer for spikes
-const short SPIKE_FRAMES = 2;
+const short SPIKE_FRAMES = 1;
 const size_t SPIKE_BUFFER_SIZE = 1000;
 std::array<std::vector<short>, SPIKE_BUFFER_SIZE> spikeBuffer;
 int currentSpikeIndex = 0;

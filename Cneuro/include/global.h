@@ -14,11 +14,11 @@ extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
 extern float totalSum;
-constexpr short SIZE = 500;
+constexpr short SIZE = 5000;
 
 // refractory period
 extern const size_t COOLDOWN_FRAMES;
-extern std::array<std::vector<short>, 7> disableBuffer;
+extern std::array<std::vector<short>, 5> disableBuffer;
 extern int currentFrameIndex; // Tracks the current slot in the ring buffer
 
 // buffer for spikes

@@ -14,7 +14,7 @@ short actionPotential[SIZE];
 short inhibitory[SIZE];
 float xCoord[SIZE];
 float yCoord[SIZE];
-short excitability[SIZE];
+float excitability[SIZE];
 
 void constructorNeuron(Neuron& pre, short id, short inhi) {
     pre.ID = id;
@@ -36,36 +36,36 @@ void spike(short pre) {
     for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
     for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
+    excitability[pre] = 1.0f;
     timeSinceSpike[pre] = 0;
+
 }
 
 void forward(short spiked, short post) {
     // w[spiked][post] depends on timeSinceSpike[post]
     // if timeSinceSpike[post] small, w go down :(
-    actionPotential[post] += (connectionMatrix[spiked][post] + biases[post]) 
+    actionPotential[post] +=  connectionMatrix[spiked][post]
                             * inhibitory[spiked] 
                             * excitability[post];
     
-    if (actionPotential[post] > 70) {
+    if (actionPotential[post] > 100) {
         actionPotential[post] = 0;
-        short targetSlot = (currentSpikeIndex + SPIKE_FRAMES) % SPIKE_BUFFER_SIZE;
-        spikeBuffer[targetSlot].push_back(post);
-        DisableObject(post);
-        excitability[post] = 1;
+        queueNeuron(post);
+        colorNeuron(post);
     } else {
-        excitability[post]++;
+        excitability[post] += 0.01f;
     }
     float delta = LR/exp(timeSinceSpike[post]/TEMP);
     connectionMatrix[spiked][post] -= delta;
     totalSum -= delta;
-    biases[post] -= LR/exp(TEMP);
 }
 void backprop(short pre, short post, float delta) {
     // w[pre][post] depends on timeSinceSpike[pre] 
     // if timeSinceSpike[pre] small, w go up :)
-    connectionMatrix[pre][post] += delta;
-    totalSum += delta;
-    biases[post] += LR/exp(TEMP);
+    if (connectionMatrix[pre][post] < 45) {
+        connectionMatrix[pre][post] += delta;
+        totalSum += delta;
+    }
 }
 
 float disconnect(short pre, short post) {
@@ -105,10 +105,15 @@ void connect(short pre, short toConnect, float weight) {
     totalSum += weight;
 }
 
-void DisableObject(short pre, short time) {
+void queueNeuron(short pre) {
+    short targetSlot = (currentSpikeIndex + SPIKE_FRAMES) % SPIKE_BUFFER_SIZE;
+    spikeBuffer[targetSlot].push_back(pre);
+}
+
+void colorNeuron(short pre, short time) {
     int targetSlot = (currentFrameIndex + time) % COOLDOWN_FRAMES;
     disableBuffer[targetSlot].push_back(pre);
-    active[pre] = false; // Immediately disable the object
     colors[pre] = RED;
+    active[pre] = false;
 }
 

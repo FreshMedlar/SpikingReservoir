@@ -106,10 +106,13 @@ int main() {
     }
     vector<vector<vector<short>>> spikeEncodedChars (encodedUniqueChars.size());
     for (int s = 0; s < encodedUniqueChars.size(); s++) {
+        vector<int> randomIndexes;
+        // take 5 random neurons for this letter
+        for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(65));}
+
         for (short o = 0; o < SPIKE_SAMPLING; o++){
             vector<short> innerVec;
-            for (int ra = 0; ra < 2; ra++){ 
-                innerVec.push_back(static_cast<short>(getRandomInt(65)));}
+            innerVec.push_back(randomIndexes[o%5]);
             spikeEncodedChars[s].push_back(innerVec);
             innerVec.clear();
         }
@@ -150,7 +153,7 @@ int main() {
     int to;
 //----------------------------------TRAINING LOOP-----------------------------------------
     int epoch = 0;
-    float epoch_loss = 0;
+    float epoch_loss;
     bool train = false;
     bool draw = true;
     bool graph = true;
@@ -163,20 +166,22 @@ int main() {
         BeginDrawing();
         ClearBackground(BLACK);
         
-        // //DRAW
-        // // manager.draw();
-        // // manager.applyForces();
-        // //GRAPH
-        // connectionsPerNeuron.clear();
-        // connectionsPerNeuron.resize(SIZE, 0); 
-        //     // EITHER, NOT BOTH
-        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
-        //     // manager.sendersFrequence(connectionsPerNeuron.data());
-        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-        // // SPIKES
-        // manager.drawSpikesGraph(spikeNumber);
+        //DRAW
+        // manager.draw();
+        // manager.applyForces();
+        //GRAPH
+        connectionsPerNeuron.clear();
+        connectionsPerNeuron.resize(SIZE, 0); 
+            // EITHER, NOT BOTH
+            manager.receiversFrequence(connectionsPerNeuron.data()); 
+            // manager.sendersFrequence(connectionsPerNeuron.data());
+        manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+        manager.clustering();
+        // SPIKES
+        manager.drawSpikesGraph(spikeNumber);
         // totalWeight[(epoch)%500] = totalSum;
-        // // manager.drawTotalWeight(totalWeight);
+        manager.drawTotalWeight();
+        // cout << excitability[1000] << endl;
 
         // FPS  
         int fps = GetFPS();
@@ -240,31 +245,36 @@ int main() {
             // we queue N neurons to spike next
             for (short ll : inputReservoir[epoch/10][epoch%10]){
                 spikeBuffer[currentSpikeIndex].push_back(ll);
-                DisableObject(ll, 5); // 5 = COOLDOWN_FRAMES - SPIKE_FRAMES
+                colorNeuron(ll); 
             }
-            //X(t) FOR THE MODEL
-            if (train) {
-                for (auto ins : scheduler.toSpike){
-                    spikeHistory.push_back(ins+(SIZE*(epoch)));
-                }
-            }
+            // //X(t) FOR THE MODEL
+            // if (epoch % 10 == 9) {
+            //     for (auto ins : spikeBuffer[currentSpikeIndex]){
+            //         spikeHistory.push_back(ins+(SIZE*(epoch)));
+            //     }
+            // }
             //RESERVOIR
-            spikeNumber[epoch%500] = spikeBuffer[currentSpikeIndex].size();
+            spikeNumber[epoch%100] = spikeBuffer[currentSpikeIndex].size();
             scheduler.update();
             // scheduler.pruningAndDecay();
             // scheduler.synaptoGenesis();
 
         // }
 //-----------------------------MODEL BY HAND-------------------------------
-        // Eigen::VectorXf output = network.forward_sparse(spikeHistory);
-        // output = network.softmax(output);
-        // epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
-        // Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
-        // spikeHistory.clear();
-        // cout << "Epoch " << epoch/100 
-        //         << " | Avg Loss: " << epoch_loss/100
-        //         << endl;
-        
+        if (epoch%10 == 9) {
+            // cout << spikeBuffer[currentSpikeIndex].size() << endl;
+            Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
+            output = network.softmax(output);
+            epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
+            Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
+            spikeHistory.clear();
+            if (epoch%100 == 99) {
+                cout << "Epoch " << epoch/100
+                        << " | Avg Loss: " << epoch_loss/10
+                        << endl;
+                epoch_loss = 0;
+            }
+        }
         epoch++;
     }
     CloseWindow();

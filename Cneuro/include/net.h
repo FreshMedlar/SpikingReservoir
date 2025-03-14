@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include <omp.h>
 #include <cmath>
+#include <set>
 
 class SingleLayerNetwork {
 private:
@@ -17,7 +18,7 @@ private:
     Eigen::VectorXf parallel_matvec(const Eigen::MatrixXf& W,
                                     const Eigen::VectorXf& x);
     Eigen::VectorXf parallel_matvec_sparse(const Eigen::MatrixXf& W, 
-                                        const std::vector<int>& indices);
+                                        const std::vector<short>& indices);
     Eigen::MatrixXf parallel_outer_sparse( const Eigen::VectorXf& a, 
                                     const std::vector<int>& b);
     Eigen::MatrixXf parallel_outer(const Eigen::VectorXf& a,
@@ -28,7 +29,7 @@ public:
     SingleLayerNetwork(float lr, int size);
     Eigen::VectorXf softmax(const Eigen::VectorXf& logits);
     Eigen::VectorXf forward(const Eigen::VectorXf& input);
-    Eigen::VectorXf forward_sparse(const std::vector<int>& spike_indices);
+    Eigen::VectorXf forward_sparse(const std::vector<short>& spike_indices);
     Eigen::VectorXf backward(const std::vector<int>& input, 
                             const Eigen::VectorXf& output,
                             int target);
