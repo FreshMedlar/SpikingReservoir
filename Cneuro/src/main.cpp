@@ -6,8 +6,8 @@
 #include <set>
 #include <map>
 #include <Eigen/Dense>
-#include <ensmallen.hpp>
-#include <cereal/archives/json.hpp>
+// #include <ensmallen.hpp>
+// #include <cereal/archives/json.hpp>
 
 // Define these to print extra informational output and warnings.
 // #define MLPACK_PRINT_INFO
@@ -131,9 +131,9 @@ int main() {
     const int screenWidth = 1920;
     const int screenHeight = 1080;
 
-    InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-    ToggleFullscreen();    
-    SetTargetFPS(-1);
+    // InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
+    // ToggleFullscreen();    
+    // SetTargetFPS(-1);
 //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
@@ -160,37 +160,37 @@ int main() {
     bool restructure = false;
     static vector<int> fpsHistory;
     static long totalFPS = 0;
-    while (!WindowShouldClose()) {
+    while (true) { // !WindowShouldClose()) {
     // for (int nun = 0; nun < 100; nun++) {
 //------------------------------ NEURONS DRAWING ------------------------------------ 
-        BeginDrawing();
-        ClearBackground(BLACK);
+        // BeginDrawing();
+        // ClearBackground(BLACK);
         
-        //DRAW
+        // //DRAW
         // manager.draw();
         // manager.applyForces();
-        //GRAPH
-        connectionsPerNeuron.clear();
-        connectionsPerNeuron.resize(SIZE, 0); 
-            // EITHER, NOT BOTH
-            manager.receiversFrequence(connectionsPerNeuron.data()); 
-            // manager.sendersFrequence(connectionsPerNeuron.data());
-        manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-        manager.clustering();
-        // SPIKES
-        manager.drawSpikesGraph(spikeNumber);
-        // totalWeight[(epoch)%500] = totalSum;
-        manager.drawTotalWeight();
-        // cout << excitability[1000] << endl;
+        // //GRAPH
+        // connectionsPerNeuron.clear();
+        // connectionsPerNeuron.resize(SIZE, 0); 
+        //     // EITHER, NOT BOTH
+        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
+        //     // manager.sendersFrequence(connectionsPerNeuron.data());
+        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+        // manager.clustering();
+        // // SPIKES
+        // manager.drawSpikesGraph(spikeNumber);
+        // // totalWeight[(epoch)%500] = totalSum;
+        // manager.drawTotalWeight();
+        // // cout << excitability[1000] << endl;
 
-        // FPS  
-        int fps = GetFPS();
-        DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+        // // FPS  
+        // int fps = GetFPS();
+        // DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
 
-        EndDrawing();
+        // EndDrawing();
         
-        fpsHistory.push_back(fps);
-        totalFPS += fps;
+        // fpsHistory.push_back(fps);
+        // totalFPS += fps;
 
 
 //--------------------------------------------------------------------------------------------------------
@@ -277,7 +277,7 @@ int main() {
         }
         epoch++;
     }
-    CloseWindow();
+    // CloseWindow();
 
     int averageFPS = totalFPS / fpsHistory.size();
     cout << averageFPS << endl;
@@ -286,12 +286,51 @@ int main() {
 
 
 
+// #define _USE_MATH_DEFINES
+// #include <iostream>
+// #include <cmath>
+// #include "matplotlibcpp.h"
+// #include <vector>
 
+// namespace plt = matplotlibcpp;
 
+// int main() 
+// {
+//     // Prepare data.
+//     int n = 5000;
+//     std::vector<double> x(n), y(n), z(n), w(n,2);
+//     for(int i=0; i<n; ++i) {
+//         x.at(i) = i*i;
+//         y.at(i) = sin(2*M_PI*i/360.0);
+//         z.at(i) = log(i);
+//     }
+    
+//     // Set the size of output image = 1200x780 pixels
+//     plt::figure_size(1200, 780);
 
+//     // Plot line from given x and y data. Color is selected automatically.
+//     plt::plot(x, y);
 
+//     // Plot a red dashed line from given x and y data.
+//     plt::plot(x, w,"r--");
 
+//     // Plot a line whose name will show up as "log(x)" in the legend.
+//     plt::named_plot("log(x)", x, z);
 
+//     // Set x-axis to interval [0,1000000]
+//     plt::xlim(0, 1000*1000);
+
+//     // Add graph title
+//     plt::title("Sample figure");
+
+//     // Enable legend.
+//     plt::legend();
+
+//     // save figure
+//     const char* filename = "./basic.png";
+//     std::cout << "Saving result to " << filename << std::endl;;
+//     plt::save(filename);
+// }
 
 
 
