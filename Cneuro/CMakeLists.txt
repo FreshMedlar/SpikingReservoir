@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include/Eigen")
+include_directories(/usr/include/python3.10)
 
 # Add source files
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -14,7 +15,7 @@ file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 add_executable(program ${SOURCES})
 
 # Link against LibTorch and other libraries
-target_link_libraries(program PRIVATE raylib GL m pthread dl rt X11)
+target_link_libraries(program PRIVATE python3.11 raylib GL m pthread dl rt X11)
 
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
@@ -28,4 +29,3 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")#-pg -O0")
 
 # Set rpath so the program can find the shared libraries
 set_property(TARGET program PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-# set(CMAKE_BUILD_RPATH "/opt/libtorch/lib")

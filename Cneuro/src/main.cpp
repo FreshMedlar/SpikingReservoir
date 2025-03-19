@@ -1,335 +1,287 @@
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <fstream>
-#include <string>
-#include <set>
-#include <map>
-#include <Eigen/Dense>
-// #include <ensmallen.hpp>
-// #include <cereal/archives/json.hpp>
-
-// Define these to print extra informational output and warnings.
-// #define MLPACK_PRINT_INFO
-// #define MLPACK_PRINT_WARN
-
-#include "neuron.h"
-#include "manager.h"
-#include "raylib.h"
-#include "scheduler.h"
-#include "global.h"
-#include "net.h"
-#include "encoder.h"
-#include "utilities.h"
-
-// using namespace arma;
-using namespace std;
-
-int main() {
-//-----------------------READ INPUT FILE----------------------
-    string filePath = "/home/medlar/SpikingReservoir/tinyshakespeare.txt";
-    ifstream file(filePath);
-    if (!file.is_open()) {
-        cerr << "Error opening file." << endl;
-        return 1;
-    }
-    string fileContent((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
-    file.close();
-//-----------------------DATA PROCESSING-----------------------------
-    size_t textLength = fileContent.length();
-    cout << "Length of the text: " << textLength << endl;
-
-    set<char> uniqueCharsSet(fileContent.begin(), fileContent.end());
-    vector<char> uniqueChars(uniqueCharsSet.begin(), uniqueCharsSet.end());
-    vector<char> charVector(fileContent.begin(), fileContent.end());
-
-    int splitIndex = static_cast<int>(round(0.9*textLength));
-    string training = fileContent.substr(0, splitIndex);
-    string validation = fileContent.substr(splitIndex);
-    // Print the vector of characters (optional)
-    cout << "Characters in the vector: ";
-    for (char c : uniqueChars) {
-        cout << c;
-    }
-    cout << endl;
-
-    // Example of translating characters to numbers
-    map<char, short> stoi;
-    map<short, char> itos;
-    for (short i = 0; i < uniqueChars.size(); i++) {
-        stoi[uniqueChars[i]] = i;
-        itos[i] = uniqueChars[i];
-    }
-
-    cout << "Characters translated to numbers: ";
-    string prova = "prova";
-    vector<short> encoded = encode(prova, stoi);
-    string decoded = decode(encoded, itos);
-    for (auto i : decoded) {
-        cout << i << " ";
-    }
-    for (char c : uniqueChars) {
-        cout << stoi[c] << "";
-    }
-    cout << endl;
-//----------------------------------RESERVOIR DEFINITION-----------------------------------
-    manager.createNeurons();
-    manager.initialConnections();
-    manager.status();
-    manager.removeInputConnections(65);
-
-    
-    int SPIKE_SAMPLING = 10;
-    int frameCounter = 0;
-    vector<int> connectionsPerNeuron(SIZE, 0);
-    uniform_real_distribution<> dis(0.0,1.0);
-    uniform_int_distribution<> disreal(0, SIZE-1);
-//----------------------------------STUPID ENCODING------------------------------------------
-    vector<short> encodedTraining = encode(training, stoi); // whole training
-    vector<vector<vector<short>>> inputReservoir;
-    // inputReservoir.reserve(encodedTraining.size());
-    // int cycle = 0;
-    // for (short letter : encodedTraining) {
-    //     vector<short> innerVec = {letter, static_cast<short>(letter + 65), static_cast<short>(letter + 130)};
-    //     for (int as = 0; as < SPIKE_SAMPLING;as++) {
-    //         inputReservoir[cycle].push_back(innerVec);
-    //     }
-    //     cycle += 1;
-    // }
-//---------------------------------SECOND ENCODING------------------------------------------
-    
-    // the idea is to have a normal distribution around the encoded letter/symbol
-    vector<short> encodedUniqueChars;
-    for (char letter : uniqueChars){
-        string s = {letter};
-        encodedUniqueChars.push_back(encode(s, stoi)[0]);
-    }
-    vector<vector<vector<short>>> spikeEncodedChars (encodedUniqueChars.size());
-    for (int s = 0; s < encodedUniqueChars.size(); s++) {
-        vector<int> randomIndexes;
-        // take 5 random neurons for this letter
-        for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(65));}
-
-        for (short o = 0; o < SPIKE_SAMPLING; o++){
-            vector<short> innerVec;
-            innerVec.push_back(randomIndexes[o%5]);
-            spikeEncodedChars[s].push_back(innerVec);
-            innerVec.clear();
-        }
-    }
-    for (short letter : encodedTraining) {
-        inputReservoir.push_back(spikeEncodedChars[letter]);
-    }
-//----------------------------------BY HAND MODEL------------------------------------------
-    const int INPUT_SIZE = SIZE*10;
-    const int OUTPUT_SIZE = 65;
-    const float LR_M = 0.0001;
-    const int NUM_SAMPLES = 1;  // Online learning
-
-    SingleLayerNetwork network(LR_M, SIZE);
-//----------------------------------VISUALS-----------------------------------------------
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
-
-    // InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-    // ToggleFullscreen();    
-    // SetTargetFPS(-1);
-//----------------------------------DATA--------------------------------------------------
-    // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
-    vector<int> spikeHistory;
-    spikeHistory.reserve(SPIKE_SAMPLING);
-    vector<int> spikeNumber(500, 0); // Initialize with size 500 and default value 0
-
-
-    vector<float> totalWeight;
-    totalWeight.reserve(SIZE);
-    totalWeight.resize(SIZE);
-//---------------------------------REGROWTH---------------------------------------------------
-    float growthProb = 0.66f;
-    int toRemove;
-    int fromRemove;
-    float toDistribute = 0.0f;
-    int from;
-    int to;
-//----------------------------------TRAINING LOOP-----------------------------------------
-    int epoch = 0;
-    float epoch_loss;
-    bool train = false;
-    bool draw = true;
-    bool graph = true;
-    bool restructure = false;
-    static vector<int> fpsHistory;
-    static long totalFPS = 0;
-    while (true) { // !WindowShouldClose()) {
-    // for (int nun = 0; nun < 100; nun++) {
-//------------------------------ NEURONS DRAWING ------------------------------------ 
-        // BeginDrawing();
-        // ClearBackground(BLACK);
-        
-        // //DRAW
-        // manager.draw();
-        // manager.applyForces();
-        // //GRAPH
-        // connectionsPerNeuron.clear();
-        // connectionsPerNeuron.resize(SIZE, 0); 
-        //     // EITHER, NOT BOTH
-        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
-        //     // manager.sendersFrequence(connectionsPerNeuron.data());
-        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-        // manager.clustering();
-        // // SPIKES
-        // manager.drawSpikesGraph(spikeNumber);
-        // // totalWeight[(epoch)%500] = totalSum;
-        // manager.drawTotalWeight();
-        // // cout << excitability[1000] << endl;
-
-        // // FPS  
-        // int fps = GetFPS();
-        // DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
-
-        // EndDrawing();
-        
-        // fpsHistory.push_back(fps);
-        // totalFPS += fps;
-
-
-//--------------------------------------------------------------------------------------------------------
-//----------------------------RESERVOIR UPDATE------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------
-        // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
-    //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
-
-            for (short obj : disableBuffer[currentFrameIndex]) {
-                active[obj] = true;
-                colors[obj] = WHITE;
-            }
-            disableBuffer[currentFrameIndex].clear(); // Reset the slot
-            // Advance the ring buffer index
-            currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
-
-    //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
-
-            // for (int restruct = 0; restruct < 10000; restruct++) {
-            //     toRemove = disreal(gen);
-            //     if (!receivers[toRemove].empty()) {
-            //         // get the ID of the neuron we disconnect from
-            //         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
-            //         Neuron* targetNeuron = receivers[toRemove][fromRemove];
-            //         fromRemove = targetNeuron->ID;
-            //         // disconnect and get connection strength
-            //         toDistribute = disconnect(fromRemove, toRemove);
-            //         // if a connection has been removed, distribute its strength
-            //         int sjdfo = static_cast<int>(toDistribute); 
-            //         for (int a = 0; a < sjdfo; a++) {
-            //             if (dis(gen) < growthProb) {
-            //                 float weight = static_cast<float>(SIZE);
-            //                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
-            //                 connectionMatrix[row][col] += 1.0f;
-            //                 // connectionMatrix[toRemove][] += 1.0f;
-            //             } else {
-            //                 from = disreal(gen);
-            //                 to = disreal(gen);
-            //                 if (connectionMatrix[from][to] != 0.0f){
-            //                     connectionMatrix[from][to] += 1.0f;
-            //                 } else {
-            //                     connect(neurons[from], to, 1.0f);
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     toDistribute = 0.0f;
-            // }
-            // restructure = false; 
-
-//-------------------------------INPUT----------------------------------------------
-            // we queue N neurons to spike next
-            for (short ll : inputReservoir[epoch/10][epoch%10]){
-                spikeBuffer[currentSpikeIndex].push_back(ll);
-                colorNeuron(ll); 
-            }
-            // //X(t) FOR THE MODEL
-            // if (epoch % 10 == 9) {
-            //     for (auto ins : spikeBuffer[currentSpikeIndex]){
-            //         spikeHistory.push_back(ins+(SIZE*(epoch)));
-            //     }
-            // }
-            //RESERVOIR
-            spikeNumber[epoch%100] = spikeBuffer[currentSpikeIndex].size();
-            scheduler.update();
-            // scheduler.pruningAndDecay();
-            // scheduler.synaptoGenesis();
-
-        // }
-//-----------------------------MODEL BY HAND-------------------------------
-        if (epoch%10 == 9) {
-            // cout << spikeBuffer[currentSpikeIndex].size() << endl;
-            Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
-            output = network.softmax(output);
-            epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
-            Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
-            spikeHistory.clear();
-            if (epoch%100 == 99) {
-                cout << "Epoch " << epoch/100
-                        << " | Avg Loss: " << epoch_loss/10
-                        << endl;
-                epoch_loss = 0;
-            }
-        }
-        epoch++;
-    }
-    // CloseWindow();
-
-    int averageFPS = totalFPS / fpsHistory.size();
-    cout << averageFPS << endl;
-    return 0;
-}
-
-
-
-// #define _USE_MATH_DEFINES
 // #include <iostream>
-// #include <cmath>
-// #include "matplotlibcpp.h"
+// #include <algorithm>
 // #include <vector>
+// #include <fstream>
+// #include <string>
+// #include <set>
+// #include <map>
+// #include <Eigen/Dense>
+// // #include <ensmallen.hpp>
+// // #include <cereal/archives/json.hpp>
 
-// namespace plt = matplotlibcpp;
+// // Define these to print extra informational output and warnings.
+// // #define MLPACK_PRINT_INFO
+// // #define MLPACK_PRINT_WARN
 
-// int main() 
-// {
-//     // Prepare data.
-//     int n = 5000;
-//     std::vector<double> x(n), y(n), z(n), w(n,2);
-//     for(int i=0; i<n; ++i) {
-//         x.at(i) = i*i;
-//         y.at(i) = sin(2*M_PI*i/360.0);
-//         z.at(i) = log(i);
+// #include "neuron.h"
+// #include "manager.h"
+// #include "raylib.h"
+// #include "scheduler.h"
+// #include "global.h"
+// #include "net.h"
+// #include "encoder.h"
+// #include "utilities.h"
+
+// // using namespace arma;
+// using namespace std;
+
+// int main() {
+// //-----------------------READ INPUT FILE----------------------
+//     string filePath = "/home/medlar/SpikingReservoir/tinyshakespeare.txt";
+//     ifstream file(filePath);
+//     if (!file.is_open()) {
+//         cerr << "Error opening file." << endl;
+//         return 1;
 //     }
+//     string fileContent((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+//     file.close();
+// //-----------------------DATA PROCESSING-----------------------------
+//     size_t textLength = fileContent.length();
+//     cout << "Length of the text: " << textLength << endl;
+
+//     set<char> uniqueCharsSet(fileContent.begin(), fileContent.end());
+//     vector<char> uniqueChars(uniqueCharsSet.begin(), uniqueCharsSet.end());
+//     vector<char> charVector(fileContent.begin(), fileContent.end());
+
+//     int splitIndex = static_cast<int>(round(0.9*textLength));
+//     string training = fileContent.substr(0, splitIndex);
+//     string validation = fileContent.substr(splitIndex);
+//     // Print the vector of characters (optional)
+//     cout << "Characters in the vector: ";
+//     for (char c : uniqueChars) {
+//         cout << c;
+//     }
+//     cout << endl;
+
+//     // Example of translating characters to numbers
+//     map<char, short> stoi;
+//     map<short, char> itos;
+//     for (short i = 0; i < uniqueChars.size(); i++) {
+//         stoi[uniqueChars[i]] = i;
+//         itos[i] = uniqueChars[i];
+//     }
+
+//     cout << "Characters translated to numbers: ";
+//     string prova = "prova";
+//     vector<short> encoded = encode(prova, stoi);
+//     string decoded = decode(encoded, itos);
+//     for (auto i : decoded) {
+//         cout << i << " ";
+//     }
+//     for (char c : uniqueChars) {
+//         cout << stoi[c] << "";
+//     }
+//     cout << endl;
+// //----------------------------------RESERVOIR DEFINITION-----------------------------------
+//     manager.createNeurons();
+//     manager.initialConnections();
+//     manager.status();
+//     manager.removeInputConnections(65);
+
     
-//     // Set the size of output image = 1200x780 pixels
-//     plt::figure_size(1200, 780);
+//     int SPIKE_SAMPLING = 10;
+//     int frameCounter = 0;
+//     vector<int> connectionsPerNeuron(SIZE, 0);
+//     uniform_real_distribution<> dis(0.0,1.0);
+//     uniform_int_distribution<> disreal(0, SIZE-1);
+// //----------------------------------STUPID ENCODING------------------------------------------
+//     vector<short> encodedTraining = encode(training, stoi); // whole training
+//     vector<vector<vector<short>>> inputReservoir;
+//     // inputReservoir.reserve(encodedTraining.size());
+//     // int cycle = 0;
+//     // for (short letter : encodedTraining) {
+//     //     vector<short> innerVec = {letter, static_cast<short>(letter + 65), static_cast<short>(letter + 130)};
+//     //     for (int as = 0; as < SPIKE_SAMPLING;as++) {
+//     //         inputReservoir[cycle].push_back(innerVec);
+//     //     }
+//     //     cycle += 1;
+//     // }
+// //---------------------------------SECOND ENCODING------------------------------------------
+    
+//     // the idea is to have a normal distribution around the encoded letter/symbol
+//     vector<short> encodedUniqueChars;
+//     for (char letter : uniqueChars){
+//         string s = {letter};
+//         encodedUniqueChars.push_back(encode(s, stoi)[0]);
+//     }
+//     vector<vector<vector<short>>> spikeEncodedChars (encodedUniqueChars.size());
+//     for (int s = 0; s < encodedUniqueChars.size(); s++) {
+//         vector<int> randomIndexes;
+//         // take 5 random neurons for this letter
+//         for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(65));}
 
-//     // Plot line from given x and y data. Color is selected automatically.
-//     plt::plot(x, y);
+//         for (short o = 0; o < SPIKE_SAMPLING; o++){
+//             vector<short> innerVec;
+//             innerVec.push_back(randomIndexes[o%5]);
+//             spikeEncodedChars[s].push_back(innerVec);
+//             innerVec.clear();
+//         }
+//     }
+//     for (short letter : encodedTraining) {
+//         inputReservoir.push_back(spikeEncodedChars[letter]);
+//     }
+// //----------------------------------BY HAND MODEL------------------------------------------
+//     const int INPUT_SIZE = SIZE*10;
+//     const int OUTPUT_SIZE = 65;
+//     const float LR_M = 0.0001;
+//     const int NUM_SAMPLES = 1;  // Online learning
 
-//     // Plot a red dashed line from given x and y data.
-//     plt::plot(x, w,"r--");
+//     SingleLayerNetwork network(LR_M, SIZE);
+// //----------------------------------VISUALS-----------------------------------------------
+//     const int screenWidth = 1920;
+//     const int screenHeight = 1080;
 
-//     // Plot a line whose name will show up as "log(x)" in the legend.
-//     plt::named_plot("log(x)", x, z);
+//     // InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
+//     // ToggleFullscreen();    
+//     // SetTargetFPS(-1);
+// //----------------------------------DATA--------------------------------------------------
+//     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
+//     vector<int> spikeHistory;
+//     spikeHistory.reserve(SPIKE_SAMPLING);
+//     vector<int> spikeNumber(500, 0); // Initialize with size 500 and default value 0
 
-//     // Set x-axis to interval [0,1000000]
-//     plt::xlim(0, 1000*1000);
 
-//     // Add graph title
-//     plt::title("Sample figure");
+//     vector<float> totalWeight;
+//     totalWeight.reserve(SIZE);
+//     totalWeight.resize(SIZE);
+// //---------------------------------REGROWTH---------------------------------------------------
+//     float growthProb = 0.66f;
+//     int toRemove;
+//     int fromRemove;
+//     float toDistribute = 0.0f;
+//     int from;
+//     int to;
+// //----------------------------------TRAINING LOOP-----------------------------------------
+//     int epoch = 0;
+//     float epoch_loss;
+//     bool train = false;
+//     bool draw = true;
+//     bool graph = true;
+//     bool restructure = false;
+//     static vector<int> fpsHistory;
+//     static long totalFPS = 0;
+//     while (true) { // !WindowShouldClose()) {
+//     // for (int nun = 0; nun < 100; nun++) {
+// //------------------------------ NEURONS DRAWING ------------------------------------ 
+//         // BeginDrawing();
+//         // ClearBackground(BLACK);
+        
+//         // //DRAW
+//         // manager.draw();
+//         // manager.applyForces();
+//         // //GRAPH
+//         // connectionsPerNeuron.clear();
+//         // connectionsPerNeuron.resize(SIZE, 0); 
+//         //     // EITHER, NOT BOTH
+//         //     manager.receiversFrequence(connectionsPerNeuron.data()); 
+//         //     // manager.sendersFrequence(connectionsPerNeuron.data());
+//         // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+//         // manager.clustering();
+//         // // SPIKES
+//         // manager.drawSpikesGraph(spikeNumber);
+//         // // totalWeight[(epoch)%500] = totalSum;
+//         // manager.drawTotalWeight();
+//         // // cout << excitability[1000] << endl;
 
-//     // Enable legend.
-//     plt::legend();
+//         // // FPS  
+//         // int fps = GetFPS();
+//         // DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
 
-//     // save figure
-//     const char* filename = "./basic.png";
-//     std::cout << "Saving result to " << filename << std::endl;;
-//     plt::save(filename);
+//         // EndDrawing();
+        
+//         // fpsHistory.push_back(fps);
+//         // totalFPS += fps;
+
+
+// //--------------------------------------------------------------------------------------------------------
+// //----------------------------RESERVOIR UPDATE------------------------------------------------------------
+// //--------------------------------------------------------------------------------------------------------
+//         // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
+//     //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
+
+//             for (short obj : disableBuffer[currentFrameIndex]) {
+//                 active[obj] = true;
+//                 colors[obj] = WHITE;
+//             }
+//             disableBuffer[currentFrameIndex].clear(); // Reset the slot
+//             // Advance the ring buffer index
+//             currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
+
+//     //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
+
+//             // for (int restruct = 0; restruct < 10000; restruct++) {
+//             //     toRemove = disreal(gen);
+//             //     if (!receivers[toRemove].empty()) {
+//             //         // get the ID of the neuron we disconnect from
+//             //         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
+//             //         Neuron* targetNeuron = receivers[toRemove][fromRemove];
+//             //         fromRemove = targetNeuron->ID;
+//             //         // disconnect and get connection strength
+//             //         toDistribute = disconnect(fromRemove, toRemove);
+//             //         // if a connection has been removed, distribute its strength
+//             //         int sjdfo = static_cast<int>(toDistribute); 
+//             //         for (int a = 0; a < sjdfo; a++) {
+//             //             if (dis(gen) < growthProb) {
+//             //                 float weight = static_cast<float>(SIZE);
+//             //                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
+//             //                 connectionMatrix[row][col] += 1.0f;
+//             //                 // connectionMatrix[toRemove][] += 1.0f;
+//             //             } else {
+//             //                 from = disreal(gen);
+//             //                 to = disreal(gen);
+//             //                 if (connectionMatrix[from][to] != 0.0f){
+//             //                     connectionMatrix[from][to] += 1.0f;
+//             //                 } else {
+//             //                     connect(neurons[from], to, 1.0f);
+//             //                 }
+//             //             }
+//             //         }
+//             //     }
+//             //     toDistribute = 0.0f;
+//             // }
+//             // restructure = false; 
+
+// //-------------------------------INPUT----------------------------------------------
+//             // we queue N neurons to spike next
+//             for (short ll : inputReservoir[epoch/10][epoch%10]){
+//                 spikeBuffer[currentSpikeIndex].push_back(ll);
+//                 colorNeuron(ll); 
+//             }
+//             // //X(t) FOR THE MODEL
+//             // if (epoch % 10 == 9) {
+//             //     for (auto ins : spikeBuffer[currentSpikeIndex]){
+//             //         spikeHistory.push_back(ins+(SIZE*(epoch)));
+//             //     }
+//             // }
+//             //RESERVOIR
+//             spikeNumber[epoch%100] = spikeBuffer[currentSpikeIndex].size();
+//             scheduler.update();
+//             // scheduler.pruningAndDecay();
+//             // scheduler.synaptoGenesis();
+
+//         // }
+// //-----------------------------MODEL BY HAND-------------------------------
+//         if (epoch%10 == 9) {
+//             // cout << spikeBuffer[currentSpikeIndex].size() << endl;
+//             Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
+//             output = network.softmax(output);
+//             epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
+//             Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
+//             spikeHistory.clear();
+//             if (epoch%100 == 99) {
+//                 cout << "Epoch " << epoch/100
+//                         << " | Avg Loss: " << epoch_loss/10
+//                         << endl;
+//                 epoch_loss = 0;
+//             }
+//         }
+//         epoch++;
+//     }
+//     // CloseWindow();
+
+//     int averageFPS = totalFPS / fpsHistory.size();
+//     cout << averageFPS << endl;
+//     return 0;
 // }
 
 
@@ -340,13 +292,12 @@ int main() {
 
 
 
-
-
-
-
-
-
-
+// #include "matplotlibcpp.h"
+// namespace plt = matplotlibcpp;
+// int main() {
+//     plt::plot({1,3,2,4});
+//     plt::show();
+// }
 
 
 

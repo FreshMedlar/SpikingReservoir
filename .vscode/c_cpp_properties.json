@@ -4,8 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/eigen3",
-                "/usr/include/python3.11/**"
+                "/usr/include/python3.10"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
