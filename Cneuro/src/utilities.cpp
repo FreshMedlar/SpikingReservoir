@@ -7,6 +7,7 @@
 #include <map>
 #include <Eigen/Dense>
 
+#include "utilities.h"
 #include "global.h"
 
 using namespace std;
@@ -41,7 +42,7 @@ int getRandomInt(int n) {
     return randum(gen);
 }
 
-int getRandomFloat(float n) {
+float getRandomFloat(float n) {
     uniform_real_distribution<> randfloat(0, n);
     return randfloat(gen);
 }

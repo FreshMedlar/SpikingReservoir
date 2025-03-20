@@ -23,6 +23,7 @@ public:
     // that have reached the threshold and
     // will spike next iteration
     void update();
+    void updateColor();
     // static std::vector<int> lonelyNeurons;
     // void synaptoGenesis();
     //

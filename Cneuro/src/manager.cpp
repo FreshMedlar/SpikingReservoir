@@ -6,10 +6,15 @@
 #include <cmath>
 #include <set>
 #include "neuron.h"
+#include <algorithm>
 
 #define EXTRALIGHTGRAY CLITERAL(Color){ 100, 100, 100, 255 }
 
 Manager::Manager(int size) : size(size) { }
+
+void Manager::saveModel() {
+    
+}
 
 void Manager::createNeurons() {
     std::uniform_real_distribution<> randum(0.0f, 1.0f);
@@ -18,7 +23,7 @@ void Manager::createNeurons() {
     for (short i = 0; i < size; i++) {
  
         Neuron so;
-        if (randum(gen) < 0.7) { 
+        if (randum(gen) < 0.5) { 
             constructorNeuron(so, i, 1);
         } else { 
             constructorNeuron(so, i, -1);
@@ -28,11 +33,48 @@ void Manager::createNeurons() {
     std::cout << "Neurons Created" << std::endl;
 }
 
+void Manager::createSequentialNeurons() {
+    connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
+    std::uniform_real_distribution<> randum(0.0f, 1.0f);
+    neurons.clear();
+    neurons.reserve(size);  // Reserve memory to optimize performance
+    for (short i = 0; i < size; i++) {
+ 
+        Neuron so;
+        if (randum(gen) < 0.5) { constructorNeuron(so, i, 1);
+        } else { constructorNeuron(so, i, -1);}
+        neurons.push_back(so);
+        
+        if (i>1) {connectSingle(i, i-2);}
+        // std::cout << "Neuron " << i << " connected" << std::endl;
+    }
+    std::cout << "Neurons Created" << std::endl;
+}
+
 void Manager::createSingle(short id, bool inhibitory) {
     Neuron so;
     if (inhibitory) {constructorNeuron(so, id, -1);}
     else {constructorNeuron(so, id, 1);}
     neurons.push_back(so);
+}
+
+void Manager::connectSingle(short id, int nConns) {
+    std::vector<short> connected;
+    for (short i = 0; i < neurons.size(); ++i) {
+        if (i != id) { // Avoid self-connections
+            connected.push_back(i);
+        }
+    }
+    while (receivers[id].size() < nConns) {
+        short index = getRandomInt(connected.size());
+        int target = connected[index];
+
+        // Avoid duplicates
+        if (std::find(receivers[id].begin(), receivers[id].end(), target) == receivers[id].end()) {
+            connect(id, target);
+        }
+        connected.erase(connected.begin() + index);
+    }
 }
 
 void Manager::status() {
@@ -47,12 +89,12 @@ short Manager::randomNeuron (Neuron* nen) {
     return randomIndex; 
 }
 
-void Manager::initialConnections() {
+void Manager::initialConnections(int nConns) {
     connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
-        while (connected.size() < 10) {
+        while (connected.size() < nConns) {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
@@ -65,9 +107,20 @@ void Manager::initialConnections() {
 }
 
 void Manager::removeInputConnections(short nInput) {
-    for (int neu = 0; neu < nInput; neu++) {
-        for (short incoming : senders[neu]) {
-            disconnect(incoming, neu);
+    if (nInput > 0) {
+        for (int neu = 0; neu < nInput; neu++) {
+            inhibitory[neu] = 1;
+            for (short incoming : senders[neu]) {
+                disconnect(incoming, neu);
+            }
+        }
+    } 
+    if (nInput < 0) {
+        for (int neu = SIZE-1; neu > (SIZE+nInput)-1; neu--) {
+            inhibitory[neu] = 1;
+            for (short incoming : senders[neu]) {
+                disconnect(incoming, neu);
+            }
         }
     }
 }
@@ -224,7 +277,7 @@ void Manager::drawTotalWeight() {
 
     //     DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);
     // }
-    DrawRectangle(0, 80, totalSum/50, 35, ORANGE);
+    DrawRectangle(0, 80, totalSum/(SIZE/10), 35, ORANGE);
     DrawText("TOTAL WEIGHT", 10, 84, 24, WHITE);
 }
  

@@ -1,3 +1,6 @@
+#ifndef UTILITIES_H
+#define UTILITIES_H
+
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -6,8 +9,7 @@
 #include <set>
 #include <map>
 #include <Eigen/Dense>
-
-#include "global.h"
+#include <random>
 
 using namespace std;
 
@@ -20,4 +22,6 @@ Eigen::VectorXf vectorToEigen(const vector<int>& vec);
 
 int getRandomInt(int n);
 
-int getRandomFloat(float n);
+float getRandomFloat(float n);
+
+#endif 

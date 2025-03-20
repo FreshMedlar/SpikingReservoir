@@ -32,11 +32,15 @@ void constructorNeuron(Neuron& pre, short id, short inhi) {
 }
 
 void spike(short pre) {
+    // connection strenghten    if the previous neuron  just spiked
+    // connection weaken        if the next neuron      just spiked
+
     float delta = LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
     for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
     for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
-    excitability[pre] = 1.0f;
+    // excitability[pre] -= 3*sigmoid(timeSinceSpike[pre]);
+    excitability[pre] += excitability[pre]*(0.03f * (1.0 - excitability[pre]));
     timeSinceSpike[pre] = 0;
 
 }
@@ -52,17 +56,19 @@ void forward(short spiked, short post) {
         actionPotential[post] = 0;
         queueNeuron(post);
         colorNeuron(post);
+
+        // float delta = LR/exp(timeSinceSpike[post]/TEMP);
+        // connectionMatrix[spiked][post] -= delta;
+        // totalSum -= delta;
+    
     } else {
-        excitability[post] += 0.01f;
+        excitability[post] += 1.0f;
     }
-    float delta = LR/exp(timeSinceSpike[post]/TEMP);
-    connectionMatrix[spiked][post] -= delta;
-    totalSum -= delta;
 }
 void backprop(short pre, short post, float delta) {
     // w[pre][post] depends on timeSinceSpike[pre] 
     // if timeSinceSpike[pre] small, w go up :)
-    if (connectionMatrix[pre][post] < 45) {
+    if (connectionMatrix[pre][post] < 100) {
         connectionMatrix[pre][post] += delta;
         totalSum += delta;
     }
@@ -96,24 +102,35 @@ float disconnect(short pre, short post) {
 }
 
 void connect(short pre, short toConnect, float weight) {
+    // Select a random neuron if toConnect is -1
     if (toConnect == -1) {
         toConnect = manager.randomNeuron(&neurons[pre]);
     }
+    // Establish the connection
     senders[toConnect].push_back(pre);
-    receivers[pre].push_back(toConnect); 
+    receivers[pre].push_back(toConnect);
     connectionMatrix[pre][toConnect] = weight;
     totalSum += weight;
 }
 
+
 void queueNeuron(short pre) {
     short targetSlot = (currentSpikeIndex + SPIKE_FRAMES) % SPIKE_BUFFER_SIZE;
     spikeBuffer[targetSlot].push_back(pre);
-}
-
-void colorNeuron(short pre, short time) {
-    int targetSlot = (currentFrameIndex + time) % COOLDOWN_FRAMES;
-    disableBuffer[targetSlot].push_back(pre);
-    colors[pre] = RED;
     active[pre] = false;
 }
 
+void colorNeuron(short pre, short time) {
+    int targetSlot = (currentColorIndex + time) % COLOR_FRAMES;
+    colorBuffer[targetSlot].push_back(pre);
+    colors[pre] = RED;
+}
+
+float sigmoid(float x) {
+   return (3.0f/(1.0f+exp(-x)));
+}
+
+float sigmoid_derivative(float x) {
+    float s = sigmoid(x);
+    return s * (1.0f - s);
+}

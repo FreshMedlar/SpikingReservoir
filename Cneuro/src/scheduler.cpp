@@ -13,13 +13,22 @@ void Scheduler::update() {
     // update timeSinceSpike timer for all neurons
     for (int neu = 0; neu < SIZE; neu++) {
         timeSinceSpike[neu] += 1;
+        // excitability[neu] += excitability[neu]*(0.1f * (1.0 - excitability[neu]));
+
     } 
-    for (short neur : spikeBuffer[currentSpikeIndex]) {
-        spike(neur);
-    }
+    for (short neur : spikeBuffer[currentSpikeIndex]) { spike(neur); 
+                                                        active[neur] = true;}
     spikeBuffer[currentSpikeIndex].clear(); // Reset the slot
-    // Advance the ring buffer index
     currentSpikeIndex = (currentSpikeIndex + 1) % SPIKE_BUFFER_SIZE;
+}
+
+void Scheduler::updateColor() {
+    for (short obj : colorBuffer[currentColorIndex]) {
+        colors[obj] = WHITE;
+    }
+    colorBuffer[currentColorIndex].clear(); // Reset the slot
+    // Advance the ring buffer index
+    currentColorIndex = (currentColorIndex + 1) % COLOR_FRAMES;
 }
 
 void Scheduler::pruningAndDecay() {

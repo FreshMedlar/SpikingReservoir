@@ -34,4 +34,6 @@ float disconnect(short pre, short post);
 void backprop(short from, short to, float delta);
 void forward(short from, short to);
 
+float sigmoid(float x);
+
 #endif // NEURON_H

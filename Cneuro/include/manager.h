@@ -4,6 +4,8 @@
 #include <vector>
 #include "neuron.h"
 #include "scheduler.h"
+#include "utilities.h"
+
 class Neuron;
 class Scheduler;
 
@@ -21,14 +23,19 @@ public:
     void drawTotalWeight();
     void status();
     void applyForces();
-    void initialConnections();
+    void initialConnections(int nConns = 10);
     void removeInputConnections(short nInput);
     void createNeurons();
+    void createSequentialNeurons();
     void createSingle(short id, bool inhibitory);
+    void connectSingle(short id, int nConns = 10);
     std::pair<std::size_t, std::size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, float totalSum);
     // return a random neuron
     short randomNeuron(Neuron* n);
     void clustering();
+    
+    void saveModel();
+
 
 private:
     int size;

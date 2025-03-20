@@ -10,4 +10,3 @@ Encoder::Encoder(int n_sam) : n_sam(n_sam){;}
 //     return 
 // }
 
-

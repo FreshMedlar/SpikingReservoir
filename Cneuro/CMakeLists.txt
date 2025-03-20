@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include/Eigen")
-include_directories(/usr/include/python3.10)
+include_directories(/usr/include/python3.11)
 
 # Add source files
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
