@@ -14,7 +14,7 @@ extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
 extern float totalSum;
-constexpr short SIZE = 500;
+constexpr short SIZE = 1000;
 
 // refractory period
 // extern const size_t COOLDOWN_FRAMES;

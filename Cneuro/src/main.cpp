@@ -125,7 +125,7 @@ int main() {
 //----------------------------------BY HAND MODEL------------------------------------------
     const int INPUT_SIZE = SIZE*10;
     const int OUTPUT_SIZE = 65;
-    const float LR_M = 0.001;
+    const float LR_M = 0.01;
     const int NUM_SAMPLES = 1;  // Online learning
 
     SingleLayerNetwork network(LR_M, SIZE);
@@ -166,7 +166,7 @@ int main() {
     std::cout << encodedTraining.size() << std::endl;
     vector<short> tracker;
     // while (!WindowShouldClose()) {
-    for (int letter = 0; letter < encodedTraining.size(); letter++) {
+    for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
         tracker.push_back(encodedTraining[letter]);
         for (int cycle = 0; cycle < 10; cycle++) {
     //------------------------------ NEURONS DRAWING ------------------------------------ 
@@ -271,11 +271,11 @@ int main() {
                 // a.push_back(encodedTraining[letter]);
 
                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;
-                short target = letter+1;
+                short target = encodedTraining[letter+1];
                 Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
                 output = network.softmax(output);
-                epoch_loss += network.compute_loss(output, encodedTraining[target]);
-                Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[target]); // 10000, 
+                epoch_loss += network.compute_loss(output, target);
+                Eigen::VectorXf d_input = network.backward(spikeHistory, output, target); // 10000, 
                 spikeHistory.clear();
                 if (letter%1000 == 999) {
                     
@@ -291,7 +291,7 @@ int main() {
         }
     }
     cout << epoch << endl;
-    cout << decode(tracker, itos);
+    // cout << decode(tracker, itos);
 
     
     // CloseWindow();
