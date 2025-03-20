@@ -22,7 +22,7 @@ void constructorNeuron(Neuron& pre, short id, short inhi) {
     std::uniform_real_distribution<> dis(0.0,1.0);
     xCoord[id] =            1920.0f*dis(gen);
     yCoord[id] =            1080.0f*dis(gen);
-    biases[id] =            1.0f;
+    biases[id] =            getRandomFloat(5.0f);
     colors[id] =            WHITE;
     active[id] =            true;
     inhibitory[id] =        inhi;

@@ -13,7 +13,7 @@
 Manager::Manager(int size) : size(size) { }
 
 void Manager::saveModel() {
-    
+
 }
 
 void Manager::createNeurons() {
@@ -71,7 +71,7 @@ void Manager::connectSingle(short id, int nConns) {
 
         // Avoid duplicates
         if (std::find(receivers[id].begin(), receivers[id].end(), target) == receivers[id].end()) {
-            connect(id, target);
+            connect(id, target, getRandomFloat(2.0f));
         }
         connected.erase(connected.begin() + index);
     }
@@ -98,7 +98,7 @@ void Manager::initialConnections(int nConns) {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
-                connect(neuron.ID, target);
+                connect(neuron.ID, target, getRandomFloat(2.0f));
                 connected.insert(target);
             }
         }

@@ -162,127 +162,143 @@ int main() {
     bool restructure = false;
     static vector<int> fpsHistory;
     static long totalFPS = 0;
+    std::cout << fileContent.size() << std::endl;
+    std::cout << encodedTraining.size() << std::endl;
+    vector<short> tracker;
     // while (!WindowShouldClose()) {
-    // for (int nun = 0; nun < encodedTraining.size()-100; nun++) {
-    for (int nun = 0; nun < encodedTraining.size(); nun++) {
-//------------------------------ NEURONS DRAWING ------------------------------------ 
-        // BeginDrawing();
-        // ClearBackground(BLACK);
-        
-        // //DRAW
-        // // manager.draw();
-        // // manager.applyForces();
-        // //GRAPH
-        // connectionsPerNeuron.clear();
-        // connectionsPerNeuron.resize(SIZE, 0); 
-        //     // EITHER, NOT BOTH
-        //     manager.receiversFrequence(connectionsPerNeuron.data()); 
-        //     // manager.sendersFrequence(connectionsPerNeuron.data());
-        // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-        // manager.clustering();
-        // // SPIKES
-        // manager.drawSpikesGraph(spikeNumber);
-        // // totalWeight[(epoch)%500] = totalSum;
-        // manager.drawTotalWeight();
-        // // cout << excitability[1000] << endl;
+    for (int letter = 0; letter < encodedTraining.size(); letter++) {
+        tracker.push_back(encodedTraining[letter]);
+        for (int cycle = 0; cycle < 10; cycle++) {
+    //------------------------------ NEURONS DRAWING ------------------------------------ 
+            // BeginDrawing();
+            // ClearBackground(BLACK);
+            
+            // //DRAW
+            // // manager.draw();
+            // // manager.applyForces();
+            // //GRAPH
+            // connectionsPerNeuron.clear();
+            // connectionsPerNeuron.resize(SIZE, 0); 
+            //     // EITHER, NOT BOTH
+            //     manager.receiversFrequence(connectionsPerNeuron.data()); 
+            //     // manager.sendersFrequence(connectionsPerNeuron.data());
+            // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+            // manager.clustering();
+            // // SPIKES
+            // manager.drawSpikesGraph(spikeNumber);
+            // // totalWeight[(epoch)%500] = totalSum;
+            // manager.drawTotalWeight();
+            // // cout << excitability[1000] << endl;
 
-        // // FPS  
-        // int fps = GetFPS();
-        // DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+            // // FPS  
+            // int fps = GetFPS();
+            // DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
 
-        // EndDrawing();
-        
-        // fpsHistory.push_back(fps);
-        // totalFPS += fps;
+            // EndDrawing();
+            
+            // fpsHistory.push_back(fps);
+            // totalFPS += fps;
 
 
-//--------------------------------------------------------------------------------------------------------
-//----------------------------RESERVOIR UPDATE------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------
-        // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
-    //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------
+    //----------------------------RESERVOIR UPDATE------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------
+            // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
+        //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
 
-            scheduler.updateColor();
+                scheduler.updateColor();
 
-    //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
+        //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
 
-            // for (int restruct = 0; restruct < 10000; restruct++) {
-            //     toRemove = disreal(gen);
-            //     if (!receivers[toRemove].empty()) {
-            //         // get the ID of the neuron we disconnect from
-            //         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
-            //         Neuron* targetNeuron = receivers[toRemove][fromRemove];
-            //         fromRemove = targetNeuron->ID;
-            //         // disconnect and get connection strength
-            //         toDistribute = disconnect(fromRemove, toRemove);
-            //         // if a connection has been removed, distribute its strength
-            //         int sjdfo = static_cast<int>(toDistribute); 
-            //         for (int a = 0; a < sjdfo; a++) {
-            //             if (dis(gen) < growthProb) {
-            //                 float weight = static_cast<float>(SIZE);
-            //                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
-            //                 connectionMatrix[row][col] += 1.0f;
-            //                 // connectionMatrix[toRemove][] += 1.0f;
-            //             } else {
-            //                 from = disreal(gen);
-            //                 to = disreal(gen);
-            //                 if (connectionMatrix[from][to] != 0.0f){
-            //                     connectionMatrix[from][to] += 1.0f;
-            //                 } else {
-            //                     connect(neurons[from], to, 1.0f);
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     toDistribute = 0.0f;
+                // for (int restruct = 0; restruct < 10000; restruct++) {
+                //     toRemove = disreal(gen);
+                //     if (!receivers[toRemove].empty()) {
+                //         // get the ID of the neuron we disconnect from
+                //         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
+                //         Neuron* targetNeuron = receivers[toRemove][fromRemove];
+                //         fromRemove = targetNeuron->ID;
+                //         // disconnect and get connection strength
+                //         toDistribute = disconnect(fromRemove, toRemove);
+                //         // if a connection has been removed, distribute its strength
+                //         int sjdfo = static_cast<int>(toDistribute); 
+                //         for (int a = 0; a < sjdfo; a++) {
+                //             if (dis(gen) < growthProb) {
+                //                 float weight = static_cast<float>(SIZE);
+                //                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
+                //                 connectionMatrix[row][col] += 1.0f;
+                //                 // connectionMatrix[toRemove][] += 1.0f;
+                //             } else {
+                //                 from = disreal(gen);
+                //                 to = disreal(gen);
+                //                 if (connectionMatrix[from][to] != 0.0f){
+                //                     connectionMatrix[from][to] += 1.0f;
+                //                 } else {
+                //                     connect(neurons[from], to, 1.0f);
+                //                 }
+                //             }
+                //         }
+                //     }
+                //     toDistribute = 0.0f;
+                // }
+                // restructure = false; 
+
+    //-------------------------------INPUT----------------------------------------------
+                // we queue N neurons to spike next
+                short input = SIZE - encodedTraining[letter];
+                // for (short input : inputReservoir[epoch/10][epoch%10]){
+                    if (active[input] == true) {
+                        spikeBuffer[currentSpikeIndex].push_back(input);
+                        active[input] = false;
+                    }
+                    colorNeuron(input); 
+                // }
+                // //X(t) FOR THE MODEL
+                // if (epoch % 10 == 9) {
+                //     for (auto ins : spikeBuffer[currentSpikeIndex]){
+                //         spikeHistory.push_back(ins+(SIZE*(epoch)));
+                //     }
+                // }
+                //RESERVOIR
+                spikeNumber[letter%100] = spikeBuffer[currentSpikeIndex].size();
+
+                scheduler.update();
+                // scheduler.pruningAndDecay();
+                // scheduler.synaptoGenesis();
+
             // }
-            // restructure = false; 
+    //-----------------------------MODEL BY HAND-------------------------------
+            if (cycle == 9) {
+                // a.push_back(encodedTraining[letter]);
 
-//-------------------------------INPUT----------------------------------------------
-            // we queue N neurons to spike next
-            short input = SIZE - encodedTraining[epoch/10];
-            // for (short input : inputReservoir[epoch/10][epoch%10]){
-                if (active[input] == true) {
-                    spikeBuffer[currentSpikeIndex].push_back(input);
-                    active[input] = false;
+                // cout << spikeBuffer[currentSpikeIndex].size() << endl;
+                short target = letter+1;
+                Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
+                output = network.softmax(output);
+                epoch_loss += network.compute_loss(output, encodedTraining[target]);
+                Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[target]); // 10000, 
+                spikeHistory.clear();
+                if (letter%1000 == 999) {
+                    
+                    // cout << decode(a, itos) << endl;
+                    // a.clear();
+                    cout << "Epoch " << letter+1
+                            << " | Avg Loss: " << epoch_loss/1000
+                            << endl;
+                    epoch_loss = 0;
                 }
-                colorNeuron(input); 
-            // }
-            // //X(t) FOR THE MODEL
-            // if (epoch % 10 == 9) {
-            //     for (auto ins : spikeBuffer[currentSpikeIndex]){
-            //         spikeHistory.push_back(ins+(SIZE*(epoch)));
-            //     }
-            // }
-            //RESERVOIR
-            spikeNumber[epoch%100] = spikeBuffer[currentSpikeIndex].size();
-
-            scheduler.update();
-            // scheduler.pruningAndDecay();
-            // scheduler.synaptoGenesis();
-
-        // }
-//-----------------------------MODEL BY HAND-------------------------------
-        if (epoch%10 == 9) {
-            // cout << spikeBuffer[currentSpikeIndex].size() << endl;
-            Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
-            output = network.softmax(output);
-            epoch_loss += network.compute_loss(output, encodedTraining[epoch+1]);
-            Eigen::VectorXf d_input = network.backward(spikeHistory, output, encodedTraining[epoch]); // 10000, 
-            spikeHistory.clear();
-            if (epoch%1000 == 999) {
-                cout << "Epoch " << epoch
-                        << " | Avg Loss: " << epoch_loss/100
-                        << endl;
-                epoch_loss = 0;
             }
+            epoch++;
         }
-        epoch++;
     }
+    cout << epoch << endl;
+    cout << decode(tracker, itos);
+
+    
     // CloseWindow();
 
     // int averageFPS = totalFPS / fpsHistory.size();
     // cout << averageFPS << endl;
+    // cout << decode(encodedTraining, itos) << endl;
     return 0;
 }
 
@@ -407,3 +423,5 @@ int main() {
 
 //     return 0;
 // }
+
+
