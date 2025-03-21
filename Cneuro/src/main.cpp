@@ -73,12 +73,16 @@ int main() {
     }
     cout << endl;
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
-    // manager.createNeurons();
-    // manager.initialConnections();
-    manager.createSequentialNeurons();
-    manager.status();
-    manager.removeInputConnections(-65);
+    manager.createNeurons();
+    manager.initialConnections(100);
+    // OR
+    // manager.createSequentialNeurons();
     
+    manager.status();
+    manager.removeInputConnections(65);
+    for (int dos = 0; dos < 100; dos++) {
+        cout << senders[dos].size() << dos << " ";
+    }
     int SPIKE_SAMPLING = 10;
     int frameCounter = 0;
     vector<int> connectionsPerNeuron(SIZE, 0);
@@ -125,7 +129,7 @@ int main() {
 //----------------------------------BY HAND MODEL------------------------------------------
     const int INPUT_SIZE = SIZE*10;
     const int OUTPUT_SIZE = 65;
-    const float LR_M = 0.01;
+    const float LR_M = 0.001;
     const int NUM_SAMPLES = 1;  // Online learning
 
     SingleLayerNetwork network(LR_M, SIZE);
@@ -133,9 +137,15 @@ int main() {
     const int screenWidth = 1920;
     const int screenHeight = 1080;
 
-    // InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-    // ToggleFullscreen();    
-    // SetTargetFPS(-1);
+    bool train = false;
+    // bool draw = true;
+    bool graph = true;
+    bool restructure = false;
+    if (graph) {
+        InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
+        ToggleFullscreen();    
+        SetTargetFPS(-1);
+    }
 //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
@@ -156,10 +166,6 @@ int main() {
 //----------------------------------TRAINING LOOP-----------------------------------------
     int epoch = 0;
     float epoch_loss;
-    bool train = false;
-    bool draw = true;
-    bool graph = true;
-    bool restructure = false;
     static vector<int> fpsHistory;
     static long totalFPS = 0;
     std::cout << fileContent.size() << std::endl;
@@ -167,37 +173,39 @@ int main() {
     vector<short> tracker;
     // while (!WindowShouldClose()) {
     for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
-        tracker.push_back(encodedTraining[letter]);
+        // tracker.push_back(encodedTraining[letter]);
         for (int cycle = 0; cycle < 10; cycle++) {
     //------------------------------ NEURONS DRAWING ------------------------------------ 
-            // BeginDrawing();
-            // ClearBackground(BLACK);
-            
-            // //DRAW
-            // // manager.draw();
-            // // manager.applyForces();
-            // //GRAPH
-            // connectionsPerNeuron.clear();
-            // connectionsPerNeuron.resize(SIZE, 0); 
-            //     // EITHER, NOT BOTH
-            //     manager.receiversFrequence(connectionsPerNeuron.data()); 
-            //     // manager.sendersFrequence(connectionsPerNeuron.data());
-            // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-            // manager.clustering();
-            // // SPIKES
-            // manager.drawSpikesGraph(spikeNumber);
-            // // totalWeight[(epoch)%500] = totalSum;
-            // manager.drawTotalWeight();
-            // // cout << excitability[1000] << endl;
+            if (graph) {
+                BeginDrawing();
+                ClearBackground(BLACK);
+                
+                //DRAW
+                // manager.draw();
+                // manager.applyForces();
+                //GRAPH
+                connectionsPerNeuron.clear();
+                connectionsPerNeuron.resize(SIZE, 0); 
+                    // EITHER, NOT BOTH
+                    manager.receiversFrequence(connectionsPerNeuron.data()); 
+                    // manager.sendersFrequence(connectionsPerNeuron.data());
+                manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+                // manager.clustering();
+                // SPIKES
+                manager.drawSpikesGraph(spikeNumber);
+                // totalWeight[(epoch)%500] = totalSum;
+                manager.drawTotalWeight();
+                // cout << excitability[1000] << endl;
 
-            // // FPS  
-            // int fps = GetFPS();
-            // DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+                // FPS  
+                int fps = GetFPS();
+                DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
 
-            // EndDrawing();
-            
-            // fpsHistory.push_back(fps);
-            // totalFPS += fps;
+                EndDrawing();
+                
+                fpsHistory.push_back(fps);
+                totalFPS += fps;
+            }
 
 
     //--------------------------------------------------------------------------------------------------------
@@ -267,7 +275,7 @@ int main() {
 
             // }
     //-----------------------------MODEL BY HAND-------------------------------
-            if (cycle == 9) {
+            if (cycle == 9 && train) {
                 // a.push_back(encodedTraining[letter]);
 
                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;

@@ -26,7 +26,7 @@ void constructorNeuron(Neuron& pre, short id, short inhi) {
     colors[id] =            WHITE;
     active[id] =            true;
     inhibitory[id] =        inhi;
-    excitability[id] =      1;
+    excitability[id] =      30;
     timeSinceSpike[id] =    1000; // to ignore the first spike
     actionPotential[id] =   0;
 }
@@ -37,10 +37,11 @@ void spike(short pre) {
 
     float delta = LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
     for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
-    for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
+    // for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
     // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
     // excitability[pre] -= 3*sigmoid(timeSinceSpike[pre]);
-    excitability[pre] += excitability[pre]*(0.03f * (1.0 - excitability[pre]));
+    // excitability[pre] += excitability[pre]*(0.1f * (1.0 - excitability[pre]));
+    // if (timeSinceSpike[pre] < 10) {excitability[pre]-=0.3;}
     timeSinceSpike[pre] = 0;
 
 }
@@ -48,11 +49,10 @@ void spike(short pre) {
 void forward(short spiked, short post) {
     // w[spiked][post] depends on timeSinceSpike[post]
     // if timeSinceSpike[post] small, w go down :(
-    actionPotential[post] +=  connectionMatrix[spiked][post]
-                            * inhibitory[spiked] 
-                            * excitability[post];
+    actionPotential[post] +=  (connectionMatrix[spiked][post]
+                            * inhibitory[spiked]);
     
-    if (actionPotential[post] > 100) {
+    if (actionPotential[post] > excitability[post]) {
         actionPotential[post] = 0;
         queueNeuron(post);
         colorNeuron(post);
@@ -62,7 +62,7 @@ void forward(short spiked, short post) {
         // totalSum -= delta;
     
     } else {
-        excitability[post] += 1.0f;
+        // excitability[post] += 1.0f;
     }
 }
 void backprop(short pre, short post, float delta) {

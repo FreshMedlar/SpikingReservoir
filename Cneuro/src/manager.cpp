@@ -23,7 +23,7 @@ void Manager::createNeurons() {
     for (short i = 0; i < size; i++) {
  
         Neuron so;
-        if (randum(gen) < 0.5) { 
+        if (randum(gen) < 0.7) { 
             constructorNeuron(so, i, 1);
         } else { 
             constructorNeuron(so, i, -1);
@@ -157,13 +157,13 @@ std::pair<size_t, size_t> Manager::selectWeightedRandom(const std::vector<std::v
 void Manager::draw() {
     // std::cout << countNonZero(connectionMatrix) << std::endl;
     // std::cout << "Drawing with matrix at: " << &connectionMatrix << std::endl;
-    for (size_t n = 0; n < size; n++) {
-        for (size_t a = 0; a < size; a++) {
-            if (connectionMatrix[n][a] > 0.0f) {
-                DrawLine(xCoord[n], yCoord[n], xCoord[a], yCoord[a], EXTRALIGHTGRAY);
-            } 
-        }
-    }
+    // for (size_t n = 0; n < size; n++) {
+    //     for (size_t a = 0; a < size; a++) {
+    //         if (connectionMatrix[n][a] > 0.0f) {
+    //             DrawLine(xCoord[n], yCoord[n], xCoord[a], yCoord[a], EXTRALIGHTGRAY);
+    //         } 
+    //     }
+    // }
     for (size_t n = 0; n < size; n++) {
         DrawCircle(xCoord[n], yCoord[n], 8, colors[n]);  
     }
