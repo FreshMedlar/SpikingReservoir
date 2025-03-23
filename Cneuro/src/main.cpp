@@ -141,6 +141,7 @@ int main() {
     // bool draw = true;
     bool graph = true;
     bool restructure = false;
+
     if (graph) {
         InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
         ToggleFullscreen();    
@@ -195,6 +196,8 @@ int main() {
                 manager.drawSpikesGraph(spikeNumber);
                 // totalWeight[(epoch)%500] = totalSum;
                 manager.drawTotalWeight();
+                manager.drawOrder();
+                manager.drawChaos();
                 // cout << excitability[1000] << endl;
 
                 // FPS  
@@ -211,11 +214,7 @@ int main() {
     //--------------------------------------------------------------------------------------------------------
     //----------------------------RESERVOIR UPDATE------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------
-            // for(int sample = 0; sample < SPIKE_SAMPLING; sample++) {
-        //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
-
                 scheduler.updateColor();
-
         //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
 
                 // for (int restruct = 0; restruct < 10000; restruct++) {
@@ -250,7 +249,7 @@ int main() {
                 // }
                 // restructure = false; 
 
-    //-------------------------------INPUT----------------------------------------------
+        //-------------------------------INPUT----------------------------------------------
                 // we queue N neurons to spike next
                 short input = SIZE - encodedTraining[letter];
                 // for (short input : inputReservoir[epoch/10][epoch%10]){

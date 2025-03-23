@@ -263,20 +263,6 @@ void Manager::drawSpikesGraph(std::vector<int>& spikeNumber) {
 }
 
 void Manager::drawTotalWeight() {
-    int plotWidth = 500;
-    int plotHeight = 250;
-    int barWidth = 1;
-
-    // for (size_t i = 0; i < totalWeight.size(); i++) {
-    //     if (std::isnan(totalWeight[i]) || std::isinf(totalWeight[i])) {
-    //         continue;  // Skip invalid values
-    //     }
-
-    //     int barHeight = static_cast<int>(totalWeight[i] / 100);
-    //     if (barHeight < 0) barHeight = 0;  // Avoid negative heights
-
-    //     DrawRectangle(10 + (i % 1920), 10 + plotHeight * 3 - barHeight, barWidth, barHeight, BLUE);
-    // }
     DrawRectangle(0, 80, totalSum/(SIZE/10), 35, ORANGE);
     DrawText("TOTAL WEIGHT", 10, 84, 24, WHITE);
 }
@@ -294,4 +280,16 @@ void Manager::clustering() {
     avgCluster = avgCluster/SIZE;
     DrawRectangle(0, 40, avgCluster*10, 35, RED);
     DrawText("CLUSTERING", 10, 44, 24, WHITE);
+}
+
+void Manager::drawChaos() {
+    int chaos = 200;
+    DrawRectangle(0, 900, chaos, 35, RED);
+    DrawText("CHAOS", 10, 904, 24, WHITE);
+}
+
+void Manager::drawOrder() {
+    int order = 200;
+    DrawRectangle(0, 950, order, 35, BLUE);
+    DrawText("ORDER", 10, 954, 24, WHITE);
 }
