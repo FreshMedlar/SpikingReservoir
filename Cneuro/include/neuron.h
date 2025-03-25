@@ -20,7 +20,16 @@ extern short actionPotential[];
 extern short inhibitory[];
 extern float xCoord[];
 extern float yCoord[];
-extern float excitability[];
+extern float xA[];
+extern float yA[];
+
+extern float threshold[];
+extern std::vector<float> frequency;
+
+extern int maxConnectionStrenght;
+extern int generalThreshold;
+extern int generalBias;
+extern int generalRefractPeriod;
 
 void constructorNeuron(Neuron& pre, short id, short inhi);
 void colorNeuron(short pre, short time = 5);

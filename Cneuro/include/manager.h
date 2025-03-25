@@ -35,6 +35,7 @@ public:
     void drawTotalWeight();
     void drawOrder();
     void drawChaos();
+    void drawSpikeFrequencyDistribution(vector<float> freq);
     std::pair<std::size_t, std::size_t> selectWeightedRandom(const std::vector<std::vector<float>>& matrix, float totalSum);
     // return a random neuron
     

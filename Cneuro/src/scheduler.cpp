@@ -13,8 +13,8 @@ void Scheduler::update() {
     // update timeSinceSpike timer for all neurons
     for (int neu = 0; neu < SIZE; neu++) {
         timeSinceSpike[neu] += 1;
-        excitability[neu] += 0.06f * (30.0f - excitability[neu]);
-        actionPotential[neu] -= 0.08f * excitability[neu];
+        // excitability[neu] += 0.06f * (30.0f - excitability[neu]);
+        // actionPotential[neu] -= 0.08f * excitability[neu];
 
     } 
     for (short neur : spikeBuffer[currentSpikeIndex]) { spike(neur); 

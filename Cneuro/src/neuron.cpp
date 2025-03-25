@@ -14,19 +14,30 @@ short actionPotential[SIZE];
 short inhibitory[SIZE];
 float xCoord[SIZE];
 float yCoord[SIZE];
-float excitability[SIZE];
+float threshold[SIZE];
+float xA[SIZE];
+float yA[SIZE];
+std::vector<float> frequency(SIZE);
+
+int maxConnectionStrenght = 15;
+int generalThreshold = 30;
+int generalBias = 5;
+int generalRefractPeriod = 3;
 
 void constructorNeuron(Neuron& pre, short id, short inhi) {
     pre.ID = id;
 
     std::uniform_real_distribution<> dis(0.0,1.0);
+    xA[id] =                0.0f;
+    yA[id] =                0.0f;
     xCoord[id] =            1920.0f*dis(gen);
     yCoord[id] =            1080.0f*dis(gen);
     biases[id] =            getRandomFloat(5.0f);
     colors[id] =            WHITE;
     active[id] =            true;
+    frequency[id] =         0.0f;
     inhibitory[id] =        inhi;
-    excitability[id] =      30;
+    threshold[id] =         30;
     timeSinceSpike[id] =    1000; // to ignore the first spike
     actionPotential[id] =   0;
 }
@@ -35,14 +46,17 @@ void spike(short pre) {
     // connection strenghten    if the previous neuron  just spiked
     // connection weaken        if the next neuron      just spiked
 
-    float delta = LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
-    for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
-    // for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
-    // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
-    // excitability[pre] -= 3*sigmoid(timeSinceSpike[pre]);
-    // excitability[pre] += excitability[pre]*(0.1f * (1.0 - excitability[pre]));
-    // if (timeSinceSpike[pre] < 10) {excitability[pre]-=0.3;}
+    
+        float delta = inhibitory[pre]*LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
+        for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
+        for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
+
+        // if (timeSinceSpike> 1000){ scheduler_.lonelyNeurons.push_back(ID);}
+    // threshold[pre] -= 3*sigmoid(timeSinceSpike[pre]);
+    // threshold[pre] += threshold[pre]*(0.1f * (1.0 - threshold[pre]));
+    // if (timeSinceSpike[pre] < 10) {threshold[pre]-=0.3;}
     timeSinceSpike[pre] = 0;
+    frequency[pre] += 1.0f;
 
 }
 
@@ -50,10 +64,11 @@ void forward(short spiked, short post) {
     // w[spiked][post] depends on timeSinceSpike[post]
     // if timeSinceSpike[post] small, w go down :(
     actionPotential[post] +=  (connectionMatrix[spiked][post]
-                            * inhibitory[spiked]);
+                            * inhibitory[spiked]) + generalBias;
     
-    if (actionPotential[post] > excitability[post]) {
+    if (actionPotential[post] > generalThreshold) {
         actionPotential[post] = 0;
+        xA[post] += 2;
         queueNeuron(post);
         colorNeuron(post);
 
@@ -62,13 +77,13 @@ void forward(short spiked, short post) {
         // totalSum -= delta;
     
     } else {
-        // excitability[post] += 1.0f;
+        // threshold[post] += 1.0f;
     }
 }
 void backprop(short pre, short post, float delta) {
     // w[pre][post] depends on timeSinceSpike[pre] 
     // if timeSinceSpike[pre] small, w go up :)
-    if (connectionMatrix[pre][post] < 100) {
+    if (connectionMatrix[pre][post] < maxConnectionStrenght) {
         connectionMatrix[pre][post] += delta;
         totalSum += delta;
     }
@@ -115,7 +130,7 @@ void connect(short pre, short toConnect, float weight) {
 
 
 void queueNeuron(short pre) {
-    short targetSlot = (currentSpikeIndex + SPIKE_FRAMES) % SPIKE_BUFFER_SIZE;
+    short targetSlot = (currentSpikeIndex + generalRefractPeriod) % SPIKE_BUFFER_SIZE; // was SPIKE_FRAMES
     spikeBuffer[targetSlot].push_back(pre);
     active[pre] = false;
 }

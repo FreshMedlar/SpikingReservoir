@@ -6,6 +6,8 @@
 #include <set>
 #include <map>
 #include <Eigen/Dense>
+#include <cmath>
+// #include <dlib/statistics.h>
 // #include <ensmallen.hpp>
 // #include <cereal/archives/json.hpp>
 
@@ -114,7 +116,7 @@ int main() {
     for (int s = 0; s < encodedUniqueChars.size(); s++) {
         vector<int> randomIndexes;
         // take 5 random neurons for this letter
-        for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(65));}
+        for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(0, 64));}
 
         for (short o = 0; o < SPIKE_SAMPLING; o++){
             vector<short> innerVec;
@@ -136,17 +138,12 @@ int main() {
 //----------------------------------VISUALS-----------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
-
-    bool train = false;
-    // bool draw = true;
-    bool graph = true;
-    bool restructure = false;
-
-    if (graph) {
-        InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-        ToggleFullscreen();    
-        SetTargetFPS(-1);
-    }
+#define DRAW
+#ifndef DRAW
+    InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
+    ToggleFullscreen();    
+    SetTargetFPS(-1);
+#endif
 //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
@@ -165,6 +162,12 @@ int main() {
     int from;
     int to;
 //----------------------------------TRAINING LOOP-----------------------------------------
+    float loss = 0.0f;
+    float old_loss = 0.0f;
+    vector<float> log_data(10, 1.0f);
+    short nOfSpikes[SIZE];
+    for (int n = 0;n < SIZE;n++) {nOfSpikes[n] = 0;}
+    float result = 0.0f;
     int epoch = 0;
     float epoch_loss;
     static vector<int> fpsHistory;
@@ -173,11 +176,14 @@ int main() {
     std::cout << encodedTraining.size() << std::endl;
     vector<short> tracker;
     // while (!WindowShouldClose()) {
+//--------------------------------------DEBUG VAR--------------------------------------------
+    int countFail = 0;
+
     for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
         // tracker.push_back(encodedTraining[letter]);
         for (int cycle = 0; cycle < 10; cycle++) {
     //------------------------------ NEURONS DRAWING ------------------------------------ 
-            if (graph) {
+#ifndef DRAW
                 BeginDrawing();
                 ClearBackground(BLACK);
                 
@@ -198,6 +204,8 @@ int main() {
                 manager.drawTotalWeight();
                 manager.drawOrder();
                 manager.drawChaos();
+                // manager.drawSpikeFrequencyDistribution(log_data);
+
                 // cout << excitability[1000] << endl;
 
                 // FPS  
@@ -208,13 +216,12 @@ int main() {
                 
                 fpsHistory.push_back(fps);
                 totalFPS += fps;
-            }
-
+                scheduler.updateColor();
+#endif
 
     //--------------------------------------------------------------------------------------------------------
     //----------------------------RESERVOIR UPDATE------------------------------------------------------------
     //--------------------------------------------------------------------------------------------------------
-                scheduler.updateColor();
         //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
 
                 // for (int restruct = 0; restruct < 10000; restruct++) {
@@ -259,41 +266,109 @@ int main() {
                     }
                     colorNeuron(input); 
                 // }
-                // //X(t) FOR THE MODEL
+
+                //X(t) FOR THE MODEL
                 // if (epoch % 10 == 9) {
                 //     for (auto ins : spikeBuffer[currentSpikeIndex]){
                 //         spikeHistory.push_back(ins+(SIZE*(epoch)));
                 //     }
                 // }
+
                 //RESERVOIR
                 spikeNumber[letter%100] = spikeBuffer[currentSpikeIndex].size();
-
+                for (short neur : spikeBuffer[currentSpikeIndex]) {
+                    nOfSpikes[neur] += 1; }
                 scheduler.update();
                 // scheduler.pruningAndDecay();
                 // scheduler.synaptoGenesis();
 
             // }
     //-----------------------------MODEL BY HAND-------------------------------
-            if (cycle == 9 && train) {
-                // a.push_back(encodedTraining[letter]);
+// #define TRAIN
+#ifndef TRAIN
+            if (cycle == 9) {
+                int toChange = getRandomInt(0, 3);
+                int change;
+                do {
+                    change = getRandomInt(-1, 1);
+                } while (change == 0); // Repeat if the number is 0   
+                switch(toChange) {
+                    case 0:
+                        maxConnectionStrenght += change;
+                      break;
+                    case 1:
+                        generalThreshold += change;
+                      break;
+                    case 2:
+                        generalBias += change;
+                      break;
+                    case 3:
+                    if (generalRefractPeriod > 1) {
+                        generalRefractPeriod += change;}
+                      break;
+                }
 
+                old_loss = loss;
                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;
                 short target = encodedTraining[letter+1];
                 Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
                 output = network.softmax(output);
-                epoch_loss += network.compute_loss(output, target);
+                loss = network.compute_loss(output, target);
+                epoch_loss += loss;
                 Eigen::VectorXf d_input = network.backward(spikeHistory, output, target); // 10000, 
                 spikeHistory.clear();
-                if (letter%1000 == 999) {
-                    
-                    // cout << decode(a, itos) << endl;
-                    // a.clear();
+                
+                if (loss > old_loss) { // reverse change if worse
+                    countFail += 1;
+                    switch(toChange) {
+                        case 0:
+                            maxConnectionStrenght -= change;
+                          break;
+                        case 1:
+                            generalThreshold -= change;
+                          break;
+                        case 2:
+                            generalBias -= change;
+                          break;
+                        case 3:
+                            if (generalRefractPeriod > 1) {
+                            generalRefractPeriod -= change;}
+                          break;
+                    }
+                }
+
+                if (letter%1000 == 0) {
                     cout << "Epoch " << letter+1
                             << " | Avg Loss: " << epoch_loss/1000
                             << endl;
                     epoch_loss = 0;
+                    cout << countFail << endl;
+                    cout << "maxConnectionStrenght " << maxConnectionStrenght << endl;
+                    cout << "generalThreshold " << generalThreshold << endl;
+                    cout << "generalBias " << generalBias << endl;
+                    cout << "generalRefractPeriod " << generalRefractPeriod << endl;
                 }
+                
+                
+                
             }
+#endif
+            
+            // if (letter%100 == 0) {
+            //     int max = 0;
+            //     for (int n = 0; n< SIZE; n++) {if (frequency[n]>max) {max = frequency[n];}}
+            //     cout << max << endl;
+            //     vector<float> log_data(max+1, 1.0f);
+            //     for (int n = 0; n<SIZE; n++) {
+            //         short a = frequency[n];
+            //         log_data[a] += 1;
+            //     }
+            //     std::transform(log_data.begin(), log_data.end(), log_data.begin(), [](float x) { return std::log(x); });
+            //     for (int ls = 0; ls < SIZE; ls++) {frequency[ls] = 0.0f;}
+            //     std::sort(log_data.begin(), log_data.end());
+            //     float result = shapiro_wilk_test(log_data);
+            //     // cout << result << endl;
+            // }
             epoch++;
         }
     }

@@ -66,7 +66,7 @@ void Manager::connectSingle(short id, int nConns) {
         }
     }
     while (receivers[id].size() < nConns) {
-        short index = getRandomInt(connected.size());
+        short index = getRandomInt(0, connected.size()-1);
         int target = connected[index];
 
         // Avoid duplicates
@@ -292,4 +292,10 @@ void Manager::drawOrder() {
     int order = 200;
     DrawRectangle(0, 950, order, 35, BLUE);
     DrawText("ORDER", 10, 954, 24, WHITE);
+}
+
+void Manager::drawSpikeFrequencyDistribution(vector<float> freq) {
+    for (int n = 0; n < freq.size(); n++) {
+        DrawRectangle(1920 - n*5, 1080-freq[n], 5, freq[n]*10, WHITE);
+    }
 }

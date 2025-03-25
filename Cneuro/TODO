@@ -1,3 +1,36 @@
+EVOLVE THE MODEL TO BE LOG DISTRIBUTED
+
+TASKS:
+evolving variables:
+    generalThreshold
+    generalBias
+    generalRefractPeriod
+     
+    maxConnectionStrenght
+### METHODS
+ 1. **Grid Search**
+ 2. **Random Search**
+ 3. **Hill Climbing**
+ 4. **Simulated Annealing**
+ 5. **Genetic Algorithms**
+ 6. **Gradient-Based Methods**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 MOST IMPORTANT
 - graph for distribution of synapses strength, firing rates, firing per second
     and in general need to study the stability of the system
@@ -17,10 +50,6 @@ MOST IMPORTANT
 - LTP, LTD, track past activity
 
 - move part of Neuron::disconnect to the rispective neuron
-
-IDEA
-
-
 
 DONE
 - pruning
