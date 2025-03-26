@@ -1,5 +1,11 @@
 #include "rl.h"
     
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <algorithm>
+#include <limits>
 
 int changeRandomInt(int toChange) {
     int change = getRandomInt(-1,1);

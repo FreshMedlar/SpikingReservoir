@@ -5,9 +5,8 @@
 #include "neuron.h"
 #include <utility>
 #include <algorithm> 
-// #include <thread>
-// #include <atomic>
 #include <set>
+#include <Eigen/Dense>
 
 class Neuron;
 
@@ -28,7 +27,9 @@ public:
     // void synaptoGenesis();
     //
     Neuron& drawNeuron();
+    void step(short letter);
     void pruningAndDecay();
+    float simulation();
 
 private:
     int size;

@@ -22,7 +22,7 @@ float excitability[SIZE];
 
 int maxConnectionStrenght = 23;
 int generalThreshold = 23;
-int generalBias = 5;
+int generalBias = 30;
 int generalRefractPeriod = 3;
 float omega = 0.3;
 float alpha = 0.06;

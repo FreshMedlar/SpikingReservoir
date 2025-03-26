@@ -22,7 +22,8 @@ public:
     void createSingle(short id, bool inhibitory);
     void connectSingle(short id, int nConns = 10);
     short randomNeuron(Neuron* n);
-    
+    void reset();
+
     void receiversFrequence(int* connections);
     void sendersFrequence(int* connections);
     void countConnections(int* connections);

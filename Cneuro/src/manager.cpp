@@ -154,6 +154,13 @@ std::pair<size_t, size_t> Manager::selectWeightedRandom(const std::vector<std::v
     return indices[selectedIndex];
 }
 
+void Manager::reset() {
+    for (auto& spikeVector : spikeBuffer) {
+        spikeVector.clear();
+    }
+    currentSpikeIndex = 0; // Reset the index as well
+}
+
 void Manager::draw() {
     // std::cout << countNonZero(connectionMatrix) << std::endl;
     // std::cout << "Drawing with matrix at: " << &connectionMatrix << std::endl;
