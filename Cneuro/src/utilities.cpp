@@ -1,6 +1,8 @@
 #include "utilities.h"
 #include "global.h"
 
+#include <cmath>
+
 using namespace std;
 
 // The text to encode in input, in output a vector with the letters encoded in integers
@@ -34,8 +36,8 @@ int getRandomInt(int min, int max) {
     return randum(gen);
 }
 
-float getRandomFloat(float n) {
-    uniform_real_distribution<> randfloat(0, n);
+float getRandomFloat(float min, float max) {
+    uniform_real_distribution<> randfloat(min, max);
     return randfloat(gen);
 }
 
@@ -75,4 +77,21 @@ double erfinv(double x) {
     return std::copysign(std::sqrt(std::sqrt(term1 * term1 - term2) - term1), x);
 }
 
+double anderson_darling_test(const float data[]) {
+    std::vector<float> sorted_data(data, data + SIZE);
+    std::sort(sorted_data.begin(), sorted_data.end());
 
+    Eigen::VectorXf X = Eigen::Map<Eigen::VectorXf>(sorted_data.data(), SIZE);
+    float mean = X.mean();
+    float stddev = std::sqrt((X.array() - mean).square().sum() / SIZE);
+
+    Eigen::VectorXf Z = (X.array() - mean) / stddev;  // Standardize
+    Eigen::VectorXf F = 0.5 * (1 + Z.array().unaryExpr([](float x) { return std::erf(x); }));
+
+    double A2 = -SIZE;
+    for (size_t i = 0; i < SIZE; i++) {
+        A2 -= (2 * (i + 1) - 1) * (std::log(F(i)) + std::log(1 - F(SIZE - i - 1)));
+    }
+    A2 /= SIZE;
+    return A2;
+}

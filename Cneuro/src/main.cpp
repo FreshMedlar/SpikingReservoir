@@ -23,6 +23,7 @@
 #include "net.h"
 #include "encoder.h"
 #include "utilities.h"
+#include "rl.h"
 
 // using namespace arma;
 using namespace std;
@@ -138,7 +139,7 @@ int main() {
 //----------------------------------VISUALS-----------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
-#define DRAW
+// #define DRAW
 #ifndef DRAW
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
@@ -165,8 +166,8 @@ int main() {
     float loss = 0.0f;
     float old_loss = 0.0f;
     vector<float> log_data(10, 1.0f);
-    short nOfSpikes[SIZE];
-    for (int n = 0;n < SIZE;n++) {nOfSpikes[n] = 0;}
+    float nOfSpikes[SIZE];
+    for (int n = 0;n < SIZE;n++) {nOfSpikes[n] = 0.0f;}
     float result = 0.0f;
     int epoch = 0;
     float epoch_loss;
@@ -178,6 +179,14 @@ int main() {
     // while (!WindowShouldClose()) {
 //--------------------------------------DEBUG VAR--------------------------------------------
     int countFail = 0;
+    int toChange = 0;
+    int change;
+    float omegaChange;
+    float alphaChange;
+    float RL_loss = 0.0f;
+    int inactive = 0;
+    int past_inactive = 0;
+    float generalImpulseChange = 0.0f;
 
     for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
         // tracker.push_back(encodedTraining[letter]);
@@ -204,7 +213,9 @@ int main() {
                 manager.drawTotalWeight();
                 manager.drawOrder();
                 manager.drawChaos();
-                // manager.drawSpikeFrequencyDistribution(log_data);
+                std::vector<float> sorted = frequency;  // Copy the original vector
+                std::sort(sorted.begin(), sorted.end());  // Sort in ascending order
+                manager.drawSpikeFrequencyDistribution(sorted);
 
                 // cout << excitability[1000] << endl;
 
@@ -277,83 +288,106 @@ int main() {
                 //RESERVOIR
                 spikeNumber[letter%100] = spikeBuffer[currentSpikeIndex].size();
                 for (short neur : spikeBuffer[currentSpikeIndex]) {
-                    nOfSpikes[neur] += 1; }
+                    nOfSpikes[neur] += 1.0f; }
                 scheduler.update();
                 // scheduler.pruningAndDecay();
                 // scheduler.synaptoGenesis();
 
             // }
     //-----------------------------MODEL BY HAND-------------------------------
-// #define TRAIN
+#define TRAIN
 #ifndef TRAIN
             if (cycle == 9) {
-                int toChange = getRandomInt(0, 3);
-                int change;
-                do {
-                    change = getRandomInt(-1, 1);
-                } while (change == 0); // Repeat if the number is 0   
-                switch(toChange) {
-                    case 0:
-                        maxConnectionStrenght += change;
-                      break;
-                    case 1:
-                        generalThreshold += change;
-                      break;
-                    case 2:
-                        generalBias += change;
-                      break;
-                    case 3:
-                    if (generalRefractPeriod > 1) {
-                        generalRefractPeriod += change;}
-                      break;
+// #define RL
+#ifndef RL
+                if (letter%100 == 99) {
+                    toChange = getRandomInt(0, 2);
+                    int change = changeRandomInt(toChange);
+                    // OR
+                    float change = changeRandomFloat(toChange);
                 }
+#endif
 
-                old_loss = loss;
                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;
                 short target = encodedTraining[letter+1];
                 Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
                 output = network.softmax(output);
                 loss = network.compute_loss(output, target);
                 epoch_loss += loss;
+                RL_loss += loss;
                 Eigen::VectorXf d_input = network.backward(spikeHistory, output, target); // 10000, 
                 spikeHistory.clear();
-                
-                if (loss > old_loss) { // reverse change if worse
-                    countFail += 1;
-                    switch(toChange) {
-                        case 0:
-                            maxConnectionStrenght -= change;
-                          break;
-                        case 1:
-                            generalThreshold -= change;
-                          break;
-                        case 2:
-                            generalBias -= change;
-                          break;
-                        case 3:
-                            if (generalRefractPeriod > 1) {
-                            generalRefractPeriod -= change;}
-                          break;
+#ifndef RL
+                if (letter%100 == 99) {
+                    // -----------------------
+                    // if (RL_loss/100 > old_loss) { // reverse change if worse
+                    // -------------------
+                    int inactive = 0;
+                    for (int i = 0; i < SIZE; i++) {
+                        if (frequency[i] == 0) {inactive++;}
+                        // OR
+                        // inactive += frequency[i];
+                        frequency[i] = 0;
                     }
+                    cout << "TOTAL SPIKES -- " << inactive << endl;
+                    if (inactive > past_inactive) {
+                    // --------------------------
+                        countFail += 1;
+                        switch(toChange) {
+                            case 0:
+                                maxConnectionStrenght -= change;
+                            break;
+                            case 1:
+                                generalThreshold -= change;
+                            break;
+                            case 2:
+                                generalBias -= change;
+                            break;
+                            case 3:
+                                omega -= omegaChange;
+                                // if (generalRefractPeriod > 1) {
+                                // generalRefractPeriod -= change;}
+                            break;
+                            case 4:
+                                alpha -= alphaChange;
+                            break;
+                            case 5:
+                                generalImpulse -= generalImpulseChange;
+                            break;
+                        }
+                    }
+                    
+
+                    past_inactive = inactive;
+                    inactive = 0;
+                    old_loss = RL_loss/100;
+                    RL_loss = 0;
                 }
+#endif
 
                 if (letter%1000 == 0) {
                     cout << "Epoch " << letter+1
                             << " | Avg Loss: " << epoch_loss/1000
                             << endl;
                     epoch_loss = 0;
+                    #ifndef RL
                     cout << countFail << endl;
+                    countFail = 0;
                     cout << "maxConnectionStrenght " << maxConnectionStrenght << endl;
                     cout << "generalThreshold " << generalThreshold << endl;
                     cout << "generalBias " << generalBias << endl;
                     cout << "generalRefractPeriod " << generalRefractPeriod << endl;
+                    cout << "omega " << omega << endl;
+                    cout << "alpha " << alpha << endl;
+                    cout << "Impulse " << generalImpulse << endl;
+                    #endif
                 }
                 
                 
                 
             }
 #endif
-            
+
             // if (letter%100 == 0) {
             //     int max = 0;
             //     for (int n = 0; n< SIZE; n++) {if (frequency[n]>max) {max = frequency[n];}}
@@ -371,7 +405,24 @@ int main() {
             // }
             epoch++;
         }
+        // END LETTER
+
+#ifndef RL2
+        if (letter% 100 == 99) { // 99, 199...
+            // std::sort(nOfSpikes, nOfSpikes + SIZE); 
+            for (int i = 0; i<SIZE; i++) { nOfSpikes[i] = log(nOfSpikes[i]);}
+            double score = anderson_darling_test(nOfSpikes);
+
+
+
+
+            for (int i = 0; i<SIZE; i++) { nOfSpikes[i] = 0.0f;}
+        }
+#endif
     }
+    // END
+
+
     cout << epoch << endl;
     // cout << decode(tracker, itos);
 

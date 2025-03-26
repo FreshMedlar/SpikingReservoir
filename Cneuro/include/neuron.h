@@ -22,6 +22,7 @@ extern float xCoord[];
 extern float yCoord[];
 extern float xA[];
 extern float yA[];
+extern float excitability[];
 
 extern float threshold[];
 extern std::vector<float> frequency;
@@ -30,10 +31,13 @@ extern int maxConnectionStrenght;
 extern int generalThreshold;
 extern int generalBias;
 extern int generalRefractPeriod;
+extern float omega;
+extern float alpha;
+extern float generalImpulse;
 
 void constructorNeuron(Neuron& pre, short id, short inhi);
 void colorNeuron(short pre, short time = 5);
-void queueNeuron(short pre);
+void queueNeuron(short pre, short next = 3);
     // if nullptr is given in input it connect to a 
     // random neuron, otherwise to given neuron
 void connect(short pre, short toConnect, float weight = 1.0f);   
@@ -44,5 +48,8 @@ void backprop(short from, short to, float delta);
 void forward(short from, short to);
 
 float sigmoid(float x);
+std::pair<float, float> whereIs(short id);
+int whenSpike(short id);
+
 
 #endif // NEURON_H

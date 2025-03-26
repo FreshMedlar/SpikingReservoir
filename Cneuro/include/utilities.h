@@ -23,10 +23,12 @@ Eigen::VectorXf vectorToEigen(const vector<int>& vec);
 
 int getRandomInt(int min, int max);
 
-float getRandomFloat(float n);
+float getRandomFloat(float min, float max);
 
 float shapiro_wilk_test(std::vector<float>& data);
 
 double erfinv(double x);
+
+double anderson_darling_test(const float data[]);
 
 #endif 

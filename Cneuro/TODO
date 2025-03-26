@@ -1,19 +1,22 @@
 EVOLVE THE MODEL TO BE LOG DISTRIBUTED
 
-TASKS:
-evolving variables:
-    generalThreshold
-    generalBias
-    generalRefractPeriod
-     
-    maxConnectionStrenght
-### METHODS
- 1. **Grid Search**
- 2. **Random Search**
- 3. **Hill Climbing**
- 4. **Simulated Annealing**
- 5. **Genetic Algorithms**
- 6. **Gradient-Based Methods**
+# RL:
+**evolving variables**:
+ 1. generalThreshold
+ 2. generalBias
+ 3. generalRefractPeriod
+ 4. maxConnectionStrenght
+**METHODS**
+ 1. Grid Search
+ 2. Random Search
+ 3. Hill Climbing
+ 4. Simulated Annealing
+ 5. Genetic Algorithms
+ 6. Gradient-Based Methods
+**OBJ FUNCTION**
+ 1. Log-Normal distribution in the number of spikes
+ 2. 85% neurons active
+ 3. N of spikes in a range
 
 
 
