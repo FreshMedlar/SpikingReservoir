@@ -82,7 +82,8 @@
         "socket": "cpp",
         "timer": "cpp",
         "ranges": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "cfenv": "cpp"
     },
     "cmake.sourceDirectory": "/home/medlar/SpikingReservoir/Cneuro",
 }

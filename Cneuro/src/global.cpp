@@ -6,6 +6,7 @@ std::vector<Neuron> neurons;
 std::random_device rd;
 std::mt19937 gen(rd());
 float totalSum = 0.0f;
+vector<short> encodedTraining;
 
 // buffer for refractory period
 // const size_t COOLDOWN_FRAMES = 5;
@@ -28,3 +29,6 @@ Manager manager(SIZE);
 Scheduler scheduler(SIZE);
 float LR = 1; // magnitued of weights updated
 float TEMP = 3; // importance of timing (low TEMP, strict timing)
+
+// CONTROL VAR
+vector<int> spikeFreq(500, 0);

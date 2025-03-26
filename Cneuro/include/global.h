@@ -15,6 +15,7 @@ extern std::random_device rd;
 extern std::mt19937 gen;
 extern float totalSum;
 constexpr short SIZE = 1000;
+extern std::vector<short> encodedTraining;
 
 // refractory period
 // extern const size_t COOLDOWN_FRAMES;
@@ -37,5 +38,9 @@ extern Manager manager;
 extern Scheduler scheduler;
 extern float LR;
 extern float TEMP;
+
+// CONTROL VAR
+// N of spikes in the last 500 steps
+extern vector<int> spikeFreq;
 
 #endif // GLOBALS_H

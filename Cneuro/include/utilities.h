@@ -29,6 +29,6 @@ float shapiro_wilk_test(std::vector<float>& data);
 
 double erfinv(double x);
 
-double anderson_darling_test(const float data[]);
+double anderson_darling_test(vector<float>& data);
 
 #endif 

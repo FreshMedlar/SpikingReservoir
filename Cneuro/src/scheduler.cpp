@@ -1,10 +1,13 @@
 #include "scheduler.h"
 #include "global.h"
+
 #include <iostream>
 #include <algorithm>
 #include <numeric>
 #include <random>
 #include <omp.h>
+
+#include "raylib.h"
 
 Scheduler::Scheduler(int size) : size(size) {
 }
@@ -76,4 +79,70 @@ Neuron& Scheduler::drawNeuron() {
 
     // In case of rounding errors or empty vector, return the last neuron
     return neurons.back();
+}
+
+
+void Scheduler::step (short letter) {
+    // INPUT
+    short input = SIZE - letter;
+    if (active[input] == true) {
+        spikeBuffer[currentSpikeIndex].push_back(input);
+        active[input] = false;
+    }
+    //RESERVOIR
+    // spikeFreq[letter%100] = spikeBuffer[currentSpikeIndex].size();
+    totalSum += spikeBuffer[currentSpikeIndex].size();
+    scheduler.update();
+}
+
+float Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {
+    bool draw = false;
+    for (int letter = 0; letter < 1000; letter++) { //encodedTraining.size()-1
+        for (int cycle = 0; cycle < 10; cycle++) {
+            // if (draw) {
+            //     BeginDrawing();
+            //     ClearBackground(BLACK);
+                
+            //     //DRAW
+            //     // manager.draw();
+            //     // manager.applyForces();
+            //     //GRAPH
+            //     connectionsPerNeuron.clear();
+            //     connectionsPerNeuron.resize(SIZE, 0); 
+            //         // EITHER, NOT BOTH
+            //         manager.receiversFrequence(connectionsPerNeuron.data()); 
+            //         // manager.sendersFrequence(connectionsPerNeuron.data());
+            //     manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+            //     // manager.clustering();
+            //     // SPIKES
+            //     manager.drawSpikesGraph(spikeFreq);
+            //     // totalWeight[(epoch)%500] = totalSum;
+            //     manager.drawTotalWeight();
+            //     manager.drawOrder();
+            //     manager.drawChaos();
+            //     std::vector<float> sorted = frequency;  // Copy the original vector
+            //     std::sort(sorted.begin(), sorted.end());  // Sort in ascending order
+            //     manager.drawSpikeFrequencyDistribution(sorted);
+
+            //     // FPS  
+            //     int fps = GetFPS();
+            //     DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+            //     EndDrawing();
+            //     scheduler.updateColor();
+            // }
+            
+            scheduler.step(encodedTraining[letter]);
+        }
+        // if (letter % 10000 == 9999) {manager.status(); }
+    }
+    
+    // OBJ function
+    double p = anderson_darling_test(frequency);
+    for (int i = 0; i < SIZE; i++) {
+        frequency[i] = 0.0f;
+    }
+
+    manager.reset();
+
+    return p;
 }
