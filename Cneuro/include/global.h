@@ -26,7 +26,7 @@ extern std::vector<short> encodedTraining;
 // buffer for spikes
 extern const short SPIKE_FRAMES; 
 extern const size_t SPIKE_BUFFER_SIZE;
-extern std::array<std::vector<short>, 30> spikeBuffer;
+extern std::array<std::vector<short>, 1000> spikeBuffer;
 extern int currentSpikeIndex;
 
 // color
