@@ -14,7 +14,7 @@ float totalSum = 0.0f;
 
 // buffer for spikes
 const short SPIKE_FRAMES = 3;
-const size_t SPIKE_BUFFER_SIZE = 30;
+const size_t SPIKE_BUFFER_SIZE = 1000;
 std::array<std::vector<short>, SPIKE_BUFFER_SIZE> spikeBuffer;
 int currentSpikeIndex = 0;
 

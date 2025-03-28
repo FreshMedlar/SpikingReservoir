@@ -24,9 +24,9 @@ int maxConnectionStrenght = 23;
 int generalThreshold = 23;
 int generalBias = 5;
 int generalRefractPeriod = 3;
-float omega = 0.3;
-float alpha = 0.06;
-float generalImpulse = 3.0f;
+float omega = 0.11;
+float alpha = 0.01;
+float generalImpulse = 5.0f;
 
 void constructorNeuron(Neuron& pre, short id, short inhi) {
     pre.ID = id;
@@ -48,6 +48,7 @@ void constructorNeuron(Neuron& pre, short id, short inhi) {
 }
 
 void spike(short pre) {
+    cout << "Neuron " << pre << " spiked at Y " << yA[pre] << endl;
     // connection strenghten    if the previous neuron  just spiked
     // connection weaken        if the next neuron      just spiked
     
@@ -57,6 +58,7 @@ void spike(short pre) {
         // float delta = inhibitory[pre]*LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
         for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
         // for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
+
     excitability[pre] += 0.1;
     timeSinceSpike[pre] = 0;
     frequency[pre] += 1.0f;
@@ -160,32 +162,40 @@ float sigmoid_derivative(float x) {
     return s * (1.0f - s);
 }
 
-pair<float, float> whereIs(short id) {
-    float decay = exp(-0.05f * timeSinceSpike[id]);
-    float theta = atan(0.1f/(1 - 0.05f));
+// return the current position of the point from last spike
+pair<float, float> whereIs(short id, float time) {
+    if (time == -1.0f) {time = timeSinceSpike[id];}
+    float decay = exp(-alpha * time);
+    float theta = atan(omega/(1 - alpha));
 
-    float co = cos(timeSinceSpike[id] * 0.1f);
-    float si = sin(timeSinceSpike[id] * 0.1f);
+    float co = cos(time * theta);
+    float si = sin(time * theta);
     float x = decay * (xA[id] * co - yA[id] * si);
     float y = decay * (yA[id] * co + xA[id] * si);
     return make_pair(x, y);
 }
 
-// returns the next time the neuron will spike
+// returns the next time the neuron will spike, and its position
 int whenSpike(short id) {
     // ignore if point is close to basin
     if (xA[id]*xA[id] + yA[id]*yA[id] < 2) {
         return 0;
     }
-    if (yA[id] != 0.0f) {
+    if (yA[id] == 0.0f) {
         return 0;
     }
-    
-    float nextSpike = (1.0f/omega) * atan(-xA[id]/yA[id]);
+    float nextSpike = (1.0f/omega) * atan(xA[id]/yA[id]);
+    // cout << "Next " << nextSpike << endl;
     // If the timing is negative we take the next
-    if (nextSpike < 0){
+    if (nextSpike <= 0){
         nextSpike += M_PI / omega;
+        // cout << "PI " << M_PI/omega << endl;
     }
+    // given the time, calculate position
+
+    auto [first, second] = whereIs(id, nextSpike);    
+    xA[id] = first;
+    yA[id] = second;
 
     return static_cast<int>(std::ceil(nextSpike));
 }
