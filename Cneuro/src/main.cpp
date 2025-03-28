@@ -37,7 +37,7 @@ int main() {
     connect(0, 1);
     cout << "prova" << endl;
     forward(0, 1);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1000; i++) {
         scheduler.step(0);
         // cout << "X1 " << xA[1] << ", Y1 " << yA[1] << endl;
     }
