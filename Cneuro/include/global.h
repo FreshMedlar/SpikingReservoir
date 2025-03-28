@@ -14,6 +14,7 @@ extern std::vector<Neuron> neurons; // Declaration
 extern std::random_device rd;
 extern std::mt19937 gen;
 extern float totalSum;
+extern short neuronCount;
 constexpr short SIZE = 1000;
 extern std::vector<short> encodedTraining;
 

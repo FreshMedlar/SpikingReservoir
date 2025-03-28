@@ -29,9 +29,11 @@ float alpha = 0.01;
 float generalImpulse = 5.0f;
 
 void constructorNeuron(Neuron& pre, short id, short inhi) {
+    
     pre.ID = id;
 
     std::uniform_real_distribution<> dis(0.0,1.0);
+    
     xA[id] =                0.0f;
     yA[id] =                0.0f;
     xCoord[id] =            1920.0f*dis(gen);
@@ -52,6 +54,7 @@ void spike(short pre) {
     // connection strenghten    if the previous neuron  just spiked
     // connection weaken        if the next neuron      just spiked
     
+    cout << "Neuron " << pre << " spiked at Y " << yA[pre] << endl;
     // check if the neuron is in a self-loop state
     int next = whenSpike(pre);
 
@@ -62,6 +65,7 @@ void spike(short pre) {
     excitability[pre] += 0.1;
     timeSinceSpike[pre] = 0;
     frequency[pre] += 1.0f;
+    cout << next << endl;
     if (next == 0) {
         active[pre] = true;
     } else {
@@ -81,13 +85,11 @@ void forward(short spiked, short post) {
     if (actionPotential[post] > (generalThreshold*excitability[post])) {
         actionPotential[post] = 0;
         yA[post] += generalImpulse;
-        queueNeuron(post);
+        queueNeuron(post, 1); // insert in next step
         colorNeuron(post);
-
         // float delta = LR/exp(timeSinceSpike[post]/TEMP);
         // connectionMatrix[spiked][post] -= delta;
         // totalSum -= delta;
-    
     } else {
         // threshold[post] += 1.0f;
     }
@@ -140,7 +142,6 @@ void connect(short pre, short toConnect, float weight) {
     totalSum += weight;
 }
 
-
 void queueNeuron(short pre, short next) {
     short targetSlot = (currentSpikeIndex + next) % SPIKE_BUFFER_SIZE; // was SPIKE_FRAMES
     spikeBuffer[targetSlot].push_back(pre);
@@ -177,6 +178,7 @@ pair<float, float> whereIs(short id, float time) {
 
 // returns the next time the neuron will spike, and its position
 int whenSpike(short id) {
+    cout << xA[id] << " " << yA[id] << endl;
     // ignore if point is close to basin
     if (xA[id]*xA[id] + yA[id]*yA[id] < 2) {
         return 0;
