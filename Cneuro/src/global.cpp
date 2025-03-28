@@ -1,11 +1,12 @@
 #include "global.h"
 
 // row n is for outgoing connection of neuron n 
-std::vector<std::vector<float>> connectionMatrix;
+std::vector<std::vector<float>> connectionMatrix(SIZE, std::vector<float>(SIZE, 0.0f));
 std::vector<Neuron> neurons; 
 std::random_device rd;
 std::mt19937 gen(rd());
 float totalSum = 0.0f;
+short neuronCount = 0;
 vector<short> encodedTraining;
 
 // buffer for refractory period
