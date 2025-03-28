@@ -48,7 +48,7 @@ void backprop(short from, short to, float delta);
 void forward(short from, short to);
 
 float sigmoid(float x);
-std::pair<float, float> whereIs(short id);
+std::pair<float, float> whereIs(short id, float time = -1.0f);
 int whenSpike(short id);
 
 
