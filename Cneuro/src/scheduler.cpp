@@ -68,31 +68,25 @@ Neuron& Scheduler::drawNeuron() {
 }
             
             
-void Scheduler::update() {
-    // update timeSinceSpike timer for all neurons
+// void Scheduler::update() {}
+
+void Scheduler::step (short letter) {
+    // INPUT
+    short input = SIZE - letter;
+    if (active[input] == true) {
+        spikeBuffer[currentSpikeIndex].push_back(input);
+        active[input] = false;
+    }
+    // GLOBAL UPDATES
     for (int neu = 0; neu < SIZE; neu++) {
         timeSinceSpike[neu] += 1;
         excitability[neu] -= 0.06f * (1.0f - excitability[neu]);
-        // actionPotential[neu] -= 0.08f * excitability[neu];
-
-    } 
+    }
+    // SPIKES 
     for (short neur : spikeBuffer[currentSpikeIndex]) { spike(neur); } 
                                                         //active[neur] = true;}
     spikeBuffer[currentSpikeIndex].clear(); // Reset the slot
     currentSpikeIndex = (currentSpikeIndex + 1) % SPIKE_BUFFER_SIZE;
-}
-
-void Scheduler::step (short letter) {
-    // INPUT
-    // short input = SIZE - letter;
-    // if (active[input] == true) {
-    //     spikeBuffer[currentSpikeIndex].push_back(input);
-    //     active[input] = false;
-    // }
-    //RESERVOIR
-    // spikeFreq[letter%100] = spikeBuffer[currentSpikeIndex].size();
-    totalSum += spikeBuffer[currentSpikeIndex].size();
-    scheduler.update();
 }
                 
 float Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {

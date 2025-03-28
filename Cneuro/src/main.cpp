@@ -139,7 +139,7 @@ int main() {
 //----------------------------------VISUALS-----------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
-// #define DRAW
+#define DRAW
 #ifndef DRAW
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
@@ -166,8 +166,7 @@ int main() {
     float loss = 0.0f;
     float old_loss = 0.0f;
     vector<float> log_data(10, 1.0f);
-    float nOfSpikes[SIZE];
-    for (int n = 0;n < SIZE;n++) {nOfSpikes[n] = 0.0f;}
+    vector<float> nOfSpikes(SIZE, 0.0f);
     float result = 0.0f;
     int epoch = 0;
     float epoch_loss;
@@ -187,7 +186,7 @@ int main() {
     int inactive = 0;
     int past_inactive = 0;
     float generalImpulseChange = 0.0f;
-
+    
     for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
         // tracker.push_back(encodedTraining[letter]);
         for (int cycle = 0; cycle < 10; cycle++) {
@@ -230,54 +229,7 @@ int main() {
                 scheduler.updateColor();
 #endif
 
-    //--------------------------------------------------------------------------------------------------------
-    //----------------------------RESERVOIR UPDATE------------------------------------------------------------
-    //--------------------------------------------------------------------------------------------------------
-        //------------------------- RANDOM RESTRUCTURING-------------------------------------------------------
-
-                // for (int restruct = 0; restruct < 10000; restruct++) {
-                //     toRemove = disreal(gen);
-                //     if (!receivers[toRemove].empty()) {
-                //         // get the ID of the neuron we disconnect from
-                //         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
-                //         Neuron* targetNeuron = receivers[toRemove][fromRemove];
-                //         fromRemove = targetNeuron->ID;
-                //         // disconnect and get connection strength
-                //         toDistribute = disconnect(fromRemove, toRemove);
-                //         // if a connection has been removed, distribute its strength
-                //         int sjdfo = static_cast<int>(toDistribute); 
-                //         for (int a = 0; a < sjdfo; a++) {
-                //             if (dis(gen) < growthProb) {
-                //                 float weight = static_cast<float>(SIZE);
-                //                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
-                //                 connectionMatrix[row][col] += 1.0f;
-                //                 // connectionMatrix[toRemove][] += 1.0f;
-                //             } else {
-                //                 from = disreal(gen);
-                //                 to = disreal(gen);
-                //                 if (connectionMatrix[from][to] != 0.0f){
-                //                     connectionMatrix[from][to] += 1.0f;
-                //                 } else {
-                //                     connect(neurons[from], to, 1.0f);
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     toDistribute = 0.0f;
-                // }
-                // restructure = false; 
-
         //-------------------------------INPUT----------------------------------------------
-                // we queue N neurons to spike next
-                short input = SIZE - encodedTraining[letter];
-                // for (short input : inputReservoir[epoch/10][epoch%10]){
-                    if (active[input] == true) {
-                        spikeBuffer[currentSpikeIndex].push_back(input);
-                        active[input] = false;
-                    }
-                    colorNeuron(input); 
-                // }
-
                 //X(t) FOR THE MODEL
                 // if (epoch % 10 == 9) {
                 //     for (auto ins : spikeBuffer[currentSpikeIndex]){
@@ -286,10 +238,11 @@ int main() {
                 // }
 
                 //RESERVOIR
-                spikeNumber[letter%100] = spikeBuffer[currentSpikeIndex].size();
+                totalSum += spikeBuffer[currentSpikeIndex].size();
+                spikeNumber[letter%500] = spikeBuffer[currentSpikeIndex].size(); // does not include current input
                 for (short neur : spikeBuffer[currentSpikeIndex]) {
                     nOfSpikes[neur] += 1.0f; }
-                scheduler.update();
+                scheduler.step(encodedTraining[letter]);
                 // scheduler.pruningAndDecay();
                 // scheduler.synaptoGenesis();
 
@@ -388,33 +341,15 @@ int main() {
             }
 #endif
 
-            // if (letter%100 == 0) {
-            //     int max = 0;
-            //     for (int n = 0; n< SIZE; n++) {if (frequency[n]>max) {max = frequency[n];}}
-            //     cout << max << endl;
-            //     vector<float> log_data(max+1, 1.0f);
-            //     for (int n = 0; n<SIZE; n++) {
-            //         short a = frequency[n];
-            //         log_data[a] += 1;
-            //     }
-            //     std::transform(log_data.begin(), log_data.end(), log_data.begin(), [](float x) { return std::log(x); });
-            //     for (int ls = 0; ls < SIZE; ls++) {frequency[ls] = 0.0f;}
-            //     std::sort(log_data.begin(), log_data.end());
-            //     float result = shapiro_wilk_test(log_data);
-            //     // cout << result << endl;
-            // }
             epoch++;
         }
         // END LETTER
-
+// #define RL2
 #ifndef RL2
         if (letter% 100 == 99) { // 99, 199...
             // std::sort(nOfSpikes, nOfSpikes + SIZE); 
             for (int i = 0; i<SIZE; i++) { nOfSpikes[i] = log(nOfSpikes[i]);}
             double score = anderson_darling_test(nOfSpikes);
-
-
-
 
             for (int i = 0; i<SIZE; i++) { nOfSpikes[i] = 0.0f;}
         }
