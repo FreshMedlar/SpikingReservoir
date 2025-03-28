@@ -16,7 +16,6 @@ extern std::vector<std::vector<short>> senders; // neuron send to me
 extern Color colors[];
 extern int timeSinceSpike[];
 extern bool active[];
-extern short actionPotential[];
 extern short inhibitory[];
 extern float xCoord[];
 extern float yCoord[];
@@ -28,7 +27,7 @@ extern float threshold[];
 extern std::vector<float> frequency;
 
 extern int maxConnectionStrenght;
-extern int generalThreshold;
+extern float generalThreshold;
 extern int generalBias;
 extern int generalRefractPeriod;
 extern float omega;

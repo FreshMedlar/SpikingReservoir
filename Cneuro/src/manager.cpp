@@ -306,3 +306,38 @@ void Manager::drawSpikeFrequencyDistribution(vector<float> freq) {
         DrawRectangle(1920 - n, 1080-freq[n]-10, 1, freq[n]*10+10, WHITE);
     }
 }
+
+
+
+// RESTRUCTURING
+// for (int restruct = 0; restruct < 10000; restruct++) {
+//     toRemove = disreal(gen);
+//     if (!receivers[toRemove].empty()) {
+//         // get the ID of the neuron we disconnect from
+//         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
+//         Neuron* targetNeuron = receivers[toRemove][fromRemove];
+//         fromRemove = targetNeuron->ID;
+//         // disconnect and get connection strength
+//         toDistribute = disconnect(fromRemove, toRemove);
+//         // if a connection has been removed, distribute its strength
+//         int sjdfo = static_cast<int>(toDistribute); 
+//         for (int a = 0; a < sjdfo; a++) {
+//             if (dis(gen) < growthProb) {
+//                 float weight = static_cast<float>(SIZE);
+//                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
+//                 connectionMatrix[row][col] += 1.0f;
+//                 // connectionMatrix[toRemove][] += 1.0f;
+//             } else {
+//                 from = disreal(gen);
+//                 to = disreal(gen);
+//                 if (connectionMatrix[from][to] != 0.0f){
+//                     connectionMatrix[from][to] += 1.0f;
+//                 } else {
+//                     connect(neurons[from], to, 1.0f);
+//                 }
+//             }
+//         }
+//     }
+//     toDistribute = 0.0f;
+// }
+// restructure = false; 
