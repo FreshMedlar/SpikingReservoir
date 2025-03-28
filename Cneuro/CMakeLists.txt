@@ -4,7 +4,7 @@ project(SpikingReservoir)
 # Use C++17 (required for LibTorch)
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(dlib REQUIRED)
+# find_package(dlib REQUIRED)
 
 
 # find_package(RLtools REQUIRED)
@@ -12,7 +12,7 @@ find_package(dlib REQUIRED)
 # include_directories(${dlib_INCLUDE_DIRS})
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include/Eigen")
-include_directories(/usr/include/python3.11)
+# include_directories(/usr/include/python3.11)
 
 # Add source files
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -20,9 +20,7 @@ file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 # Create executable
 add_executable(program ${SOURCES})
 
-# Link against LibTorch and other libraries
-target_link_libraries(program PRIVATE python3.11 raylib GL m pthread dl rt X11)
-#dlib::dlib
+target_link_libraries(program PRIVATE raylib GL m pthread dl rt X11)
 
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
