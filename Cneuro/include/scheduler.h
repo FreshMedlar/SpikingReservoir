@@ -7,6 +7,7 @@
 #include <algorithm> 
 #include <set>
 #include <Eigen/Dense>
+#include "net.h"
 
 class Neuron;
 
@@ -29,7 +30,7 @@ public:
     Neuron& drawNeuron();
     void step(short letter);
     void pruningAndDecay();
-    float simulation();
+    double simulation();
 
 private:
     int size;
