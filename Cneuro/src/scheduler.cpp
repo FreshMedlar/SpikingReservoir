@@ -89,8 +89,11 @@ void Scheduler::step (short letter) {
     currentSpikeIndex = (currentSpikeIndex + 1) % SPIKE_BUFFER_SIZE;
 }
                 
-float Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {
+double Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {
+    SingleLayerNetwork network(LR, SIZE);
     bool draw = false;
+    float loss;
+    double epoch_loss = 0.0f;
     for (int letter = 0; letter < 1000; letter++) { //encodedTraining.size()-1
         for (int cycle = 0; cycle < 10; cycle++) {
             if (draw) {
@@ -126,18 +129,27 @@ float Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {
             }
             
             scheduler.step(encodedTraining[letter]);
+
+            if (cycle == 9){
+                // cout << spikeBuffer[currentSpikeIndex].size() << endl;
+                short target = encodedTraining[letter+1];
+                Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
+                output = network.softmax(output);
+                loss = network.compute_loss(output, target);
+                epoch_loss += loss;
+                Eigen::VectorXf d_input = network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
+            }
         }
-        // if (letter % 10000 == 9999) {manager.status(); }
     }
                     
     // OBJ function
-    double p = anderson_darling_test(frequency);
-    for (int i = 0; i < SIZE; i++) {
-        frequency[i] = 0.0f;
-    }
+    // epoch_loss = anderson_darling_test(frequency);
+    // for (int i = 0; i < SIZE; i++) {
+    //     frequency[i] = 0.0f;
+    // }
     
     manager.reset();
     
-    return p;
+    return epoch_loss;
 }
                 
