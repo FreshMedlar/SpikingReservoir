@@ -139,7 +139,7 @@ int main() {
 //----------------------------------VISUALS-----------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
-// #define DRAW
+#define DRAW
 #ifndef DRAW
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
@@ -189,7 +189,7 @@ int main() {
     
     for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
         // tracker.push_back(encodedTraining[letter]);
-        for (int cycle = 0; cycle < 10; cycle++) {
+        for (int cycle = 0; cycle < CYCLE_LEN; cycle++) {
     //------------------------------ NEURONS DRAWING ------------------------------------ 
 #ifndef DRAW
                 BeginDrawing();
@@ -247,9 +247,9 @@ int main() {
 
             // }
     //-----------------------------MODEL BY HAND-------------------------------
-#define TRAIN
+// #define TRAIN
 #ifndef TRAIN
-            if (cycle == 9) {
+            if (cycle == CYCLE_LEN-1) {
 #define RL
 #ifndef RL
                 if (letter%100 == 99) {
