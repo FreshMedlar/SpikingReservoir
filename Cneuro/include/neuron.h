@@ -28,7 +28,6 @@ extern std::vector<float> frequency;
 
 extern int maxConnectionStrenght;
 extern float generalThreshold;
-extern int generalBias;
 extern int generalRefractPeriod;
 extern float omega;
 extern float alpha;
