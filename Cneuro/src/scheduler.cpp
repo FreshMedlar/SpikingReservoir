@@ -95,7 +95,7 @@ double Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {
     float loss;
     double epoch_loss = 0.0f;
     for (int letter = 0; letter < 1000; letter++) { //encodedTraining.size()-1
-        for (int cycle = 0; cycle < 10; cycle++) {
+        for (int cycle = 0; cycle < CYCLE_LEN; cycle++) {
             if (draw) {
                 BeginDrawing();
                 ClearBackground(BLACK);
@@ -130,7 +130,7 @@ double Scheduler::simulation() { //, vector<int>& connectionsPerNeuron) {
             
             scheduler.step(encodedTraining[letter]);
 
-            if (cycle == 9){
+            if (cycle == CYCLE_LEN-1){
                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;
                 short target = encodedTraining[letter+1];
                 Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
