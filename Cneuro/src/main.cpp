@@ -139,7 +139,7 @@ int main() {
 //----------------------------------VISUALS-----------------------------------------------
     const int screenWidth = 1920;
     const int screenHeight = 1080;
-#define DRAW
+// #define DRAW
 #ifndef DRAW
     InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
     ToggleFullscreen();    
@@ -247,7 +247,7 @@ int main() {
 
             // }
     //-----------------------------MODEL BY HAND-------------------------------
-// #define TRAIN
+#define TRAIN
 #ifndef TRAIN
             if (cycle == 9) {
 #define RL
@@ -267,7 +267,7 @@ int main() {
                 loss = network.compute_loss(output, target);
                 epoch_loss += loss;
                 RL_loss += loss;
-                Eigen::VectorXf d_input = network.backward(spikeHistory, output, target); // 10000, 
+                Eigen::VectorXf d_input = network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
                 spikeHistory.clear();
 #ifndef RL
                 if (letter%100 == 99) {
