@@ -33,13 +33,15 @@ int main() {
 
     manager.createSingle(0, false);
     manager.createSingle(1, false);
-    cout << "prova" << endl;
+    
     connect(0, 1);
-    cout << "prova" << endl;
+    yA[1] += 10;
     forward(0, 1);
+
     for (int i = 0; i < 1000; i++) {
         scheduler.step(0);
-        // cout << "X1 " << xA[1] << ", Y1 " << yA[1] << endl;
+        cout << "X0 " << xA[0] << ", Y0 " << yA[0] << endl;
+        cout << "X1 " << xA[1] << ", Y1 " << yA[1] << endl;
     }
 
     return 0;
