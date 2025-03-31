@@ -17,6 +17,7 @@ extern float totalSum;
 extern short neuronCount;
 constexpr short SIZE = 1000;
 extern std::vector<short> encodedTraining;
+constexpr short CYCLE_LEN = 50;
 
 // refractory period
 // extern const size_t COOLDOWN_FRAMES;
