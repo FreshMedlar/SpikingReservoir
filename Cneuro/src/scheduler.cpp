@@ -80,7 +80,7 @@ void Scheduler::step (short letter) {
     // GLOBAL UPDATES
     for (int neu = 0; neu < SIZE; neu++) {
         timeSinceSpike[neu] += 1;
-        excitability[neu] -= 0.06f * (1.0f - excitability[neu]);
+        // excitability[neu] -= 0.06f * (1.0f - excitability[neu]);
     }
     // SPIKES 
     for (short neur : spikeBuffer[currentSpikeIndex]) { spike(neur); } 
