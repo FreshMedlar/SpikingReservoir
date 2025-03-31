@@ -259,12 +259,12 @@ void Manager::drawreceiversGraph(const std::vector<int>& conn) {
 }
 
 void Manager::drawSpikesGraph(std::vector<int>& spikeNumber) {
-    int barHeight = 3;
+    int barHeight = 2;
 
     // DrawRectangle(10, 260, plotWidth, plotHeight, BLACK);
     for (int i = 0; i < spikeNumber.size(); i++) {
         int barWidth = spikeNumber[i];
-        DrawRectangle(2 , 145 + 3*i, barWidth, barHeight, BLUE);
+        DrawRectangle(2 , 145 + 2*i, barWidth, barHeight, BLUE);
 
     }
 }
@@ -303,7 +303,7 @@ void Manager::drawOrder() {
 
 void Manager::drawSpikeFrequencyDistribution(vector<float> freq) {
     for (int n = 0; n < freq.size(); n++) {
-        DrawRectangle(1920 - n, 1080-freq[n]-10, 1, freq[n]*10+10, WHITE);
+        DrawRectangle(1910 - n, 1070-freq[n], 1, freq[n], WHITE);
     }
 }
 

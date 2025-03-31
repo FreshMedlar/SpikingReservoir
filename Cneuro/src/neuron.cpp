@@ -54,11 +54,11 @@ void spike(short pre) {
     // time of next spike
     int next = whenSpike(pre);
 
-        // float delta = inhibitory[pre]*LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
+        float delta = LR/exp(timeSinceSpike[pre]/TEMP); //we calc now for efficiency
         for (short n: receivers[pre]) { if (active[n]) {forward(pre, n);}}
-        // for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
+        for (short prepre : senders[pre]) { backprop(prepre, pre, delta); }
 
-    excitability[pre] += 0.1;
+    excitability[pre] += 2.0f;
     timeSinceSpike[pre] = 0;
     if (next == 0)  { active[pre] = true;       }
     else            { queueNeuron(pre, next);   }
@@ -69,13 +69,16 @@ void forward(short spiked, short post) {
     // if timeSinceSpike[post] small, w go down :(
     
     // TODO - integrate all inputs at the end of the step, to make bigger changes possible
-    yA[post] += generalImpulse * connectionMatrix[spiked] [post] * inhibitory[spiked];
+    yA[post] += generalImpulse * connectionMatrix[spiked][post] * inhibitory[spiked];
     if (yA[post] > (generalThreshold*excitability[post])) {
         queueNeuron(post, 1); // insert in next step
         // colorNeuron(post);
-        // float delta = LR/exp(timeSinceSpike[post]/TEMP);
-        // connectionMatrix[spiked][post] -= delta;
-        // totalSum -= delta;
+        float delta = LR/exp(timeSinceSpike[post]/TEMP);
+        connectionMatrix[spiked][post] -= delta;
+        totalSum -= delta;
+    } else {
+        yA[post] = 0.0f;
+        excitability[post] -= 0.01f;
     }
 }
 void backprop(short pre, short post, float delta) {
