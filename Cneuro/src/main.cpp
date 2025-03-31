@@ -41,21 +41,9 @@ int main() {
     file.close();
 //-----------------------DATA PROCESSING-----------------------------
     size_t textLength = fileContent.length();
-    cout << "Length of the text: " << textLength << endl;
-
     set<char> uniqueCharsSet(fileContent.begin(), fileContent.end());
     vector<char> uniqueChars(uniqueCharsSet.begin(), uniqueCharsSet.end());
     vector<char> charVector(fileContent.begin(), fileContent.end());
-
-    int splitIndex = static_cast<int>(round(0.9*textLength));
-    string training = fileContent.substr(0, splitIndex);
-    string validation = fileContent.substr(splitIndex);
-    // Print the vector of characters (optional)
-    cout << "Characters in the vector: ";
-    for (char c : uniqueChars) {
-        cout << c;
-    }
-    cout << endl;
 
     // Example of translating characters to numbers
     map<char, short> stoi;
@@ -64,18 +52,7 @@ int main() {
         stoi[uniqueChars[i]] = i;
         itos[i] = uniqueChars[i];
     }
-
-    cout << "Characters translated to numbers: ";
-    string prova = "prova";
-    vector<short> encoded = encode(prova, stoi);
-    string decoded = decode(encoded, itos);
-    // for (auto i : decoded) {
-    //     cout << i << " ";
-    // }
-    // for (char c : uniqueChars) {
-    //     cout << stoi[c] << "";
-    // }
-    cout << endl;
+    encodedTraining = encode(fileContent, stoi); 
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
     manager.createNeurons();
     manager.initialConnections(100);
@@ -83,21 +60,9 @@ int main() {
     // manager.createSequentialNeurons();
     
     manager.status();
-    manager.removeInputConnections(65);
-    // for (int dos = 0; dos < 100; dos++) {
-    //     cout << senders[dos].size() << dos << " ";
-    // }
-    int SPIKE_SAMPLING = 10;
-    int frameCounter = 0;
-    vector<int> connectionsPerNeuron(SIZE, 0);
-    uniform_real_distribution<> dis(0.0,1.0);
-    uniform_int_distribution<> disreal(0, SIZE-1);
+    // manager.removeInputConnections(65);
+
 //----------------------------------STUPID ENCODING------------------------------------------
-    // from letters to integer
-    encodedTraining = encode(fileContent, stoi); 
-    vector<vector<vector<short>>> inputReservoir;
-
-
     
     // RANDOM SOLUTIONS
     vector<Solution> solutions;
