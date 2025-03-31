@@ -16,9 +16,6 @@ int changeRandomInt(int toChange) {
         case 1:
             generalThreshold += change;
             break;
-        case 2:
-            generalBias += change;
-            break;
     }
     return change;
 }
