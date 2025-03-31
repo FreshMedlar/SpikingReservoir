@@ -60,8 +60,10 @@ void spike(short pre) {
 
     excitability[pre] += 2.0f;
     timeSinceSpike[pre] = 0;
-    if (next == 0)  { active[pre] = true;       }
-    else            { queueNeuron(pre, next);   }
+    if (next == 0)  {   active[pre] = true;   
+                        yA[pre] = 0.0f;
+                        xA[pre] = 0.0f;         }
+    else            {   queueNeuron(pre, next); }
 }   
 
 void forward(short spiked, short post) {
