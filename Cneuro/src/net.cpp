@@ -35,7 +35,7 @@ Eigen::VectorXf SingleLayerNetwork::parallel_matvec_sparse(const Eigen::MatrixXf
 
 // Multithreaded outer product
 Eigen::MatrixXf SingleLayerNetwork::parallel_outer_sparse(const Eigen::VectorXf& a, 
-                                                const std::vector<int>& b) {
+                                                const std::vector<short>& b) {
     Eigen::MatrixXf result = Eigen::MatrixXf::Zero(a.size(), size);
     #pragma omp parallel for
     for (int i : b) {
@@ -69,7 +69,7 @@ Eigen::VectorXf SingleLayerNetwork::forward_sparse(const std::vector<short>& spi
     return parallel_matvec_sparse(weights, spike_indices) + biases;
 }
 
-Eigen::VectorXf SingleLayerNetwork::backward(const std::vector<int>& input, // 1x10000
+Eigen::VectorXf SingleLayerNetwork::backward(const std::vector<short>& input, // 1x10000
                                             const Eigen::VectorXf& output, // 1x65
                                             int target) { // 1
     // Create one-hot encoded target vector
