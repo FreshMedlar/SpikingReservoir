@@ -21,8 +21,6 @@ float excitability[SIZE];
 
 int maxConnectionStrenght = 23;
 float generalThreshold = 2.0f;
-int generalBias = 30;
-int generalRefractPeriod = 3;
 float omega = 0.11;
 float alpha = 0.01;
 float generalImpulse = 1.0f;
