@@ -377,12 +377,23 @@ int main() {
 
 
 
-// #include "matplotlibcpp.h"
-// namespace plt = matplotlibcpp;
-// int main() {
-//     plt::plot({1,3,2,4});
-//     plt::show();
-// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -400,12 +411,7 @@ int main() {
 // #include <set>
 // #include <map>
 // #include <Eigen/Dense>
-// #include <ensmallen.hpp>
-// #include <cereal/archives/json.hpp>
-
-// // Define these to print extra informational output and warnings.
-// // #define MLPACK_PRINT_INFO
-// // #define MLPACK_PRINT_WARN
+// #include <cmath>
 
 // #include "neuron.h"
 // #include "manager.h"
@@ -415,80 +421,127 @@ int main() {
 // #include "net.h"
 // #include "encoder.h"
 // #include "utilities.h"
+// #include "rl.h"
 
 // // using namespace arma;
 // using namespace std;
 
-// int main() {
-// //----------------------------------RESERVOIR DEFINITION-----------------------------------
-//     manager.createSingle(0, false);
-//     manager.createSingle(1, false);
-//     manager.initialConnections(); // matrix init
-//     connect(neurons[0], 1);
-    
-//     connectionMatrix[0][1] = 1.0f;
-//     biases[0] = 1.0f;
-//     biases[1] = 1.0f;
-    
-//     spikeBuffer[1].push_back(0);
-//     spikeBuffer[3].push_back(1);
-//     spikeBuffer[10].push_back(0);
-//     spikeBuffer[13].push_back(1);
-//     spikeBuffer[20].push_back(0);
-//     spikeBuffer[23].push_back(1);
-//     spikeBuffer[30].push_back(0);
-//     spikeBuffer[33].push_back(1);
-//     spikeBuffer[40].push_back(0);
-//     spikeBuffer[43].push_back(1);
-//     for (int step = 0; step < 100; step++) {
-//         scheduler.update();
+// struct Solution
+// {
+//     double rank, x, y, z;
+//     void fitness (double p) {
+//         rank = p - 1;
 //     }
-//     cout << connectionMatrix[0][1] << endl;
+// };
 
-//     // z[0] = biases[0]
-//     // z[1] = connectionMatrix[0][1] * active[0] + biases[1]
-//     // lambda[0] = exp(sigma[0]*z[0]/TEMP)
-//     // lambda[1] = exp(sigma[1]*z[1]/TEMP)
-//     // sigma is 1 if active, -1 if not active
-//     // fixed biases, weigth updated based on formula
+// int main() {
+// //-----------------------READ INPUT FILE----------------------
+//     string filePath = "/home/medlar/SpikingReservoir/tinyshakespeare.txt";
+//     ifstream file(filePath);
+//     if (!file.is_open()) {
+//         cerr << "Error opening file." << endl;
+//         return 1;
+//     }
+//     string fileContent((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+//     file.close();
+// //-----------------------DATA PROCESSING-----------------------------
+//     size_t textLength = fileContent.length();
+//     set<char> uniqueCharsSet(fileContent.begin(), fileContent.end());
+//     vector<char> uniqueChars(uniqueCharsSet.begin(), uniqueCharsSet.end());
+//     vector<char> charVector(fileContent.begin(), fileContent.end());
 
+//     // Example of translating characters to numbers
+//     map<char, short> stoi;
+//     map<short, char> itos;
+//     for (short i = 0; i < uniqueChars.size(); i++) {
+//         stoi[uniqueChars[i]] = i;
+//         itos[i] = uniqueChars[i];
+//     }
+//     encodedTraining = encode(fileContent, stoi); 
+// //----------------------------------RESERVOIR DEFINITION-----------------------------------
+//     manager.createNeurons();
+//     manager.initialConnections(100);
+//     // OR
+//     // manager.createSequentialNeurons();
+    
+//     manager.status();
+//     // manager.removeInputConnections(65);
 
+// //----------------------------------STUPID ENCODING------------------------------------------
+    
+//     // RANDOM SOLUTIONS
+//     vector<Solution> solutions;
+//     const int SOL = 100;
+//     for (int i = 0; i < SOL; i++) {
+//         solutions.push_back(Solution{
+//             0, 
+//             getRandomFloat(-10, 10),
+//             getRandomFloat(0.0f, 0.5f),
+//             getRandomFloat(2, 10),
+//         });
+//     }
 
-// //     int SPIKE_SAMPLING = 10;
-// //     int frameCounter = 0;
-// //     vector<int> connectionsPerNeuron(SIZE, 0);
-// //     uniform_real_distribution<> dis(0.0,1.0);
-// //     uniform_int_distribution<> disreal(0, SIZE-1);
-// // //----------------------------------TRAINING LOOP-----------------------------------------
-// //     int epoch = 0;
-// //     float epoch_loss = 0;
+//     //TEST THE SOLUTIONS
+//     double p;
+//     for (auto& s : solutions) {
+//         omega = s.x;
+//         alpha = s.y;
+//         generalImpulse = s.z;
+//         p = scheduler.simulation();
+//         s.fitness(p);
+//         cout << totalSum << endl;
+//         totalSum = 0;
+//     }
 
-// //     for (int nun = 0; nun < 100; nun++) {
-// // //------------------------ REFRACTORY PERIOD ---------------------------------------------------------
+//     sort(solutions.begin(), solutions.end(), 
+//     [](const auto& lhs, const auto& rhs){
+//         return lhs.rank > rhs.rank;
+//     });
 
-// //             for (short obj : disableBuffer[currentFrameIndex]) {
-// //                 active[obj] = true;
-// //                 colors[obj] = WHITE;
-// //             }
-// //             disableBuffer[currentFrameIndex].clear(); // Reset the slot
-// //             // Advance the ring buffer index
-// //             currentFrameIndex = (currentFrameIndex + 1) % COOLDOWN_FRAMES;
+//     for_each(
+//         solutions.begin(),
+//         solutions.begin() + 10, [](const auto& s) {
+//             cout << fixed
+//                 << "Rank " << static_cast<int>(s.rank) 
+//                 << "\n x:" << s.x << " y:" << s.y << " z:" << s.z
+//                 << "\n";
+//         }
+//     );
 
-// // //-------------------------------INPUT----------------------------------------------
-// //             // we queue N neurons to spike next
-// //             // for (short ll : inputReservoir[epoch/10][epoch%10]){
-// //             //     scheduler.toSpike.insert(ll);
-// //             // }
-// //             //X(t) FOR THE MODEL
-  
-// //             //RESERVOIR
-// //             scheduler.update();
-
-// //         epoch++;
-// //     }
-// //     CloseWindow();
 
 //     return 0;
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
