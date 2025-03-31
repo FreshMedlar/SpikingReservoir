@@ -149,7 +149,7 @@ int main() {
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
     spikeHistory.reserve(SPIKE_SAMPLING);
-    vector<int> spikeNumber(500, 0); // Initialize with size 500 and default value 0
+    vector<int> spikeNumber(200, 0); // Initialize with size 500 and default value 0
 
 
     vector<float> totalWeight;
@@ -208,7 +208,6 @@ int main() {
                 // manager.clustering();
                 // SPIKES
                 manager.drawSpikesGraph(spikeNumber);
-                // totalWeight[(epoch)%500] = totalSum;
                 manager.drawTotalWeight();
                 manager.drawOrder();
                 manager.drawChaos();
@@ -238,8 +237,8 @@ int main() {
                 // }
 
                 //RESERVOIR
-                totalSum += spikeBuffer[currentSpikeIndex].size();
-                spikeNumber[letter%500] = spikeBuffer[currentSpikeIndex].size(); // does not include current input
+                // totalSum += spikeBuffer[currentSpikeIndex].size();
+                spikeNumber[letter%200] = spikeBuffer[currentSpikeIndex].size(); // does not include current input
                 for (short neur : spikeBuffer[currentSpikeIndex]) {
                     nOfSpikes[neur] += 1.0f; }
                 scheduler.step(encodedTraining[letter]);
@@ -248,10 +247,10 @@ int main() {
 
             // }
     //-----------------------------MODEL BY HAND-------------------------------
-#define TRAIN
+// #define TRAIN
 #ifndef TRAIN
             if (cycle == 9) {
-// #define RL
+#define RL
 #ifndef RL
                 if (letter%100 == 99) {
                     toChange = getRandomInt(0, 2);
@@ -344,7 +343,7 @@ int main() {
             epoch++;
         }
         // END LETTER
-// #define RL2
+#define RL2
 #ifndef RL2
         if (letter% 100 == 99) { // 99, 199...
             // std::sort(nOfSpikes, nOfSpikes + SIZE); 
