@@ -136,47 +136,45 @@ int main() {
     const int NUM_SAMPLES = 1;  // Online learning
 
     SingleLayerNetwork network(LR_M, SIZE);
-//----------------------------------VISUALS-----------------------------------------------
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
-#define DRAW
-#ifndef DRAW
-    InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-    ToggleFullscreen();    
-    SetTargetFPS(-1);
-#endif
-//----------------------------------DATA--------------------------------------------------
+    //----------------------------------DATA--------------------------------------------------
     // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
     vector<int> spikeHistory;
     spikeHistory.reserve(SPIKE_SAMPLING);
     vector<int> spikeNumber(200, 0); // Initialize with size 500 and default value 0
-
-
+    
+    
     vector<float> totalWeight;
     totalWeight.reserve(SIZE);
     totalWeight.resize(SIZE);
-//---------------------------------REGROWTH---------------------------------------------------
+    //---------------------------------REGROWTH---------------------------------------------------
     float growthProb = 0.66f;
     int toRemove;
     int fromRemove;
     float toDistribute = 0.0f;
     int from;
     int to;
-//----------------------------------TRAINING LOOP-----------------------------------------
+    //----------------------------------TRAINING LOOP-----------------------------------------
     float loss = 0.0f;
     float old_loss = 0.0f;
     vector<float> log_data(10, 1.0f);
     vector<float> nOfSpikes(SIZE, 0.0f);
     float result = 0.0f;
-    int epoch = 0;
     float epoch_loss;
     static vector<int> fpsHistory;
     static long totalFPS = 0;
     std::cout << fileContent.size() << std::endl;
     std::cout << encodedTraining.size() << std::endl;
     vector<short> tracker;
-    // while (!WindowShouldClose()) {
-//--------------------------------------DEBUG VAR--------------------------------------------
+    //----------------------------------VISUALS-----------------------------------------------
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
+    #define DRAW
+    #ifndef DRAW
+        InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
+        ToggleFullscreen();    
+        SetTargetFPS(-1);
+    #endif
+    //--------------------------------------DEBUG VAR--------------------------------------------
     int countFail = 0;
     int toChange = 0;
     int change;
@@ -186,80 +184,68 @@ int main() {
     int inactive = 0;
     int past_inactive = 0;
     float generalImpulseChange = 0.0f;
-    
+        
     for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
         // tracker.push_back(encodedTraining[letter]);
         for (int cycle = 0; cycle < CYCLE_LEN; cycle++) {
-    //------------------------------ NEURONS DRAWING ------------------------------------ 
+            //------------------------------ NEURONS DRAWING ------------------------------------ 
 #ifndef DRAW
-                BeginDrawing();
-                ClearBackground(BLACK);
-                
-                //DRAW
-                // manager.draw();
-                // manager.applyForces();
-                //GRAPH
-                connectionsPerNeuron.clear();
-                connectionsPerNeuron.resize(SIZE, 0); 
-                    // EITHER, NOT BOTH
-                    manager.receiversFrequence(connectionsPerNeuron.data()); 
-                    // manager.sendersFrequence(connectionsPerNeuron.data());
-                manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-                // manager.clustering();
-                // SPIKES
-                manager.drawSpikesGraph(spikeNumber);
-                manager.drawTotalWeight();
-                manager.drawOrder();
-                manager.drawChaos();
-                std::vector<float> sorted = frequency;  // Copy the original vector
-                std::sort(sorted.begin(), sorted.end());  // Sort in ascending order
-                manager.drawSpikeFrequencyDistribution(sorted);
+            BeginDrawing();
+            ClearBackground(BLACK);
+            
+            //DRAW
+            // manager.draw();
+            // manager.applyForces();
+            //GRAPH
+            connectionsPerNeuron.clear();
+            connectionsPerNeuron.resize(SIZE, 0); 
+            // EITHER, NOT BOTH
+            manager.receiversFrequence(connectionsPerNeuron.data()); 
+            // manager.sendersFrequence(connectionsPerNeuron.data());
+            manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
+            // manager.clustering();
+            // SPIKES
+            manager.drawSpikesGraph(spikeNumber);
+            manager.drawTotalWeight();
+            manager.drawOrder();
+            manager.drawChaos();
+            std::vector<float> sorted = frequency;  // Copy the original vector
+            std::sort(sorted.begin(), sorted.end());  // Sort in ascending order
+            manager.drawSpikeFrequencyDistribution(sorted);
 
-                // cout << excitability[1000] << endl;
+            // cout << excitability[1000] << endl;
 
-                // FPS  
-                int fps = GetFPS();
-                DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+            // FPS  
+            int fps = GetFPS();
+            DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
 
-                EndDrawing();
-                
-                fpsHistory.push_back(fps);
-                totalFPS += fps;
-                scheduler.updateColor();
+            EndDrawing();
+            
+            fpsHistory.push_back(fps);
+            totalFPS += fps;
+            scheduler.updateColor();
 #endif
-
-        //-------------------------------INPUT----------------------------------------------
-                //X(t) FOR THE MODEL
-                // if (epoch % 10 == 9) {
-                //     for (auto ins : spikeBuffer[currentSpikeIndex]){
-                //         spikeHistory.push_back(ins+(SIZE*(epoch)));
-                //     }
-                // }
-
-                //RESERVOIR
-                // totalSum += spikeBuffer[currentSpikeIndex].size();
-                spikeNumber[letter%200] = spikeBuffer[currentSpikeIndex].size(); // does not include current input
-                for (short neur : spikeBuffer[currentSpikeIndex]) {
-                    nOfSpikes[neur] += 1.0f; }
-                scheduler.step(encodedTraining[letter]);
-                // scheduler.pruningAndDecay();
-                // scheduler.synaptoGenesis();
-
+    //-------------------------------INPUT----------------------------------------------
+            //X(t) FOR THE MODEL
+            // if (epoch % 10 == 9) {
+            //     for (auto ins : spikeBuffer[currentSpikeIndex]){
+            //         spikeHistory.push_back(ins+(SIZE*(epoch)));
+            //     }
             // }
+
+            //RESERVOIR
+            // totalSum += spikeBuffer[currentSpikeIndex].size();
+            spikeNumber[letter%200] = spikeBuffer[currentSpikeIndex].size(); // does not include current input
+            for (short neur : spikeBuffer[currentSpikeIndex]) {
+                nOfSpikes[neur] += 1.0f; }
+            scheduler.step(encodedTraining[letter]);
+            // scheduler.pruningAndDecay();
+            // scheduler.synaptoGenesis();
+
     //-----------------------------MODEL BY HAND-------------------------------
 // #define TRAIN
 #ifndef TRAIN
             if (cycle == CYCLE_LEN-1) {
-#define RL
-#ifndef RL
-                if (letter%100 == 99) {
-                    toChange = getRandomInt(0, 2);
-                    int change = changeRandomInt(toChange);
-                    // OR
-                    float change = changeRandomFloat(toChange);
-                }
-#endif
-
                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;
                 short target = encodedTraining[letter+1];
                 Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
@@ -269,97 +255,20 @@ int main() {
                 RL_loss += loss;
                 Eigen::VectorXf d_input = network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
                 spikeHistory.clear();
-#ifndef RL
-                if (letter%100 == 99) {
-                    // -----------------------
-                    // if (RL_loss/100 > old_loss) { // reverse change if worse
-                    // -------------------
-                    int inactive = 0;
-                    for (int i = 0; i < SIZE; i++) {
-                        if (frequency[i] == 0) {inactive++;}
-                        // OR
-                        // inactive += frequency[i];
-                        frequency[i] = 0;
-                    }
-                    cout << "TOTAL SPIKES -- " << inactive << endl;
-                    if (inactive > past_inactive) {
-                    // --------------------------
-                        countFail += 1;
-                        switch(toChange) {
-                            case 0:
-                                maxConnectionStrenght -= change;
-                            break;
-                            case 1:
-                                generalThreshold -= change;
-                            break;
-                            case 2:
-                                generalBias -= change;
-                            break;
-                            case 3:
-                                omega -= omegaChange;
-                                // if (generalRefractPeriod > 1) {
-                                // generalRefractPeriod -= change;}
-                            break;
-                            case 4:
-                                alpha -= alphaChange;
-                            break;
-                            case 5:
-                                generalImpulse -= generalImpulseChange;
-                            break;
-                        }
-                    }
-                    
-
-                    past_inactive = inactive;
-                    inactive = 0;
-                    old_loss = RL_loss/100;
-                    RL_loss = 0;
-                }
-#endif
 
                 if (letter%1000 == 0) {
                     cout << "Epoch " << letter+1
-                            << " | Avg Loss: " << epoch_loss/1000
-                            << endl;
+                        << " | Avg Loss: " << epoch_loss/1000
+                        << endl;
                     epoch_loss = 0;
-                    #ifndef RL
-                    cout << countFail << endl;
-                    countFail = 0;
-                    cout << "maxConnectionStrenght " << maxConnectionStrenght << endl;
-                    cout << "generalThreshold " << generalThreshold << endl;
-                    cout << "generalBias " << generalBias << endl;
-                    cout << "generalRefractPeriod " << generalRefractPeriod << endl;
-                    cout << "omega " << omega << endl;
-                    cout << "alpha " << alpha << endl;
-                    cout << "Impulse " << generalImpulse << endl;
-                    #endif
-                }
-                
-                
-                
+                } 
             }
 #endif
 
-            epoch++;
         }
         // END LETTER
-#define RL2
-#ifndef RL2
-        if (letter% 100 == 99) { // 99, 199...
-            // std::sort(nOfSpikes, nOfSpikes + SIZE); 
-            for (int i = 0; i<SIZE; i++) { nOfSpikes[i] = log(nOfSpikes[i]);}
-            double score = anderson_darling_test(nOfSpikes);
-
-            for (int i = 0; i<SIZE; i++) { nOfSpikes[i] = 0.0f;}
-        }
-#endif
     }
     // END
-
-
-    cout << epoch << endl;
-    // cout << decode(tracker, itos);
-
     
     // CloseWindow();
 
