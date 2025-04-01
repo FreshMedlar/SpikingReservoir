@@ -4,15 +4,8 @@ project(SpikingReservoir)
 # Use C++17 (required for LibTorch)
 set(CMAKE_CXX_STANDARD 17)
 
-# find_package(dlib REQUIRED)
-
-
-# find_package(RLtools REQUIRED)
-
-# include_directories(${dlib_INCLUDE_DIRS})
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include/Eigen")
-# include_directories(/usr/include/python3.11)
 
 # Add source files
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
