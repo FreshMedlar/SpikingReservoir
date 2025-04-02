@@ -1,13 +1,4 @@
 #include "scheduler.h"
-#include "global.h"
-
-#include <iostream>
-#include <algorithm>
-#include <numeric>
-#include <random>
-#include <omp.h>
-
-#include "raylib.h"
 
 Scheduler::Scheduler(int size, Simulation& simulation) 
         :   size(size), 

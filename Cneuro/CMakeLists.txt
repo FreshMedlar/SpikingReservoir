@@ -5,7 +5,6 @@ project(SpikingReservoir)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories("${PROJECT_SOURCE_DIR}/include/Eigen")
 
 # Add source files
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -15,6 +14,7 @@ add_executable(program ${SOURCES})
 
 target_link_libraries(program PRIVATE raylib GL m pthread dl rt X11)
 
+find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")

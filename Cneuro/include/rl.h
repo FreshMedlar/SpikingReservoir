@@ -3,6 +3,7 @@
 
 #include "utilities.h"
 #include "neuron.h"
+#include <random>
 
 int changeRandomInt(int toChange);
 float changeRandomFloat(int toChange);
