@@ -1,10 +1,42 @@
+EVOLVE THE MODEL TO BE LOG DISTRIBUTED
+
+# RL:
+**evolving variables**:
+ 1. generalThreshold
+ 2. generalBias
+ 3. generalRefractPeriod
+ 4. maxConnectionStrenght
+**METHODS**
+ 1. Grid Search
+ 2. Random Search
+ 3. Hill Climbing
+ 4. Simulated Annealing
+ 5. Genetic Algorithms
+ 6. Gradient-Based Methods
+**OBJ FUNCTION**
+ 1. Log-Normal distribution in the number of spikes
+ 2. 85% neurons active
+ 3. N of spikes in a range
+
+
+
+
+
+
+
+MOST IMPORTANT
+- graph for distribution of synapses strength, firing rates, firing per second
+    and in general need to study the stability of the system
+
+- there may be douplicates in the spike buffer (from manual input)
+
 - synaptogenesis
     the development of new synapses is based on competition and various constraints.
     NOTE: this could also be impossible without ordered data. Rand spike won't do it 
     
     THEORY - The # of outgoing connection per neuron follow a log-normal distribution, this is an emergent property that we see when nodes compete (limited inputs are necessary/needed)on such task based, among many factors, on their current performance. This cause the resulting variable to compound, skewing the distribution.
 
-- the synaptoGenesis function needs to be changed. Lonely neurons should remain such, and 
+- the synaptoGenesis function needs to be changed. Lonely neurons should remain such
 
 - homeostasis
 
@@ -12,7 +44,18 @@
 
 - move part of Neuron::disconnect to the rispective neuron
 
-- graph for distribution of synapses strength and firing rates
-
 DONE
 - pruning
+
+EFFICIENCY
+no changes | 36 FPS
+
+
+# Day 50 - v0.0.1
+
+Now simulations can be run in parallen and with different paramenters.
+The environment has been enclosed in the Simulation class.
+It's still a mess, but a usable one.
+Next step is **refactoring**, cleaning and calculus exam :-(
+Also need to make a **drawer class** for order.
+
