@@ -21,9 +21,9 @@
 #include "scheduler.h"
 #include "global.h"
 #include "net.h"
-#include "encoder.h"
 #include "utilities.h"
 #include "rl.h"
+#include "simulation.h"
 
 // using namespace arma;
 using namespace std;
@@ -76,25 +76,13 @@ int main() {
     }
     cout << endl;
 //----------------------------------RESERVOIR DEFINITION-----------------------------------
-    manager.createNeurons();
-    manager.initialConnections(100);
-    // OR
-    // manager.createSequentialNeurons();
-    
-    manager.status();
-    manager.removeInputConnections(65);
-    for (int dos = 0; dos < 100; dos++) {
-        cout << senders[dos].size() << dos << " ";
-    }
-    int SPIKE_SAMPLING = 10;
-    int frameCounter = 0;
-    vector<int> connectionsPerNeuron(SIZE, 0);
+    vector<int> connectionsPerNeuron(1000, 0);
     uniform_real_distribution<> dis(0.0,1.0);
-    uniform_int_distribution<> disreal(0, SIZE-1);
+    uniform_int_distribution<> disreal(0, 1000-1);
 //----------------------------------STUPID ENCODING------------------------------------------
     // from letters to integer
     vector<short> encodedTraining = encode(fileContent, stoi); 
-    vector<vector<vector<short>>> inputReservoir;
+    // vector<vector<vector<short>>> inputReservoir;
     // inputReservoir.reserve(encodedTraining.size());
     // int cycle = 0;
     // for (short letter : encodedTraining) {
@@ -108,173 +96,34 @@ int main() {
     
     // the idea is to have a normal distribution around the encoded letter/symbol
 
-    vector<short> encodedUniqueChars;
-    for (char letter : uniqueChars){
-        string s = {letter};
-        encodedUniqueChars.push_back(encode(s, stoi)[0]);
-    }
-    vector<vector<vector<short>>> spikeEncodedChars (encodedUniqueChars.size());
-    for (int s = 0; s < encodedUniqueChars.size(); s++) {
-        vector<int> randomIndexes;
-        // take 5 random neurons for this letter
-        for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(0, 64));}
+    // vector<short> encodedUniqueChars;
+    // for (char letter : uniqueChars){
+    //     string s = {letter};
+    //     encodedUniqueChars.push_back(encode(s, stoi)[0]);
+    // }
+    // vector<vector<vector<short>>> spikeEncodedChars (encodedUniqueChars.size());
+    // for (int s = 0; s < encodedUniqueChars.size(); s++) {
+    //     vector<int> randomIndexes;
+    //     // take 5 random neurons for this letter
+    //     for (int sos = 0; sos < 5; sos++) {randomIndexes.push_back(getRandomInt(0, 64));}
 
-        for (short o = 0; o < SPIKE_SAMPLING; o++){
-            vector<short> innerVec;
-            innerVec.push_back(randomIndexes[o%5]);
-            spikeEncodedChars[s].push_back(innerVec);
-            innerVec.clear();
-        }
-    }
-    for (short letter : encodedTraining) {
-        inputReservoir.push_back(spikeEncodedChars[letter]);
-    }
+    //     for (short o = 0; o < SPIKE_SAMPLING; o++){
+    //         vector<short> innerVec;
+    //         innerVec.push_back(randomIndexes[o%5]);
+    //         spikeEncodedChars[s].push_back(innerVec);
+    //         innerVec.clear();
+    //     }
+    // }
+    // for (short letter : encodedTraining) {
+    //     inputReservoir.push_back(spikeEncodedChars[letter]);
+    // }
 //----------------------------------BY HAND MODEL------------------------------------------
-    const int INPUT_SIZE = SIZE*10;
-    const int OUTPUT_SIZE = 65;
-    const float LR_M = 0.001;
-    const int NUM_SAMPLES = 1;  // Online learning
 
-    SingleLayerNetwork network(LR_M, SIZE);
-    //----------------------------------DATA--------------------------------------------------
-    // Eigen::MatrixXf spikeHistory = Eigen::MatrixXf::Zero(10, 1000); 
-    vector<int> spikeHistory;
-    spikeHistory.reserve(SPIKE_SAMPLING);
-    vector<int> spikeNumber(200, 0); // Initialize with size 500 and default value 0
-    
-    
-    vector<float> totalWeight;
-    totalWeight.reserve(SIZE);
-    totalWeight.resize(SIZE);
-    //---------------------------------REGROWTH---------------------------------------------------
-    float growthProb = 0.66f;
-    int toRemove;
-    int fromRemove;
-    float toDistribute = 0.0f;
-    int from;
-    int to;
-    //----------------------------------TRAINING LOOP-----------------------------------------
-    float loss = 0.0f;
-    float old_loss = 0.0f;
-    vector<float> log_data(10, 1.0f);
-    vector<float> nOfSpikes(SIZE, 0.0f);
-    float result = 0.0f;
-    float epoch_loss;
-    static vector<int> fpsHistory;
-    static long totalFPS = 0;
-    std::cout << fileContent.size() << std::endl;
-    std::cout << encodedTraining.size() << std::endl;
-    vector<short> tracker;
-    //----------------------------------VISUALS-----------------------------------------------
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
-    #define DRAW
-    #ifndef DRAW
-        InitWindow(screenWidth, screenHeight, "Raylib - Circle Manager");
-        ToggleFullscreen();    
-        SetTargetFPS(-1);
-    #endif
-    //--------------------------------------DEBUG VAR--------------------------------------------
-    int countFail = 0;
-    int toChange = 0;
-    int change;
-    float omegaChange;
-    float alphaChange;
-    float RL_loss = 0.0f;
-    int inactive = 0;
-    int past_inactive = 0;
-    float generalImpulseChange = 0.0f;
-        
-    for (int letter = 0; letter < encodedTraining.size()-1; letter++) {
-        // tracker.push_back(encodedTraining[letter]);
-        for (int cycle = 0; cycle < CYCLE_LEN; cycle++) {
-            //------------------------------ NEURONS DRAWING ------------------------------------ 
-#ifndef DRAW
-            BeginDrawing();
-            ClearBackground(BLACK);
-            
-            //DRAW
-            // manager.draw();
-            // manager.applyForces();
-            //GRAPH
-            connectionsPerNeuron.clear();
-            connectionsPerNeuron.resize(SIZE, 0); 
-            // EITHER, NOT BOTH
-            manager.receiversFrequence(connectionsPerNeuron.data()); 
-            // manager.sendersFrequence(connectionsPerNeuron.data());
-            manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-            // manager.clustering();
-            // SPIKES
-            manager.drawSpikesGraph(spikeNumber);
-            manager.drawTotalWeight();
-            manager.drawOrder();
-            manager.drawChaos();
-            std::vector<float> sorted = frequency;  // Copy the original vector
-            std::sort(sorted.begin(), sorted.end());  // Sort in ascending order
-            manager.drawSpikeFrequencyDistribution(sorted);
 
-            // cout << excitability[1000] << endl;
+    Simulation sim(1000, 0.001, encodedTraining, true, true);
 
-            // FPS  
-            int fps = GetFPS();
-            DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
+    sim.simulate();
 
-            EndDrawing();
-            
-            fpsHistory.push_back(fps);
-            totalFPS += fps;
-            scheduler.updateColor();
-#endif
-    //-------------------------------INPUT----------------------------------------------
-            //X(t) FOR THE MODEL
-            // if (epoch % 10 == 9) {
-            //     for (auto ins : spikeBuffer[currentSpikeIndex]){
-            //         spikeHistory.push_back(ins+(SIZE*(epoch)));
-            //     }
-            // }
-
-            //RESERVOIR
-            // totalSum += spikeBuffer[currentSpikeIndex].size();
-            spikeNumber[letter%200] = spikeBuffer[currentSpikeIndex].size(); // does not include current input
-            for (short neur : spikeBuffer[currentSpikeIndex]) {
-                nOfSpikes[neur] += 1.0f; }
-            scheduler.step(encodedTraining[letter]);
-            // scheduler.pruningAndDecay();
-            // scheduler.synaptoGenesis();
-
-    //-----------------------------MODEL BY HAND-------------------------------
-// #define TRAIN
-#ifndef TRAIN
-            if (cycle == CYCLE_LEN-1) {
-                // cout << spikeBuffer[currentSpikeIndex].size() << endl;
-                short target = encodedTraining[letter+1];
-                Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
-                output = network.softmax(output);
-                loss = network.compute_loss(output, target);
-                epoch_loss += loss;
-                RL_loss += loss;
-                Eigen::VectorXf d_input = network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
-                spikeHistory.clear();
-
-                if (letter%1000 == 0) {
-                    cout << "Epoch " << letter+1
-                        << " | Avg Loss: " << epoch_loss/1000
-                        << endl;
-                    epoch_loss = 0;
-                } 
-            }
-#endif
-
-        }
-        // END LETTER
-    }
-    // END
-    
-    // CloseWindow();
-
-    // int averageFPS = totalFPS / fpsHistory.size();
-    // cout << averageFPS << endl;
-    // cout << decode(encodedTraining, itos) << endl;
     return 0;
 }
 

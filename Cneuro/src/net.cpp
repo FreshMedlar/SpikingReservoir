@@ -20,7 +20,7 @@ Eigen::VectorXf SingleLayerNetwork::parallel_matvec(const Eigen::MatrixXf& W,
 }
 
 Eigen::VectorXf SingleLayerNetwork::parallel_matvec_sparse(const Eigen::MatrixXf& W, 
-                                                const std::vector<short>& indices) {
+                                                        const std::vector<short>& indices) {
     Eigen::VectorXf result(W.rows());
     #pragma omp parallel for
     for(int i = 0; i < W.rows(); ++i) {
@@ -35,7 +35,7 @@ Eigen::VectorXf SingleLayerNetwork::parallel_matvec_sparse(const Eigen::MatrixXf
 
 // Multithreaded outer product
 Eigen::MatrixXf SingleLayerNetwork::parallel_outer_sparse(const Eigen::VectorXf& a, 
-                                                const std::vector<short>& b) {
+                                                        const std::vector<short>& b) {
     Eigen::MatrixXf result = Eigen::MatrixXf::Zero(a.size(), size);
     #pragma omp parallel for
     for (int i : b) {
@@ -45,7 +45,7 @@ Eigen::MatrixXf SingleLayerNetwork::parallel_outer_sparse(const Eigen::VectorXf&
 }
 
 Eigen::MatrixXf SingleLayerNetwork::parallel_outer(const Eigen::VectorXf& a,
-                                                        const Eigen::VectorXf& b){
+                                                    const Eigen::VectorXf& b){
     Eigen::MatrixXf result = Eigen::MatrixXf::Zero(a.size(), b.size());
     #pragma omp parallel for
     for(int i = 0; i < a.size(); ++i) {
@@ -58,12 +58,6 @@ Eigen::VectorXf SingleLayerNetwork::softmax(const Eigen::VectorXf& logits) {
     Eigen::VectorXf exp_logits = (logits.array() - logits.maxCoeff()).exp();
     return exp_logits / exp_logits.sum();
 }
-
-
-// Forward pass
-// Eigen::VectorXf SingleLayerNetwork::forward(const Eigen::VectorXf& input) {
-//     return parallel_matvec(weights, input) + biases;
-// }
 
 Eigen::VectorXf SingleLayerNetwork::forward_sparse(const std::vector<short>& spike_indices) {
     return parallel_matvec_sparse(weights, spike_indices) + biases;

@@ -24,16 +24,6 @@ EVOLVE THE MODEL TO BE LOG DISTRIBUTED
 
 
 
-
-
-
-
-
-
-
-
-
-
 MOST IMPORTANT
 - graph for distribution of synapses strength, firing rates, firing per second
     and in general need to study the stability of the system
@@ -59,3 +49,13 @@ DONE
 
 EFFICIENCY
 no changes | 36 FPS
+
+
+# Day 50 - v0.0.1
+
+Now simulations can be run in parallen and with different paramenters.
+The environment has been enclosed in the Simulation class.
+It's still a mess, but a usable one.
+Next step is **refactoring**, cleaning and calculus exam :-(
+Also need to make a **drawer class** for order.
+

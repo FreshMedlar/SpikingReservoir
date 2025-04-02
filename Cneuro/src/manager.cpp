@@ -10,40 +10,55 @@
 
 #define EXTRALIGHTGRAY CLITERAL(Color){ 100, 100, 100, 255 }
 
-Manager::Manager(int size) : size(size) { }
+Manager::Manager(int size, Simulation& simulation) 
+    :   size(size), 
+        simulation(simulation), 
+        neurons(simulation.neurons),
+        connectionMatrix(simulation.connectionMatrix)
+{
+
+}
 
 void Manager::saveModel() {
 
 }
 
 void Manager::createNeurons() {
+    cout << "Creating neurons" << endl;
     std::uniform_real_distribution<> randum(0.0f, 1.0f);
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (short i = 0; i < size; i++) {
- 
-        Neuron so;
+        // Neuron so(simulation);
         if (randum(gen) < 0.7) { 
-            constructorNeuron(so, i, 1);
+            // constructorNeuron(so, i, 1);
+            Neuron so(simulation, i, 1);
+            neurons.push_back(so);
         } else { 
-            constructorNeuron(so, i, -1);
+            // constructorNeuron(so, i, -1);
+            Neuron so(simulation, i, -1);
+            neurons.push_back(so);
         }
-        neurons.push_back(so);
+        
     }
     std::cout << "Neurons Created" << std::endl;
 }
 
 void Manager::createSequentialNeurons() {
-    connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
     std::uniform_real_distribution<> randum(0.0f, 1.0f);
     neurons.clear();
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (short i = 0; i < size; i++) {
  
-        Neuron so;
-        if (randum(gen) < 0.5) { constructorNeuron(so, i, 1);
-        } else { constructorNeuron(so, i, -1);}
-        neurons.push_back(so);
+        // Neuron so;
+        if (randum(gen) < 0.5) { 
+            Neuron so(simulation, i, 1); //constructorNeuron(so, i, 1);
+            neurons.push_back(so);
+        } else { 
+            Neuron so(simulation, i, -1); //constructorNeuron(so, i, -1);}
+            neurons.push_back(so);
+        } 
+        
         
         if (i>1) {connectSingle(i, i-2);}
         // std::cout << "Neuron " << i << " connected" << std::endl;
@@ -52,10 +67,16 @@ void Manager::createSequentialNeurons() {
 }
 
 void Manager::createSingle(short id, bool inhibitory) {
-    Neuron so;
-    if (inhibitory) {constructorNeuron(so, id, -1);}
-    else {constructorNeuron(so, id, 1);}
-    neurons.push_back(so);
+    if (inhibitory) {
+        // constructorNeuron(so, id, -1);
+        Neuron so(simulation, id, -1);
+        neurons.push_back(so);
+    } else {
+        // constructorNeuron(so, id, 1);
+        Neuron so(simulation, id, -1);
+        neurons.push_back(so);
+    }
+    
 }
 
 void Manager::connectSingle(short id, int nConns) {
@@ -65,13 +86,13 @@ void Manager::connectSingle(short id, int nConns) {
             connected.push_back(i);
         }
     }
-    while (receivers[id].size() < nConns) {
+    while (simulation.receivers[id].size() < nConns) {
         short index = getRandomInt(0, connected.size()-1);
         int target = connected[index];
 
         // Avoid duplicates
-        if (std::find(receivers[id].begin(), receivers[id].end(), target) == receivers[id].end()) {
-            connect(id, target, getRandomFloat(0.0f, 2.0f));
+        if (std::find(simulation.receivers[id].begin(), simulation.receivers[id].end(), target) == simulation.receivers[id].end()) {
+            neurons[id].connect(id, target, getRandomFloat(0.0f, 2.0f));
         }
         connected.erase(connected.begin() + index);
     }
@@ -90,7 +111,7 @@ short Manager::randomNeuron (Neuron* nen) {
 }
 
 void Manager::initialConnections(int nConns) {
-    connectionMatrix = std::vector<std::vector<float>>(size, std::vector<float>(size));
+    cout << "Initializing connections" << endl;
     std::uniform_int_distribution<> intdis(0, size-1);
     for (Neuron& neuron : neurons) {
         std::set<int> connected;
@@ -98,7 +119,7 @@ void Manager::initialConnections(int nConns) {
             short target = intdis(gen);
             // Avoid self-connections and duplicates
             if (target != neuron.ID && connected.find(target) == connected.end()) {
-                connect(neuron.ID, target, getRandomFloat(0.0f, 2.0f));
+                neurons[target].connect(neuron.ID, target, getRandomFloat(0.0f, 2.0f));
                 connected.insert(target);
             }
         }
@@ -107,58 +128,60 @@ void Manager::initialConnections(int nConns) {
 }
 
 void Manager::removeInputConnections(short nInput) {
+    cout << "Removing input connections" << endl;
     if (nInput > 0) {
         for (int neu = 0; neu < nInput; neu++) {
-            inhibitory[neu] = 1;
-            for (short incoming : senders[neu]) {
-                disconnect(incoming, neu);
+            simulation.inhibitory[neu] = 1;
+            for (short incoming : simulation.senders[neu]) {
+                neurons[incoming].disconnect(incoming, neu);
             }
         }
     } 
     if (nInput < 0) {
-        for (int neu = SIZE-1; neu > (SIZE+nInput)-1; neu--) {
-            inhibitory[neu] = 1;
-            for (short incoming : senders[neu]) {
-                disconnect(incoming, neu);
+        for (int neu = size-1; neu > (size+nInput)-1; neu--) {
+            simulation.inhibitory[neu] = 1;
+            for (short incoming : simulation.senders[neu]) {
+                neurons[incoming].disconnect(incoming, neu);
             }
         }
     }
+    std::cout << "Input connections removed" << std::endl;
 }
 
-std::pair<size_t, size_t> Manager::selectWeightedRandom(const std::vector<std::vector<float>>& matrix,float totalSum) {
-    // Flatten the matrix and store non-zero values and their indices
-    std::vector<float> weights;
-    std::vector<std::pair<size_t, size_t>> indices;
-    for (size_t i = 0; i < SIZE; ++i) {
-        for (size_t j = 0; j < SIZE; ++j) {
-            if (matrix[i][j] != 0.0f) {
-                weights.push_back(matrix[i][j]);
-                indices.emplace_back(i, j);
-            }
-        }
-    }
-    // Compute cumulative distribution
-    std::vector<float> cumulative;
-    cumulative.reserve(weights.size());
-    std::partial_sum(weights.begin(), weights.end(), std::back_inserter(cumulative));
-    float actualTotal = cumulative.back();
-    // Generate a random number between 0 and totalSum
-    std::uniform_real_distribution<> dis(0.0f, actualTotal);
-    float randomValue = dis(gen);
+// std::pair<size_t, size_t> Manager::selectWeightedRandom(const std::vector<std::vector<float>>& matrix,float totalSum) {
+//     // Flatten the matrix and store non-zero values and their indices
+//     std::vector<float> weights;
+//     std::vector<std::pair<size_t, size_t>> indices;
+//     for (size_t i = 0; i < size; ++i) {
+//         for (size_t j = 0; j < size; ++j) {
+//             if (matrix[i][j] != 0.0f) {
+//                 weights.push_back(matrix[i][j]);
+//                 indices.emplace_back(i, j);
+//             }
+//         }
+//     }
+//     // Compute cumulative distribution
+//     std::vector<float> cumulative;
+//     cumulative.reserve(weights.size());
+//     std::partial_sum(weights.begin(), weights.end(), std::back_inserter(cumulative));
+//     float actualTotal = cumulative.back();
+//     // Generate a random number between 0 and totalSum
+//     std::uniform_real_distribution<> dis(0.0f, actualTotal);
+//     float randomValue = dis(gen);
 
-    // Find the corresponding index using binary search
-    auto it = std::lower_bound(cumulative.begin(), cumulative.end(), randomValue);
+//     // Find the corresponding index using binary search
+//     auto it = std::lower_bound(cumulative.begin(), cumulative.end(), randomValue);
 
-    size_t selectedIndex = (it == cumulative.end()) ? weights.size() - 1 : std::distance(cumulative.begin(), it);
-    // Return the 2D coordinates of the selected value
-    return indices[selectedIndex];
-}
+//     size_t selectedIndex = (it == cumulative.end()) ? weights.size() - 1 : std::distance(cumulative.begin(), it);
+//     // Return the 2D coordinates of the selected value
+//     return indices[selectedIndex];
+// }
 
 void Manager::reset() {
-    for (auto& spikeVector : spikeBuffer) {
+    for (auto& spikeVector : simulation.spikeBuffer) {
         spikeVector.clear();
     }
-    currentSpikeIndex = 0; // Reset the index as well
+    simulation.currentSpikeIndex = 0; // Reset the index as well
 }
 
 void Manager::draw() {
@@ -172,7 +195,7 @@ void Manager::draw() {
     //     }
     // }
     for (size_t n = 0; n < size; n++) {
-        DrawCircle(xCoord[n], yCoord[n], 8, colors[n]);  
+        DrawCircle(simulation.xCoord[n], simulation.yCoord[n], 8, simulation.colors[n]);  
     }
 }
 
@@ -181,14 +204,14 @@ void Manager::applyForces() {
     float attractionStrength = 0.1f;
 
     // Iterate through each neuron to compute its net force
-    for (size_t neuron = 0; neuron < SIZE; neuron++) {
+    for (size_t neuron = 0; neuron < size; neuron++) {
         Vector2 force = {0.0f, 0.0f};
 
         // --- Repulsion: All neurons push each other away ---
-        for (size_t other = 0; other < SIZE; other++) {
+        for (size_t other = 0; other < size; other++) {
             if (neuron != other) {  // Avoid self-interaction
-                float dx = xCoord[neuron] - xCoord[other];
-                float dy = yCoord[neuron] - yCoord[other];
+                float dx = simulation.xCoord[neuron] - simulation.xCoord[other];
+                float dy = simulation.yCoord[neuron] - simulation.yCoord[other];
                 // Compute distance (avoid division by zero with a small offset)
                 float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
                 // Calculate repulsive force components (inversely proportional to distance squared)
@@ -199,9 +222,9 @@ void Manager::applyForces() {
             }
         }
         // --- Attraction: Pull connected neurons together ---
-        for (short connected : receivers[neuron]) {
-            float dx = xCoord[connected] - xCoord[neuron];
-            float dy = yCoord[connected] - yCoord[neuron];
+        for (short connected : simulation.receivers[neuron]) {
+            float dx = simulation.xCoord[connected] - simulation.xCoord[neuron];
+            float dy = simulation.yCoord[connected] - simulation.yCoord[neuron];
             float distance = std::sqrt(dx * dx + dy * dy) + 0.01f;
             
             float attractionStrength = Manager::calculateAttractionForce(distance, 10.0f);
@@ -212,8 +235,8 @@ void Manager::applyForces() {
             // }
         }
         // --- Update neuron's position with the calculated net force ---
-        xCoord[neuron] += force.x;
-        yCoord[neuron] += force.y;
+        simulation.xCoord[neuron] += force.x;
+        simulation.yCoord[neuron] += force.y;
     }
 }
 
@@ -227,27 +250,28 @@ float Manager::calculateAttractionForce(float distance, float maxForce, float mi
 }
 
 void Manager::countConnections(int* connections) {
-    for (int sos = 0; sos < SIZE; sos++) {
-        connections[sos] = senders[sos].size();
+    for (int sos = 0; sos < size; sos++) {
+        connections[sos] = simulation.senders[sos].size();
     }
 }
 
+// number of outgoing connections
 void Manager::receiversFrequence(int* connections) {
     for (int sos = 0; sos < size; sos++) {
-        connections[receivers[sos].size()]++;
+        connections[simulation.receivers[sos].size()]++;
     }
 }
 
 void Manager::sendersFrequence(int* connections) {
     for (int sos = 0; sos < size; sos++) {
-        connections[senders[sos].size()]++;
+        connections[simulation.senders[sos].size()]++;
     }
 }
 
 void Manager::drawreceiversGraph(const std::vector<int>& conn) {
     int plotWidth = 500;
     int plotHeight = 250;
-    int barWidth = plotWidth / (SIZE/2);
+    int barWidth = plotWidth / (size/2);
     // int maxCount = *std::max_element(conn.begin(), conn.end());
 
     // DrawRectangle(10, 10, plotWidth, plotHeight, BLACK);
@@ -269,22 +293,22 @@ void Manager::drawSpikesGraph(std::vector<int>& spikeNumber) {
     }
 }
 
-void Manager::drawTotalWeight() {
-    DrawRectangle(0, 80, totalSum/(SIZE/10), 35, ORANGE);
-    DrawText("TOTAL WEIGHT", 10, 84, 24, WHITE);
-}
+// void Manager::drawTotalWeight() {
+//     DrawRectangle(0, 80, totalSum/(size/10), 35, ORANGE);
+//     DrawText("TOTAL WEIGHT", 10, 84, 24, WHITE);
+// }
  
 void Manager::clustering() {
-    for (short neu = 0; neu < SIZE; neu++) {
-        for (short node : receivers[neu]){
+    for (short neu = 0; neu < size; neu++) {
+        for (short node : simulation.receivers[neu]){
             
         }
     }
     float avgCluster = 0;
-    for (short i = 0; i < SIZE; i++) {
-        avgCluster += receivers[i].size();
+    for (short i = 0; i < size; i++) {
+        avgCluster += simulation.receivers[i].size();
     }
-    avgCluster = avgCluster/SIZE;
+    avgCluster = avgCluster/size;
     DrawRectangle(0, 40, avgCluster*10, 35, RED);
     DrawText("CLUSTERING", 10, 44, 24, WHITE);
 }
@@ -312,10 +336,10 @@ void Manager::drawSpikeFrequencyDistribution(vector<float> freq) {
 // RESTRUCTURING
 // for (int restruct = 0; restruct < 10000; restruct++) {
 //     toRemove = disreal(gen);
-//     if (!receivers[toRemove].empty()) {
+//     if (!simulation.receivers[toRemove].empty()) {
 //         // get the ID of the neuron we disconnect from
-//         fromRemove = getRandomInt(receivers[toRemove].size()); // Get connection index 
-//         Neuron* targetNeuron = receivers[toRemove][fromRemove];
+//         fromRemove = getRandomInt(simulation.receivers[toRemove].size()); // Get connection index 
+//         Neuron* targetNeuron = simulation.receivers[toRemove][fromRemove];
 //         fromRemove = targetNeuron->ID;
 //         // disconnect and get connection strength
 //         toDistribute = disconnect(fromRemove, toRemove);
@@ -323,7 +347,7 @@ void Manager::drawSpikeFrequencyDistribution(vector<float> freq) {
 //         int sjdfo = static_cast<int>(toDistribute); 
 //         for (int a = 0; a < sjdfo; a++) {
 //             if (dis(gen) < growthProb) {
-//                 float weight = static_cast<float>(SIZE);
+//                 float weight = static_cast<float>(size);
 //                 auto [row, col] = manager.selectWeightedRandom(connectionMatrix, totalSum);
 //                 connectionMatrix[row][col] += 1.0f;
 //                 // connectionMatrix[toRemove][] += 1.0f;
