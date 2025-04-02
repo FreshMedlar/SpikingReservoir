@@ -8,7 +8,7 @@
 #include <string>
 #include <set>
 #include <map>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <random>
 #include <cmath>
 

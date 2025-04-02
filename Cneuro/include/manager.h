@@ -2,10 +2,18 @@
 #define MANAGER_H
 
 #include <vector>
+#include <iostream>
+#include <random>
+#include <cmath>
+#include <set>
+#include <algorithm>
+
 #include "neuron.h"
 #include "scheduler.h"
 #include "utilities.h"
 #include "simulation.h"
+#include "raylib.h"
+#include "global.h"
 
 struct Neuron;
 class Scheduler;

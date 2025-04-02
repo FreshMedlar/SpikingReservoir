@@ -5,7 +5,7 @@
 #include <string>
 #include <set>
 #include <map>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <cmath>
 // #include <dlib/statistics.h>
 // #include <ensmallen.hpp>

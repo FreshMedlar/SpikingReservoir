@@ -2,7 +2,7 @@
 #define SINGLELAYERNETWORK_H
 
 #include <iostream>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <omp.h>
 #include <cmath>
 #include <set>

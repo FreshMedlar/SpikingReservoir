@@ -1,15 +1,26 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include <vector>
 #include "neuron.h"
-#include <utility>
-#include <algorithm> 
-#include <set>
-#include <Eigen/Dense>
 #include "net.h"
 #include "scheduler.h"
 #include "simulation.h"
+#include "raylib.h"
+#include "global.h"
+
+#include <vector>
+#include <utility>
+#include <algorithm> 
+#include <set>
+#include <eigen3/Eigen/Dense>
+#include <iostream>
+#include <numeric>
+#include <random>
+// #include <omp.h>
+
+
+
+
 
 using namespace std;
 

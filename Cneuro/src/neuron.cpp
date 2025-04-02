@@ -1,8 +1,5 @@
 #include "neuron.h"
-#include <random>
-#include <iostream>
-#include "global.h"
-#include <cmath>
+
 
 int maxConnectionStrenght = 23;
 float generalThreshold = 2.0f;

@@ -1,12 +1,5 @@
 #include "manager.h"
-#include <iostream>
-#include "raylib.h"
-#include <random>
-#include "global.h"
-#include <cmath>
-#include <set>
-#include "neuron.h"
-#include <algorithm>
+
 
 #define EXTRALIGHTGRAY CLITERAL(Color){ 100, 100, 100, 255 }
 

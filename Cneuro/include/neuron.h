@@ -2,12 +2,16 @@
 #define NEURON_H
 
 #include "raylib.h"
+#include "simulation.h"
+#include "manager.h"
+#include "global.h"
+
 #include <utility>
 #include <stdint.h>
 #include <vector>
-#include "simulation.h"
-#include "manager.h"
-
+#include <random>
+#include <iostream>
+#include <cmath>
 
 using namespace std;
 
