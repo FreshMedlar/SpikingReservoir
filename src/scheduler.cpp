@@ -69,10 +69,11 @@ void Scheduler::pruningAndDecay() {
 void Scheduler::step (short letter) {
     // INPUT
     short input = size - letter;
-    if (simulation.active[input] == true) {
-        simulation.spikeBuffer[simulation.currentSpikeIndex].push_back(input);
-        simulation.active[input] = false;
-    }
+    // for (short )
+        if (simulation.active[input] == true) {
+            simulation.spikeBuffer[simulation.currentSpikeIndex].push_back(input);
+            simulation.active[input] = false;
+        }
     // GLOBAL UPDATES
     for (int neu = 0; neu < size; neu++) {
         simulation.timeSinceSpike[neu] += 1;
@@ -84,68 +85,4 @@ void Scheduler::step (short letter) {
     simulation.spikeBuffer[simulation.currentSpikeIndex].clear(); // Reset the slot
     simulation.currentSpikeIndex = (simulation.currentSpikeIndex + 1) % simulation.SPIKE_BUFFER_SIZE;
 }
-                
-// double Scheduler::simul() { //, vector<int>& connectionsPerNeuron) {
-//     SingleLayerNetwork network(LR, SIZE);
-//     bool draw = false;
-//     float loss;
-//     double epoch_loss = 0.0f;
-//     for (int letter = 0; letter < 1000; letter++) { //encodedTraining.size()-1
-//         for (int cycle = 0; cycle < CYCLE_LEN; cycle++) {
-//             if (draw) {
-//                 BeginDrawing();
-//                 ClearBackground(BLACK);
-                
-//                 //DRAW
-//                 // manager.draw();
-//                 // manager.applyForces();
-//                 //GRAPH
-//                 // connectionsPerNeuron.clear();
-//                 // connectionsPerNeuron.resize(SIZE, 0); 
-//                 // EITHER, NOT BOTH
-//                 // manager.receiversFrequence(connectionsPerNeuron.data()); 
-//                 // manager.sendersFrequence(connectionsPerNeuron.data());
-//                 // manager.drawreceiversGraph(connectionsPerNeuron); // Draw the plot
-//                 // manager.clustering();
-//                 // SPIKES
-//                 simulation.manager.drawSpikesGraph(spikeFreq);
-//                 // totalWeight[(epoch)%500] = totalSum;
-//                 simulation.manager.drawTotalWeight();
-//                 simulation.manager.drawOrder();
-//                 simulation.manager.drawChaos();
-//                 std::vector<float> sorted = frequency;  // Copy the original vector
-//                 std::sort(sorted.begin(), sorted.end());  // Sort in ascending order
-//                 simulation.manager.drawSpikeFrequencyDistribution(sorted);
-                
-//                 // FPS  
-//                 int fps = GetFPS();
-//                 DrawText(TextFormat("FPS: %d", fps), 10, 10, 20, GREEN); 
-//                 EndDrawing();
-//                 simulation.scheduler.updateColor();
-//             }
-            
-//             simulation.scheduler.step(encodedTraining[letter]);
 
-//             if (cycle == CYCLE_LEN-1){
-//                 // cout << spikeBuffer[currentSpikeIndex].size() << endl;
-//                 short target = encodedTraining[letter+1];
-//                 Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
-//                 output = network.softmax(output);
-//                 loss = network.compute_loss(output, target);
-//                 epoch_loss += loss;
-//                 Eigen::VectorXf d_input = network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
-//             }
-//         }
-//     }
-                    
-//     // OBJ function
-//     // epoch_loss = anderson_darling_test(frequency);
-//     // for (int i = 0; i < SIZE; i++) {
-//     //     frequency[i] = 0.0f;
-//     // }
-    
-//     simulation.manager.reset();
-    
-//     return epoch_loss;
-// }
-                

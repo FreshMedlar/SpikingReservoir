@@ -14,24 +14,24 @@ Simulation::Simulation(short size,
         draw(draw),
         currentSpikeIndex(0),
         currentColorIndex(0)
-{
+        {
     connectionMatrix.resize(SIZE, vector<float>(SIZE, 0.0f));
+    timeSinceSpike.resize(SIZE, 1000);
+    excitability.resize(SIZE, 1.0f);
+    inhibitory.resize(SIZE);
+    threshold.resize(SIZE, 30);
     receivers.resize(SIZE);
+    frequency.resize(SIZE, 0.0f);
     senders.resize(SIZE);
-    
     biases.resize(SIZE);
     colors.resize(SIZE, WHITE);
-    timeSinceSpike.resize(SIZE, 1000);
     active.resize(SIZE, true);
-    inhibitory.resize(SIZE);
     xCoord.resize(SIZE);
     yCoord.resize(SIZE);
     xA.resize(SIZE, 0.0f);
     yA.resize(SIZE, 0.0f);
-    excitability.resize(SIZE, 1.0f);
-    frequency.resize(SIZE, 0.0f);
-    threshold.resize(SIZE, 30);
-
+    
+    // NETWORK SETUP
     manager.createNeurons();
     manager.initialConnections();
     // OR
@@ -55,20 +55,27 @@ float Simulation::simulate() {
             // spikeNumber[letter%200] = spikeBuffer[currentSpikeIndex].size();
             scheduler.step(encodedTraining[letter]);
 
-            if (cycle%CYCLE_LEN == CYCLE_LEN-1 && train) {
-                short target = encodedTraining[letter+1];
-                Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
-                output = network.softmax(output);
-                loss = network.compute_loss(output, target);
-                epoch_loss += loss;
-                Eigen::VectorXf d_input = network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
+            if (train) {
+                if (cycle%CYCLE_LEN == CYCLE_LEN-2) {
+                    short target = encodedTraining[letter-1];
+                    
+                    Eigen::VectorXf output = network.forward_sparse(spikeBuffer[currentSpikeIndex]);
+                    output = network.softmax(output);
+                    loss = network.compute_loss(output, target);
+                    if (letter % 100 == 0) {
+                        cout << loss << endl;
+                    }
+                        epoch_loss += loss;
+                    network.backward(spikeBuffer[currentSpikeIndex], output, target); // 10000, 
 
-                if (letter%1000 == 0) {
-                    cout << "Epoch " << letter+1
-                        << " | Avg Loss: " << epoch_loss/1000
-                        << endl;
-                    epoch_loss = 0;
-                } 
+                    if (letter%1000 == 0) {
+                        cout << "Epoch " << letter+1
+                            << " | Avg Loss: " << epoch_loss/1000
+                            << endl;
+                        epoch_loss = 0;
+                    } 
+                    loss = 0.0f;
+                }
             }
 
             if (draw) {
@@ -106,7 +113,7 @@ float Simulation::simulate() {
                 scheduler.updateColor();
             }
 
-
+            
         }
     }
     return loss;

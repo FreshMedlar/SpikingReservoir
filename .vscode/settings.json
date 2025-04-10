@@ -85,5 +85,5 @@
         "span": "cpp",
         "cfenv": "cpp"
     },
-    "cmake.sourceDirectory": "/home/medlar/SpikingReservoir/Cneuro",
+    "cmake.sourceDirectory": "/home/medlar/SpikingReservoir",
 }

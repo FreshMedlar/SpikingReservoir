@@ -17,8 +17,7 @@ private:
 
     Eigen::VectorXf parallel_matvec(const Eigen::MatrixXf& W,
                                     const Eigen::VectorXf& x);
-    Eigen::VectorXf parallel_matvec_sparse(const Eigen::MatrixXf& W, 
-                                        const std::vector<short>& indices);
+    Eigen::VectorXf parallel_matvec_sparse(const std::vector<short>& indices);
     Eigen::MatrixXf parallel_outer_sparse( const Eigen::VectorXf& a, 
                                     const std::vector<short>& b);
     Eigen::MatrixXf parallel_outer(const Eigen::VectorXf& a,
@@ -30,7 +29,7 @@ public:
     Eigen::VectorXf softmax(const Eigen::VectorXf& logits);
     Eigen::VectorXf forward(const Eigen::VectorXf& input);
     Eigen::VectorXf forward_sparse(const std::vector<short>& spike_indices);
-    Eigen::VectorXf backward(const std::vector<short>& input, 
+    void backward(const std::vector<short>& input, 
                             const Eigen::VectorXf& output,
                             int target);
     float compute_loss(const Eigen::VectorXf& output,
