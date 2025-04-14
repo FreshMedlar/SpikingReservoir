@@ -23,7 +23,7 @@ void Manager::createNeurons() {
     neurons.reserve(size);  // Reserve memory to optimize performance
     for (short i = 0; i < size; i++) {
         // Neuron so(simulation);
-        if (randum(gen) < 0.7) { 
+        if (randum(gen) < 0.5) { 
             // constructorNeuron(so, i, 1);
             Neuron so(simulation, i, 1);
             neurons.push_back(so);

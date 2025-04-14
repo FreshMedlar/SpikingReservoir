@@ -33,7 +33,7 @@ Simulation::Simulation(short size,
     
     // NETWORK SETUP
     manager.createNeurons();
-    manager.initialConnections();
+    manager.initialConnections(100);
     // OR
     // manager.createSequentialNeurons();
 

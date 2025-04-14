@@ -118,9 +118,11 @@ int main() {
     //     inputReservoir.push_back(spikeEncodedChars[letter]);
     // }
 //----------------------------------BY HAND MODEL------------------------------------------
-
-
-    Simulation sim(1000, 0.001, encodedTraining, true, true);
+    short size = 1000; // neurons
+    float LR = 0.001f;
+    bool draw = false;
+    bool train = true;
+    Simulation sim(size, LR, encodedTraining, draw, train);
 
     sim.simulate();
 

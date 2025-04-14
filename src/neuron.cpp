@@ -37,26 +37,6 @@ Neuron::Neuron (Simulation& simulation, short id, short inhi)
     inhibitory[id] =        inhi;
 }
 
-// void Neuron::constructorNeuron(Neuron& pre, short id, short inhi) {
-    
-//     pre.ID = id;
-
-//     std::uniform_real_distribution<> dis(0.0,1.0);
-    
-//     xA[id] =                0.0f;
-//     yA[id] =                0.0f;
-//     xCoord[id] =            1920.0f*dis(gen);
-//     yCoord[id] =            1080.0f*dis(gen);
-//     biases[id] =            getRandomFloat(0.0f, 5.0f);
-//     colors[id] =            WHITE;
-//     active[id] =            true;
-//     frequency[id] =         0.0f;
-//     inhibitory[id] =        inhi;
-//     threshold[id] =         30;
-//     excitability[id] =      1.0f;
-//     timeSinceSpike[id] =    1000; // to ignore the first spike
-// }
-
 void Neuron::spike(short pre) {
     frequency[pre] += 1.0f;
     // cout << "Neuron " << pre << " spiked at Y " << yA[pre] << endl;
@@ -91,7 +71,7 @@ void Neuron::forward(short spiked, short post) {
         connectionMatrix[spiked][post] -= delta;
         simulation.totalSum -= delta;
     } else {
-        yA[post] = 0.0f;
+        // yA[post] = 0.0f;
         excitability[post] -= 0.01f;
     }
 }
