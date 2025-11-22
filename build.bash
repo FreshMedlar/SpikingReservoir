@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set build directory
-BUILD_DIR="/home/medlar/SpikingReservoir/build"
+BUILD_DIR="/home/medlar/Projects/SpikingReservoir/build"
 
 # Create build directory if it doesn't exist
 mkdir -p $BUILD_DIR

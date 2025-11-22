@@ -30,7 +30,7 @@ using namespace std;
 
 int main() {
 //-----------------------READ INPUT FILE----------------------
-    string filePath = "/home/medlar/SpikingReservoir/tinyshakespeare.txt";
+    string filePath = "/home/medlar/Projects/SpikingReservoir/tinyshakespeare.txt";
     ifstream file(filePath);
     if (!file.is_open()) {
         cerr << "Error opening file." << endl;
